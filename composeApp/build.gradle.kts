@@ -41,9 +41,12 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(compose.materialIconsExtended)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(projects.shared)
+            implementation("media.kamel:kamel-image:0.9.1")
+            implementation("androidx.compose.animation:animation:1.8.2")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -81,4 +84,3 @@ android {
 dependencies {
     debugImplementation(compose.uiTooling)
 }
-

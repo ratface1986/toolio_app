@@ -4,29 +4,34 @@ import ai.toolio.app.SupabaseConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
 import io.ktor.client.request.header
+import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.isSuccess
+import java.util.Base64
 
 suspend fun uploadToStorage(httpClient: HttpClient, imageBytes: ByteArray, fileName: String): String {
     val bucket = SupabaseConfig.bucket
-    val uploadUrl = "${SupabaseConfig.storageBaseUrl}/${SupabaseConfig.bucket}/$fileName"
+    val uploadUrl = "${SupabaseConfig.storageBaseUrl}/$bucket/$fileName"
     val apiKey = SupabaseConfig.apiKey
 
-    val response = httpClient.put(uploadUrl) {
-        header(HttpHeaders.Authorization, "Bearer $apiKey")
-        header(HttpHeaders.ContentType, "image/jpeg")
-        header("x-upsert", "true") // allow overwrite
-        setBody(imageBytes)
+    val base64Image = Base64.getEncoder().encodeToString(imageBytes)
+
+    val response = httpClient.post(uploadUrl) {
+        header("Authorization", "Bearer $apiKey")
+        header("Content-Type", "image/jpeg")
+        header("x-upsert", "true")
+        setBody(base64Image)
     }
 
     if (!response.status.isSuccess()) {
-        throw IllegalStateException("Upload failed: ${response.status}")
+        val body = response.bodyAsText()
+        throw IllegalStateException("Upload failed: ${response.status} — $body")
     }
 
-    // return public URL (read-only)
     return "${SupabaseConfig.publicBaseUrl}/$fileName"
 }
 

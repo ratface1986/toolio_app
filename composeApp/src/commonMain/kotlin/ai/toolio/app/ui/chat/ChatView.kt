@@ -1,7 +1,9 @@
 package ai.toolio.app.ui.chat
 
+import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.repo.ToolioRepo
 import ai.toolio.app.ui.sidemenu.SideMenu
+import ai.toolio.app.utils.PhotoPicker
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,17 +25,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
+@OptIn(ExperimentalEncodingApi::class)
 @Composable
-fun ChatView(onBack: () -> Unit) {
+fun ChatView(
+    onBack: () -> Unit
+) {
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val toolioRepo = remember { ToolioRepo.getInstance() }
 
     // State for messages and loading
     val messages = remember {
-        mutableStateListOf(
+        mutableStateListOf<ChatMessage>(
             ChatMessage.Text("Hello! How can I help you today?", isUser = false)
         )
     }
@@ -94,7 +100,7 @@ fun ChatView(onBack: () -> Unit) {
                                 isLoading = true
                                 try {
                                     println("Sending message to GPT: $text")
-                                    val response = toolioRepo.chatGpt(text)
+                                    val response = AppEnvironment.repo.chatGpt(text)
                                     response.fold(
                                         onSuccess = { gptResponse ->
                                             val botMessage = gptResponse.content
@@ -117,7 +123,15 @@ fun ChatView(onBack: () -> Unit) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp),
-                        isInputEnabled = !isLoading // Pass enabled state here
+                        isInputEnabled = !isLoading,
+                        onPhotoClick = {
+                            AppEnvironment.nativeFeatures.photoPicker.pickPhoto { photoBytes ->
+                                photoBytes?.let {
+                                    val base64String = Base64.encode(photoBytes)
+                                    messages.add(ChatMessage.Image(base64String, isUser = false))
+                                }
+                            }
+                        }
                     )
                 }
             }

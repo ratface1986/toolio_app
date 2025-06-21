@@ -3,15 +3,15 @@ package ai.toolio.app.ui.chat
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 
@@ -20,8 +20,9 @@ fun ChatInputView(
     onSendMessage: (String) -> Unit,
     onAttachmentClick: () -> Unit,
     onVoiceClick: () -> Unit,
+    onPhotoClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isInputEnabled: Boolean = true // Add input enabled prop
+    isInputEnabled: Boolean = true
 ) {
     Row(
         modifier = modifier.padding(bottom = 30.dp),
@@ -29,12 +30,12 @@ fun ChatInputView(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         IconButton(
-            onClick = onAttachmentClick,
+            onClick = onPhotoClick,
             enabled = isInputEnabled
         ) {
             Icon(
-                imageVector = Icons.Default.AttachFile,
-                contentDescription = "Attach file"
+                imageVector = Icons.Default.PhotoCamera,
+                contentDescription = "Attach Photo"
             )
         }
 
@@ -99,7 +100,7 @@ fun MessageInput(
                     enabled = enabled
                 ) {
                     Icon(
-                        Icons.Default.Send,
+                        Icons.AutoMirrored.Filled.Send,
                         contentDescription = "Send message"
                     )
                 }

@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.automirrored.filled.Logout
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 data class TaskItem(
@@ -157,7 +158,7 @@ private fun BottomPanel(
             ListItem(
                 headlineContent = { Text("Log out") },
                 leadingContent = { 
-                    Icon(Icons.Default.Logout, contentDescription = null)
+                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
                 },
                 modifier = Modifier.clickable { onLogoutClick() }
             )

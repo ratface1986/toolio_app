@@ -4,5 +4,26 @@
     <dict>
         <key>CADisableMinimumFrameDurationOnPhone</key>
         <true/>
+        <key>NSCameraUsageDescription</key>
+        <string>We need camera to add photos</string>
+        <key>NSLocalNetworkUsageDescription</key>
+        <string>We need access to the local network to connect to the game server.</string>
+        <key>NSBonjourServices</key>
+        <array>
+            <string>_http._tcp</string>
+        </array>
+        <key>NSAppTransportSecurity</key>
+        <dict>
+            <key>NSAllowsArbitraryLoads</key>
+            <true/>
+        </dict>
+
+        <key>NSLocalNetworkUsageDescription</key>
+        <string>App needs access to local network to connect to backend server</string>
+
+        <key>NSBonjourServices</key>
+        <array>
+            <string>_http._tcp</string>
+        </array>
     </dict>
 </plist>

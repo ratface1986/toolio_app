@@ -1,41 +1,44 @@
 import ai.toolio.app.models.ChatGptRequest
 import ai.toolio.app.models.ChatGptResponse
 import ai.toolio.app.models.ChatMessage
+import ai.toolio.app.models.ChatMessageOut
+import ai.toolio.app.models.ContentPart
+import ai.toolio.app.models.ImagePayload
 import ai.toolio.app.models.OpenAIChatResponse
 import ai.toolio.app.models.OpenAIRequest
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.http.content.TextContent
-import io.ktor.serialization.kotlinx.json.*
+import io.ktor.util.encodeBase64
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
-val httpClient = HttpClient {
-    install(ContentNegotiation) {
-        json(Json {
-            prettyPrint = true
-            isLenient = true
-            ignoreUnknownKeys = true
-        })
-    }
-}
 
-suspend fun callOpenAI(request: ChatGptRequest): ChatGptResponse {
+
+suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ChatGptResponse {
     val log = LoggerFactory.getLogger("OpenAIDebug")
     val apiKey = dotenv()["OPENAI_API_KEY"] ?: error("Missing OPENAI_API_KEY")
 
+    val base64 = request.imageBytes?.encodeBase64()
+        ?: error("Missing imageBytes for Vision request")
+
+    val imageDataUrl = "data:image/jpeg;base64,$base64"
+
     val openAIRequest = OpenAIRequest(
-        model = "gpt-3.5-turbo",
+        model = "gpt-4o",
         temperature = 0.7,
         maxTokens = 1000,
         messages = listOf(
-            ChatMessage("system", "Ты помощник по домашнему ремонту."),
-            ChatMessage("user", request.prompt)
+            ChatMessageOut(
+                role = "user",
+                content = listOf(
+                    ContentPart.Text(request.prompt),
+                    ContentPart.ImageUrl(ImagePayload(url = imageDataUrl))
+                )
+            )
         )
     )
 
@@ -51,7 +54,7 @@ suspend fun callOpenAI(request: ChatGptRequest): ChatGptResponse {
         val parsed = Json { ignoreUnknownKeys = true }.decodeFromString<OpenAIChatResponse>(response.bodyAsText())
         val reply = parsed.choices.firstOrNull()?.message?.content ?: "OpenAI ничего не вернул"
 
-        return ChatGptResponse(
+        ChatGptResponse(
             content = reply,
             model = parsed.model,
             tokensUsed = parsed.usage?.totalTokens
@@ -61,4 +64,5 @@ suspend fun callOpenAI(request: ChatGptRequest): ChatGptResponse {
         ChatGptResponse(content = "Ошибка: ${e.message.orEmpty()}")
     }
 }
+
 

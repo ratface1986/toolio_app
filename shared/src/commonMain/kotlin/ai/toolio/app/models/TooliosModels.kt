@@ -6,18 +6,53 @@ import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class OpenAIRequest(
-    @SerialName("model") val model: String,
-    @SerialName("messages") val messages: List<ChatMessage>,
-    @SerialName("temperature") val temperature: Double,
-    @SerialName("max_tokens") val maxTokens: Int = 1000
+    val model: String,
+    val messages: List<ChatMessageOut>,
+    val temperature: Double,
+    @SerialName("max_tokens") val maxTokens: Int
 )
+
+@Serializable
+data class Choice(
+    val index: Int,
+    val message: ChatMessageIn,
+    @SerialName("finish_reason") val finishReason: String? = null
+)
+
+@Serializable
+data class ChatMessageOut(
+    val role: String,
+    val content: List<ContentPart>
+)
+
+@Serializable
+data class ChatMessageIn(
+    val role: String,
+    val content: String
+)
+
 
 @Serializable
 data class ChatMessage(
     val role: String,
-    val content: String,
-    val refusal: JsonElement? = null,
-    val annotations: List<JsonElement>? = null
+    val content: List<ContentPart>
+)
+
+@Serializable
+sealed class ContentPart {
+    @Serializable
+    @SerialName("text")
+    data class Text(val text: String) : ContentPart()
+
+    @Serializable
+    @SerialName("image_url")
+    data class ImageUrl(val image_url: ImagePayload) : ContentPart()
+}
+
+@Serializable
+data class ImagePayload(
+    val url: String,
+    val detail: String = "auto"
 )
 
 @Serializable
@@ -31,14 +66,6 @@ data class OpenAIChatResponse(
 )
 
 @Serializable
-data class Choice(
-    val index: Int,
-    val message: ChatMessage,
-    val logprobs: JsonElement? = null,
-    @SerialName("finish_reason") val finishReason: String? = null
-)
-
-@Serializable
 data class Usage(
     @SerialName("prompt_tokens") val promptTokens: Int,
     @SerialName("completion_tokens") val completionTokens: Int,
@@ -49,7 +76,9 @@ data class Usage(
 
 @Serializable
 data class ChatGptRequest(
-    val prompt: String
+    val prompt: String,
+    val imageUrl: String = "",
+    val imageBytes: ByteArray? = null
 )
 
 @Serializable
@@ -57,4 +86,12 @@ data class ChatGptResponse(
     val content: String,
     val model: String? = null,
     val tokensUsed: Int? = null
+)
+
+@Serializable
+data class ToolRecognitionResult(
+    val matchesExpected: Boolean,
+    val type: String? = null,
+    val name: String? = null,
+    val description: String? = null
 )

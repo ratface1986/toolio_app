@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -29,7 +28,9 @@ kotlin {
     }
 
     sourceSets {
-
+        all {
+            languageSettings.optIn("kotlinx.serialization.ExperimentalSerializationApi")
+        }
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -45,8 +46,12 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(projects.shared)
-            implementation("media.kamel:kamel-image:0.9.1")
-            implementation("androidx.compose.animation:animation:1.8.2")
+            implementation(libs.kamel.image)
+            implementation(libs.skiko)
+            implementation(libs.ui)
+            implementation(libs.ui.graphics)
+            implementation(libs.kotlinx.serialization.json.v163)
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

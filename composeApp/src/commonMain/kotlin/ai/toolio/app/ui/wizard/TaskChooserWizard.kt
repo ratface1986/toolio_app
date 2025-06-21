@@ -1,5 +1,8 @@
 package ai.toolio.app.ui.wizard
 
+import ai.toolio.app.ui.wizard.model.Task
+import ai.toolio.app.ui.wizard.model.TaskCategory
+import ai.toolio.app.ui.wizard.model.Tasks
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,7 +27,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun TaskChooserWizardScreen(
     categories: List<TaskCategory>,
-    onCategoryChosen: () -> Unit
+    onCategoryChosen: (task: Task) -> Unit
 ) {
     // null = main screen; else = selected category
     var selectedCategory by remember { mutableStateOf<TaskCategory?>(null) }
@@ -162,7 +165,7 @@ private fun CategoryButton(
 @Composable
 private fun SubcategoryListView(
     category: TaskCategory,
-    onClick: () -> Unit,
+    onClick: (task: Task) -> Unit,
     onBack: () -> Unit
 ) {
     Column(
@@ -198,7 +201,7 @@ private fun SubcategoryListView(
         ) {
             items(category.tasks) { task ->
                 Surface(
-                    onClick = { onClick() },
+                    onClick = { onClick(task) },
                     shape = RoundedCornerShape(14.dp),
                     tonalElevation = 1.dp,
                     modifier = Modifier
@@ -214,7 +217,7 @@ private fun SubcategoryListView(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = task,
+                            text = task.name,
                             style = MaterialTheme.typography.titleMedium.copy(
                                 textAlign = TextAlign.Center,
                                 fontWeight = FontWeight.Bold,

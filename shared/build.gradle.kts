@@ -15,9 +15,35 @@ kotlin {
         }
     }
 
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
+    iosSimulatorArm64 {
+        binaries.framework {
+            baseName = "ToolioShared"
+            freeCompilerArgs += listOf(
+                "-Xexpect-actual-classes",
+                "-Xbinary=bundleId=ai.toolio.app.shared"
+            )
+        }
+    }
+
+    iosArm64 {
+        binaries.framework {
+            baseName = "ToolioShared"
+            freeCompilerArgs += listOf(
+                "-Xexpect-actual-classes",
+                "-Xbinary=bundleId=ai.toolio.app.shared"
+            )
+        }
+    }
+
+    iosX64 {
+        binaries.framework {
+            baseName = "ToolioShared"
+            freeCompilerArgs += listOf(
+                "-Xexpect-actual-classes",
+                "-Xbinary=bundleId=ai.toolio.app.shared"
+            )
+        }
+    }
 
     jvm()
 
@@ -34,14 +60,23 @@ kotlin {
             
             // Coroutines
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.skiko)
+            implementation(libs.ui)
+            implementation(libs.ui.graphics)
         }
         
         androidMain.dependencies {
             implementation(libs.ktor.client.android)
+            implementation(libs.skiko)
+            implementation(libs.ui)
+            implementation(libs.ui.graphics)
         }
         
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            implementation(libs.skiko)
+            implementation(libs.ui)
+            implementation(libs.ui.graphics)
         }
         
         jvmMain.dependencies {
@@ -64,5 +99,8 @@ android {
     }
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
+    }
+    packaging {
+        "**/libandroidx.graphics.path.so"
     }
 }

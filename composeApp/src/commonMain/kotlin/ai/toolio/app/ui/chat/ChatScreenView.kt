@@ -45,7 +45,7 @@ sealed class ChatMessage(open val isUser: Boolean) {
     ) : ChatMessage(isUser)
 
     data class Image(
-        val imageUrl: String,
+        val imageBase64: String,
         override val isUser: Boolean
     ) : ChatMessage(isUser)
 }
@@ -164,7 +164,7 @@ private fun ChatMessageItem(
                         .size(200.dp)
                 ) {
                     KamelImage(
-                        resource = asyncPainterResource(message.imageUrl),
+                        resource = asyncPainterResource("data:image/jpeg;base64,${message.imageBase64}"),
                         contentDescription = "Shared image",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier

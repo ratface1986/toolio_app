@@ -11,13 +11,13 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun App(settings: NativeFeatures) {
+fun App(nativeFeatures: NativeFeatures) {
     MaterialTheme(
         colorScheme = AppDarkColorScheme
     ) {
         MainScreenController(
             categories = Tasks.categories,
-            settings = settings,
+            nativeFeatures = nativeFeatures,
         )
     }
 }
@@ -26,7 +26,7 @@ fun App(settings: NativeFeatures) {
 @Composable
 fun AppPreview() {
     App(
-        settings = NativeFeatures(photoPicker = object : PhotoPicker {
+        nativeFeatures = NativeFeatures(photoPicker = object : PhotoPicker {
             override fun pickPhoto(onResult: (ByteArray?) -> Unit) {
                 TODO("Not yet implemented")
             }

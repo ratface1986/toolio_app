@@ -1,12 +1,13 @@
 package ai.toolio.app.ui.inventory
 
+import ai.toolio.app.data.VerifyStatus
 import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.models.ToolRecognitionResult
 import ai.toolio.app.ui.shared.ToolPhotoView
 import ai.toolio.app.models.Tool
+import ai.toolio.app.models.ToolData
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
@@ -22,80 +23,67 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.InternalResourceApi
-import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.Composable
 
 @OptIn(ExperimentalEncodingApi::class, InternalResourceApi::class)
 @Composable
 fun AddToolView(
     tool: Tool,
     onAdded: () -> Unit = {},
-    onNotHave: () -> Unit = {}
+    onNoToolClick: () -> Unit = {},
+    onBackClick: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
     var toolImageData by remember { mutableStateOf<ByteArray?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var toolName by remember { mutableStateOf<String>("") }
-    var tasks by remember { mutableStateOf<List<String>>(emptyList()) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
+    var result by remember {
+        mutableStateOf<ToolRecognitionResult>(
+            ToolRecognitionResult(
+                matchesExpected = false,
+                name = tool.displayName,
+                description = "",
+                imageUrl = "",
+                confirmed = false
+            )
+        )
+    }
 
     fun processPhoto(photoBytes: ByteArray) {
-        val base64 = Base64.encode(photoBytes)
+        val prompt = tool.displayName
+        val userId = AppEnvironment.userProfile.userId
+
         scope.launch {
             isLoading = true
             errorMsg = null
+
             try {
-                // Simulate sending to GPT and parsing result using toolioRepo
-                val gptImagePrompt = """
-                    Analyze this image and determine if it contains the expected tool: "${tool.displayName}".
-                
-                    Return a JSON response in the following format:
-                
-                    {
-                      "matchesExpected": true,
-                      "type": "drill",
-                      "name": "Bosch PSB 1800 LI-2",
-                      "description": "A cordless electric drill used for drilling holes and driving screws.",
-                      "isTool": true
-                    }
-                
-                    If no tool is present, set "isTool": false and leave all other fields null.
-                    If the tool doesn't match expected, set "matchesExpected": false.
-                    Only return valid JSON. No explanation.
-                """.trimIndent()
-
-                val response = AppEnvironment.repo.chatGptImage(gptImagePrompt, base64)
-
-                response.fold(
-                    onSuccess = { gptResponse ->
-                        val jsonString = gptResponse.content
-                        try {
-                            val result = Json.decodeFromString<ToolRecognitionResult>(jsonString)
-                            // Теперь у тебя есть: result.matchesExpected, result.name, etc.
-                            toolName = result.name ?: ""
-                            tasks = result.description?.split("\n") ?: emptyList()
-                            isLoading = false
-                            if (!result.matchesExpected) {
-                                errorMsg = "Tool not found in image"
-                            } else {
-                                onAdded()
-                            }
-                        } catch (e: Exception) {
-                            errorMsg = "Failed to parse response: ${e.message}"
-                        }
-                    },
-                    onFailure = { error ->
-                        errorMsg = error.message ?: "Unknown error"
-                    }
+                result = AppEnvironment.repo.verifyTool(
+                    userId = userId,
+                    prompt = prompt,
+                    imageBytes = photoBytes
                 )
+
+                if (result.matchesExpected) {
+                    // Update inventory with verified tool
+                    toolName = result.name ?: tool.displayName
+                } else {
+                    // Tool does not match expected one
+                    errorMsg = "It does not match the expected: ${tool.displayName}"
+                }
+            } catch (e: Exception) {
+                // Error during verification
+                errorMsg = "Failed to verify tool: ${e.message}"
             } finally {
                 isLoading = false
             }
         }
     }
+
 
     Column(
         modifier = Modifier
@@ -166,38 +154,6 @@ fun AddToolView(
             Text(toolName.ifBlank { "..." }, fontSize = 17.sp)
         }
         Spacer(Modifier.height(18.dp))
-        Text(
-            "Tasks this tool fits for:",
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 15.sp,
-            modifier = Modifier.align(Alignment.Start)
-        )
-        Spacer(Modifier.height(8.dp))
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f, fill = false)
-                .background(Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
-                .padding(vertical = 6.dp)
-        ) {
-            if (tasks.isEmpty()) {
-                item {
-                    Text(
-                        text = "No tasks loaded",
-                        color = Color.Gray,
-                        modifier = Modifier.padding(14.dp)
-                    )
-                }
-            }
-            items(tasks.size) {
-                Text(
-                    text = tasks[it],
-                    fontSize = 15.sp,
-                    modifier = Modifier.padding(vertical = 6.dp, horizontal = 14.dp)
-                )
-            }
-        }
-        Spacer(Modifier.height(24.dp))
         if (errorMsg != null) {
             Text(
                 text = errorMsg!!,
@@ -205,28 +161,28 @@ fun AddToolView(
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }
-        Button(
-            onClick = { onAdded() },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(55.dp),
-            enabled = toolImageData != null && toolName.isNotBlank() && !isLoading,
-        ) {
-            Text("Add To Inventory")
-        }
-        Spacer(Modifier.height(8.dp))
-        OutlinedButton(
-            onClick = { onNotHave() },
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            border = ButtonDefaults.outlinedButtonBorder(true)
-        ) {
-            Icon(Icons.Default.Warning, contentDescription = "Don't Have", tint = Color.Red)
-            Spacer(Modifier.width(8.dp))
-            Text("I don't have it", color = Color.Red)
-        }
+        AddToolButtons(
+            enabled = toolImageData != null && toolName.isNotBlank(),
+            isLoading = isLoading,
+            onAdd = {
+                scope.launch {
+                    AppEnvironment.repo.confirmTool(tool.name)
+
+                    val updatedInventory = AppEnvironment.userProfile.inventory.toMutableMap()
+                    updatedInventory[tool.name] = ToolData(
+                        name = result.name ?: tool.displayName,
+                        description = result.description ?: "",
+                        imageUrl = result.imageUrl ?: "",
+                        confirmed = result.confirmed
+                    )
+                    AppEnvironment.setUserProfile(
+                        AppEnvironment.userProfile.copy(inventory = updatedInventory)
+                    )
+                }
+                onAdded()
+            },
+            onNoTool = onNoToolClick
+        )
     }
 }
 
@@ -236,6 +192,48 @@ fun AddToolViewPreview() {
     AddToolView(
         tool = Tool.DRILL,
         onAdded = {},
-        onNotHave = {}
+        onNoToolClick = {},
+        onBackClick = {}
     )
+}
+
+@Composable
+fun AddToolButtons(
+    enabled: Boolean,
+    isLoading: Boolean,
+    onAdd: () -> Unit,
+    onNoTool: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp, vertical = 24.dp)
+    ) {
+        // Top button
+        Button(
+            onClick = onAdd,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.dp)
+                .align(Alignment.TopCenter),
+            enabled = enabled && !isLoading,
+        ) {
+            Text("Add To Inventory")
+        }
+        Spacer(Modifier.height(160.dp))
+        // Bottom button
+        OutlinedButton(
+            onClick = onNoTool,
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .align(Alignment.BottomCenter),
+            border = ButtonDefaults.outlinedButtonBorder(true)
+        ) {
+            Icon(Icons.Default.Warning, contentDescription = "Don't Have", tint = Color.Red)
+            Spacer(Modifier.width(8.dp))
+            Text("I don't have it", color = Color.Red)
+        }
+    }
 }

@@ -1,5 +1,7 @@
 package ai.toolio.app.ui.inventory
 
+import ai.toolio.app.App
+import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.ui.wizard.model.Task
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -84,10 +86,7 @@ fun RequiredToolsView(
                         tool = tool,
                         isAdded = addedTools.contains(tool),
                         onAddClick = {
-                            if (!addedTools.contains(tool)) {
-                                addedTools.add(tool)
-                                onAddToolClicked(tool)
-                            }
+                            onAddToolClicked(tool)
                         }
                     )
                 }

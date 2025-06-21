@@ -38,6 +38,7 @@ import java.io.File
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.json.JsonPrimitive
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 fun main() {
@@ -63,6 +64,9 @@ fun Application.module() {
             })
         }
     }
+
+    val logger = LoggerFactory.getLogger("MYDATA:")
+
 
     attributes.put(HttpClientKey, httpClient)
 
@@ -161,6 +165,7 @@ fun Application.module() {
         }
 
         post("/verify-tool") {
+            logger.info("==> POST /verify-tool")
             val multipart = call.receiveMultipart()
             var promptText: String? = null
             var imageBytes: ByteArray? = null
@@ -182,7 +187,10 @@ fun Application.module() {
                 part.dispose()
             }
 
+            logger.debug("Received multipart data")
+
             if (promptText == null || imageBytes == null || fileName == null || userId == null) {
+                logger.warn("Missing prompt or image")
                 call.respond(HttpStatusCode.BadRequest, "Missing data")
                 return@post
             }
@@ -213,10 +221,12 @@ fun Application.module() {
                     imageBytes = imageBytes
                 )
             )
-
+            logger.error(gptResponse.content)
             val result = try {
-                Json.decodeFromString<ToolRecognitionResult>(gptResponse.content)
+                Json.decodeFromString<ToolRecognitionResult>(gptResponse.content).copy(
+                )
             } catch (e: Exception) {
+                logger.error(e.message)
                 call.respond(HttpStatusCode.InternalServerError, "Failed to parse GPT response: ${e.message}")
                 return@post
             }

@@ -22,20 +22,25 @@ class MainActivity : ComponentActivity(), ActivityResultCaller {
 
     private lateinit var permissionsCheck: () -> Boolean
     private lateinit var launchPermissions: () -> Unit
+    // Always create AndroidPhotoPicker at construction time
+    private lateinit var photoPicker: AndroidPhotoPicker
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        val permissions = buildPermissionsList()
+        // Register the picker in onCreate *before* any async logic!
+        photoPicker = AndroidPhotoPicker(this)
 
-        var permissionsGranted: Boolean? = null
+        val permissions = buildPermissionsList()
+        val grantedState = mutableStateOf(
+            permissions.all { checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED }
+        )
 
         val permissionsLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { result ->
-            // All must be true
-            permissionsGranted = result.all { it.value }
+            grantedState.value = result.all { it.value }
         }
 
         permissionsCheck = {
@@ -47,23 +52,17 @@ class MainActivity : ComponentActivity(), ActivityResultCaller {
         }
 
         setContent {
-            // Observe permissions
-            var granted by remember { mutableStateOf(permissionsCheck()) }
+            val granted by grantedState
+
             LaunchedEffect(granted) {
                 if (!granted) {
                     launchPermissions()
                 }
             }
-            // Listen to launcher result and update granted
-            LaunchedEffect(permissionsGranted) {
-                if (permissionsGranted != null) {
-                    granted = permissionsGranted!!
-                }
-            }
             if (granted) {
                 App(
                     NativeFeatures(
-                        photoPicker = AndroidPhotoPicker(this)
+                        photoPicker = photoPicker
                     )
                 )
             } else {

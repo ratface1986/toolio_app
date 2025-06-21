@@ -2,6 +2,7 @@ package ai.toolio.app.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.json.JsonElement
 
 @Serializable
@@ -93,5 +94,7 @@ data class ToolRecognitionResult(
     val matchesExpected: Boolean,
     val type: String? = null,
     val name: String? = null,
-    val description: String? = null
+    val description: String? = null,
+    @Transient val imageUrl: String? = null,
+    @Transient val confirmed: Boolean = false
 )

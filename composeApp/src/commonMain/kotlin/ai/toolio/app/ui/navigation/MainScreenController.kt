@@ -95,7 +95,13 @@ fun MainScreenController(
                     tool = requiredTool,
                     onAdded = {
                         screen = AppScreen.RequiredTools
-                    }
+                    },
+                    onNoToolClick = {
+                        screen = AppScreen.RequiredTools
+                    },
+                    onBackClick = {
+                        screen = AppScreen.RequiredTools
+                    },
                 )
             }
             AppScreen.Questions -> {

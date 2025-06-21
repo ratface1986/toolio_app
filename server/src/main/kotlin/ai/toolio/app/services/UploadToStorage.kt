@@ -17,7 +17,7 @@ suspend fun uploadToStorage(httpClient: HttpClient, imageBytes: ByteArray, fileN
     val uploadUrl = "${SupabaseConfig.storageBaseUrl}/$bucket/$fileName"
     val apiKey = SupabaseConfig.apiKey
 
-    val response = httpClient.post(uploadUrl) {
+    val response = httpClient.put(uploadUrl) {
         header("Authorization", "Bearer $apiKey")
         header("Content-Type", "image/jpeg")
         header("x-upsert", "true")

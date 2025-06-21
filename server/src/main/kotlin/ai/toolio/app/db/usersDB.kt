@@ -167,6 +167,9 @@ suspend fun insertUser(
     httpClient: HttpClient,
     nickname: String
 ): UserProfile? {
+    val baseUrl = "${SupabaseConfig.url}/rest/v1"
+    val apiKey = SupabaseConfig.apiKey
+    val authHeader = "Bearer $apiKey"
     val userId = UUID.randomUUID().toString()
 
     val userPayload = buildJsonObject {
@@ -174,7 +177,9 @@ suspend fun insertUser(
         put("nickname", nickname)
     }
 
-    val response = httpClient.post("users") {
+    val response = httpClient.post("$baseUrl/users") {
+        header("apikey", apiKey)
+        header("Authorization", authHeader)
         contentType(ContentType.Application.Json)
         setBody(userPayload)
     }
@@ -193,7 +198,9 @@ suspend fun insertUser(
         }
     }
 
-    val toolsResponse = httpClient.post("tools") {
+    val toolsResponse = httpClient.post("$baseUrl/tools") {
+        header("apikey", apiKey)
+        header("Authorization", authHeader)
         contentType(ContentType.Application.Json)
         setBody(Json.encodeToString(toolsPayload))
     }

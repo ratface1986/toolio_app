@@ -11,20 +11,17 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.isSuccess
-import java.util.Base64
 
 suspend fun uploadToStorage(httpClient: HttpClient, imageBytes: ByteArray, fileName: String): String {
     val bucket = SupabaseConfig.bucket
     val uploadUrl = "${SupabaseConfig.storageBaseUrl}/$bucket/$fileName"
     val apiKey = SupabaseConfig.apiKey
 
-    val base64Image = Base64.getEncoder().encodeToString(imageBytes)
-
     val response = httpClient.post(uploadUrl) {
         header("Authorization", "Bearer $apiKey")
         header("Content-Type", "image/jpeg")
         header("x-upsert", "true")
-        setBody(base64Image)
+        setBody(imageBytes)
     }
 
     if (!response.status.isSuccess()) {

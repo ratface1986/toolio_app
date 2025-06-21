@@ -21,7 +21,9 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.engine.embeddedServer
 import io.ktor.server.http.content.staticFiles
+import io.ktor.server.netty.Netty
 import io.ktor.server.request.receive
 import io.ktor.server.request.receiveMultipart
 import io.ktor.util.AttributeKey
@@ -38,7 +40,11 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.json.JsonPrimitive
 import java.util.UUID
 
-fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
+fun main() {
+    val port = System.getenv("PORT")?.toInt() ?: 8080
+    embeddedServer(Netty, port = port, module = Application::module).start(wait = true)
+
+}
 
 val HttpClientKey = AttributeKey<HttpClient>("HttpClient")
 val ApplicationCall.httpClient: HttpClient

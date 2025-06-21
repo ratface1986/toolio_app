@@ -1,25 +1,18 @@
-# -------- BUILD STAGE --------
+# ---------- BUILD ----------
 FROM gradle:8.4.0-jdk17 AS build
 WORKDIR /app
 
-# Кэшируем зависимости
-COPY build.gradle.kts settings.gradle.kts gradle.properties ./
-COPY gradle ./gradle
-RUN gradle --no-daemon build || true
-
-# Копируем всё и собираем
 COPY . .
-RUN gradle installDist --no-daemon
 
-# -------- RUNTIME STAGE --------
+RUN ./gradlew :server:installDist --stacktrace --no-daemon
+
+# ---------- RUNTIME ----------
 FROM openjdk:17-jdk-slim
 WORKDIR /app
 
-# Копируем билд из предыдущего stage
-COPY --from=build /app/build/install/server /app
+COPY --from=build /app/server/build/install/server /app
 
-# Railway передаёт порт через переменную PORT
 ENV PORT=8080
-EXPOSE ${PORT}
+EXPOSE 8080
 
 CMD ["./bin/server"]

@@ -6,25 +6,24 @@ import io.ktor.client.request.delete
 import io.ktor.client.request.header
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.isSuccess
 
 suspend fun uploadToStorage(httpClient: HttpClient, imageBytes: ByteArray, fileName: String): String {
     val bucket = SupabaseConfig.bucket
-    val projectUrl = SupabaseConfig.url
-    val accessToken = SupabaseConfig.apiKey.let { "Bearer $it" }
+    val uploadUrl = "${SupabaseConfig.storageBaseUrl}/$bucket/$fileName"
+    val apiKey = SupabaseConfig.apiKey
 
-    val uploadUrl = "$projectUrl/storage/v1/object/$bucket/$fileName"
-
-    val response: HttpResponse = httpClient.put(uploadUrl) {
-        header("Authorization", accessToken)
-        header("Content-Type", "image/jpeg")
+    val response = httpClient.put(uploadUrl) {
+        header(HttpHeaders.Authorization, "Bearer $apiKey")
+        header(HttpHeaders.ContentType, ContentType.Image.JPEG)
+        header("x-upsert", "true")
         setBody(imageBytes)
     }
 
     if (!response.status.isSuccess()) {
-        error("Upload failed: ${response.status}")
+        throw IllegalStateException("Upload failed: ${response.status}")
     }
 
     return "${SupabaseConfig.publicBaseUrl}/$fileName"

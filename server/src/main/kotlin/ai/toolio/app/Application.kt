@@ -213,14 +213,21 @@ fun Application.module() {
             """.trimIndent()
 
 
-            val gptResponse = callOpenAI(
-                httpClient = call.httpClient,
-                request = ChatGptRequest(
-                    prompt = fullPrompt,
-                    imageUrl = imageUrl,
-                    imageBytes = imageBytes
+            val gptResponse = try {
+                callOpenAI(
+                    httpClient = call.httpClient,
+                    request = ChatGptRequest(
+                        prompt = fullPrompt,
+                        imageUrl = imageUrl,
+                        imageBytes = imageBytes
+                    )
                 )
-            )
+            } catch (e: Exception) {
+                logger.error("❌ Failed to call OpenAI: ${e.message}")
+                call.respond(HttpStatusCode.InternalServerError, "Failed to call GPT: ${e.message}")
+                return@post
+            }
+
             logger.error(gptResponse.content)
             val result = try {
                 Json.decodeFromString<ToolRecognitionResult>(gptResponse.content).copy(

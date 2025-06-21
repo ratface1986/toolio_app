@@ -230,7 +230,14 @@ fun Application.module() {
 
             logger.error(gptResponse.content)
             val result = try {
-                Json.decodeFromString<ToolRecognitionResult>(gptResponse.content).copy(
+                val cleanJson = gptResponse.content
+                    .trim()
+                    .removePrefix("```json")
+                    .removePrefix("```")
+                    .removeSuffix("```")
+                    .trim()
+
+                Json.decodeFromString<ToolRecognitionResult>(cleanJson).copy(
                 )
             } catch (e: Exception) {
                 logger.error(e.message)

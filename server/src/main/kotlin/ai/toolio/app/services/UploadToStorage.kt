@@ -12,13 +12,13 @@ import io.ktor.http.isSuccess
 
 suspend fun uploadToStorage(httpClient: HttpClient, imageBytes: ByteArray, fileName: String): String {
     val bucket = SupabaseConfig.bucket
-    val uploadUrl = "${SupabaseConfig.storageBaseUrl}/$bucket/$fileName"
+    val uploadUrl = "${SupabaseConfig.storageBaseUrl}/${SupabaseConfig.bucket}/$fileName"
     val apiKey = SupabaseConfig.apiKey
 
     val response = httpClient.put(uploadUrl) {
         header(HttpHeaders.Authorization, "Bearer $apiKey")
-        header(HttpHeaders.ContentType, ContentType.Image.JPEG)
-        header("x-upsert", "true")
+        header(HttpHeaders.ContentType, "image/jpeg")
+        header("x-upsert", "true") // allow overwrite
         setBody(imageBytes)
     }
 
@@ -26,8 +26,10 @@ suspend fun uploadToStorage(httpClient: HttpClient, imageBytes: ByteArray, fileN
         throw IllegalStateException("Upload failed: ${response.status}")
     }
 
+    // return public URL (read-only)
     return "${SupabaseConfig.publicBaseUrl}/$fileName"
 }
+
 
 suspend fun deleteFromStorage(httpClient: HttpClient, fileName: String) {
     val url = "${SupabaseConfig.storageBaseUrl}/${SupabaseConfig.bucket}/$fileName"

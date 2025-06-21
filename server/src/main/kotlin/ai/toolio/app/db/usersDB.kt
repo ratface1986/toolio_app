@@ -35,7 +35,7 @@ suspend fun insertTool(
     description: String,
     imageUrl: String
 ): Boolean {
-    val endpoint = "${SupabaseConfig.url}/tools"
+    val endpoint = "${SupabaseConfig.publicBaseUrl}/tools"
     val apiKey = SupabaseConfig.apiKey
 
     val payload = buildJsonObject {

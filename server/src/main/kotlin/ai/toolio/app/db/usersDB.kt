@@ -167,7 +167,7 @@ suspend fun insertUser(
     httpClient: HttpClient,
     nickname: String
 ): UserProfile? {
-    val baseUrl = "${SupabaseConfig.url}/rest/v1"
+    val baseUrl = SupabaseConfig.url
     val apiKey = SupabaseConfig.apiKey
     val authHeader = "Bearer $apiKey"
     val userId = UUID.randomUUID().toString()

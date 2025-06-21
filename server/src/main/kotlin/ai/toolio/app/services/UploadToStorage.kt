@@ -1,5 +1,6 @@
 package ai.toolio.app.services
 
+import ai.toolio.app.SupabaseConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
 import io.ktor.client.request.header
@@ -10,9 +11,9 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.isSuccess
 
 suspend fun uploadToStorage(httpClient: HttpClient, imageBytes: ByteArray, fileName: String): String {
-    val bucket = "chat-images"
-    val projectUrl = "https://feelmhmnayhaktidaiuf.supabase.co"
-    val accessToken = "Bearer 2ff4acdb073f48f2c2d8d31e47e6ccc4"
+    val bucket = SupabaseConfig.bucket
+    val projectUrl = SupabaseConfig.url
+    val accessToken = SupabaseConfig.apiKey.let { "Bearer $it" }
 
     val uploadUrl = "$projectUrl/storage/v1/object/$bucket/$fileName"
 
@@ -26,15 +27,12 @@ suspend fun uploadToStorage(httpClient: HttpClient, imageBytes: ByteArray, fileN
         error("Upload failed: ${response.status}")
     }
 
-    return "$projectUrl/storage/v1/object/public/$bucket/$fileName"
+    return "${SupabaseConfig.publicBaseUrl}/$fileName"
 }
 
 suspend fun deleteFromStorage(httpClient: HttpClient, fileName: String) {
-    val bucket = "chat-images"
-    val url = "https://feelmhmnayhaktidaiuf.supabase.co/storage/v1/object/$bucket/$fileName"
-    val accessToken = "Bearer 2ff4acdb073f48f2c2d8d31e47e6ccc4"
-
+    val url = "${SupabaseConfig.storageBaseUrl}/${SupabaseConfig.bucket}/$fileName"
     httpClient.delete(url) {
-        header(HttpHeaders.Authorization, accessToken)
+        header(HttpHeaders.Authorization, "Bearer ${SupabaseConfig.apiKey}")
     }
 }

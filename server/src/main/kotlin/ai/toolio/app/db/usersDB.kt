@@ -35,7 +35,7 @@ suspend fun insertTool(
     description: String,
     imageUrl: String
 ): Boolean {
-    val endpoint = "${SupabaseConfig.url}/rest/v1/tools"
+    val endpoint = "${SupabaseConfig.url}/tools"
     val apiKey = SupabaseConfig.apiKey
 
     val payload = buildJsonObject {
@@ -62,7 +62,7 @@ suspend fun confirmTool(
     userId: String,
     toolType: String
 ): Boolean {
-    val endpoint = "${SupabaseConfig.url}/rest/v1/tools?user_id=eq.$userId&type=eq.$toolType"
+    val endpoint = "${SupabaseConfig.url}/tools?user_id=eq.$userId&type=eq.$toolType"
     val apiKey = SupabaseConfig.apiKey
 
     val payload = buildJsonObject {
@@ -84,7 +84,7 @@ suspend fun getUserInventory(
     httpClient: HttpClient,
     userId: String
 ): JsonObject {
-    val endpoint = "${SupabaseConfig.url}/rest/v1/tools"
+    val endpoint = "${SupabaseConfig.url}/tools"
     val apiKey = SupabaseConfig.apiKey
 
     val response = httpClient.get(endpoint) {
@@ -119,7 +119,7 @@ suspend fun findUserByNickname(
     nickname: String
 ): UserProfile? {
     val apiKey = SupabaseConfig.apiKey
-    val baseUrl = "${SupabaseConfig.url}/rest/v1"
+    val baseUrl = SupabaseConfig.url
 
     // 1. Получаем пользователя
     val userResp = httpClient.get("$baseUrl/users") {

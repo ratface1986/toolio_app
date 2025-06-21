@@ -1,12 +1,10 @@
 import ai.toolio.app.models.ChatGptRequest
 import ai.toolio.app.models.ChatGptResponse
-import ai.toolio.app.models.ChatMessage
 import ai.toolio.app.models.ChatMessageOut
 import ai.toolio.app.models.ContentPart
 import ai.toolio.app.models.ImagePayload
 import ai.toolio.app.models.OpenAIChatResponse
 import ai.toolio.app.models.OpenAIRequest
-import io.github.cdimascio.dotenv.dotenv
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
@@ -16,11 +14,9 @@ import io.ktor.util.encodeBase64
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
-
-
 suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ChatGptResponse {
     val log = LoggerFactory.getLogger("OpenAIDebug")
-    val apiKey = dotenv()["OPENAI_API_KEY"] ?: error("Missing OPENAI_API_KEY")
+    val apiKey = System.getenv("OPENAI_API_KEY") ?: error("Missing OPENAI_API_KEY")
 
     val base64 = request.imageBytes?.encodeBase64()
         ?: error("Missing imageBytes for Vision request")

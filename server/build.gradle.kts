@@ -32,6 +32,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.1.3")
     implementation("io.ktor:ktor-server-html-builder:3.1.3")
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)
 }

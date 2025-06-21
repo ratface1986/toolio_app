@@ -1,5 +1,8 @@
 package ai.toolio.app.ui.wizard.model
 
+import ai.toolio.app.models.Tool
+import ai.toolio.app.models.WallType
+
 object Tasks {
 
     val categories = listOf(

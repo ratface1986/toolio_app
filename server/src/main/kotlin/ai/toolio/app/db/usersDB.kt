@@ -1,6 +1,9 @@
 package ai.toolio.app.db
 
 import ai.toolio.app.SupabaseConfig
+import ai.toolio.app.models.Tool
+import ai.toolio.app.models.ToolData
+import ai.toolio.app.models.UserProfile
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -11,6 +14,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -21,6 +25,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import java.util.UUID
 
 suspend fun insertTool(
     httpClient: HttpClient,
@@ -54,9 +59,10 @@ suspend fun insertTool(
 
 suspend fun confirmTool(
     httpClient: HttpClient,
-    toolId: String
+    userId: String,
+    toolType: String
 ): Boolean {
-    val endpoint = "${SupabaseConfig.url}/rest/v1/tools?id=eq.$toolId"
+    val endpoint = "${SupabaseConfig.url}/rest/v1/tools?user_id=eq.$userId&type=eq.$toolType"
     val apiKey = SupabaseConfig.apiKey
 
     val payload = buildJsonObject {
@@ -99,9 +105,9 @@ suspend fun getUserInventory(
             val type = obj["type"]?.jsonPrimitive?.content ?: return@forEach
 
             put(type, buildJsonObject {
-                put("name", obj["name"]?.jsonPrimitive?.content ?: "")
-                put("description", obj["description"]?.jsonPrimitive?.content ?: "")
-                put("imageUrl", obj["image_url"]?.jsonPrimitive?.content ?: "")
+                put("name", obj["name"]?.jsonPrimitive?.content.orEmpty())
+                put("description", obj["description"]?.jsonPrimitive?.content.orEmpty())
+                put("imageUrl", obj["image_url"]?.jsonPrimitive?.content.orEmpty())
                 put("confirmed", obj["confirmed"]?.jsonPrimitive?.boolean ?: false)
             })
         }
@@ -111,11 +117,12 @@ suspend fun getUserInventory(
 suspend fun findUserByNickname(
     httpClient: HttpClient,
     nickname: String
-): String? {
-    val endpoint = "${SupabaseConfig.url}/rest/v1/users"
+): UserProfile? {
     val apiKey = SupabaseConfig.apiKey
+    val baseUrl = "${SupabaseConfig.url}/rest/v1"
 
-    val response = httpClient.get(endpoint) {
+    // 1. Получаем пользователя
+    val userResp = httpClient.get("$baseUrl/users") {
         header("apikey", apiKey)
         header(HttpHeaders.Authorization, "Bearer $apiKey")
         header(HttpHeaders.Accept, ContentType.Application.Json)
@@ -123,37 +130,81 @@ suspend fun findUserByNickname(
         parameter("limit", "1")
     }
 
-    if (!response.status.isSuccess()) return null
+    if (!userResp.status.isSuccess()) return null
+    val userJson = Json.parseToJsonElement(userResp.bodyAsText()).jsonArray.firstOrNull()?.jsonObject ?: return null
+    val userId = userJson["id"]?.jsonPrimitive?.content ?: return null
 
-    val body = response.bodyAsText()
-    val json = Json.parseToJsonElement(body).jsonArray
-    if (json.isEmpty()) return null
+    // 2. Получаем inventory пользователя
+    val toolsResp = httpClient.get("$baseUrl/tools") {
+        header("apikey", apiKey)
+        header(HttpHeaders.Authorization, "Bearer $apiKey")
+        header(HttpHeaders.Accept, ContentType.Application.Json)
+        parameter("user_id", "eq.$userId")
+    }
 
-    return json.first().jsonObject["id"]?.jsonPrimitive?.content
+    if (!toolsResp.status.isSuccess()) return null
+    val toolsJson = Json.parseToJsonElement(toolsResp.bodyAsText()).jsonArray
+
+    val inventory = toolsJson.associate { toolJsonElement ->
+        val obj = toolJsonElement.jsonObject
+        val type = obj["type"]?.jsonPrimitive?.content.orEmpty()
+        val name = obj["name"]?.jsonPrimitive?.content.orEmpty()
+        val description = obj["description"]?.jsonPrimitive?.content.orEmpty()
+        val imageUrl = obj["image_url"]?.jsonPrimitive?.content.orEmpty()
+        val confirmed = obj["confirmed"]?.jsonPrimitive?.boolean ?: false
+
+        type to ToolData(name, description, imageUrl, confirmed)
+    }
+
+    return UserProfile(
+        userId = userId,
+        nickname = nickname,
+        inventory = inventory
+    )
 }
 
 suspend fun insertUser(
     httpClient: HttpClient,
     nickname: String
-): String? {
-    val endpoint = "${SupabaseConfig.url}/rest/v1/users"
-    val apiKey = SupabaseConfig.apiKey
+): UserProfile? {
+    val userId = UUID.randomUUID().toString()
 
-    val payload = buildJsonObject {
-        put("nickname", JsonPrimitive(nickname))
+    val userPayload = buildJsonObject {
+        put("id", userId)
+        put("nickname", nickname)
     }
 
-    val response = httpClient.post(endpoint) {
-        header("apikey", apiKey)
-        header(HttpHeaders.Authorization, "Bearer $apiKey")
-        header(HttpHeaders.ContentType, ContentType.Application.Json)
-        header("Prefer", "return=representation")
-        setBody(payload.toString())
+    val response = httpClient.post("users") {
+        contentType(ContentType.Application.Json)
+        setBody(userPayload)
     }
 
-    if (!response.status.isSuccess()) return null
+    if (!response.status.isSuccess()) {
+        error("Failed to create user: ${response.status}")
+    }
 
-    val body = response.bodyAsText()
-    val json = Json.parseToJsonElement(body).jsonArray
-    return json.firstOrNull()?.jsonObject?.get("id")?.jsonPrimitive?.content
+    println("✅ User created: $userId with ${Tool.entries.size} tools")
+    val toolsPayload = Tool.entries.map { tool ->
+        buildJsonObject {
+            put("user_id", userId)
+            put("type", tool.name)
+            put("confirmed", false)
+            put("image_url", "")  // пока пусто
+        }
+    }
+
+    val toolsResponse = httpClient.post("tools") {
+        contentType(ContentType.Application.Json)
+        setBody(Json.encodeToString(toolsPayload))
+    }
+
+    if (!toolsResponse.status.isSuccess()) {
+        error("Failed to create tools: ${toolsResponse.status}")
+    }
+
+    return UserProfile(
+        userId = userId,
+        nickname = nickname,
+        inventory = Tool.entries.associate { it.name to ToolData(it.displayName, "", "", false) }
+    )
 }

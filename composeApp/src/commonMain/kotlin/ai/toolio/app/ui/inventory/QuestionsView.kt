@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import ai.toolio.app.ui.wizard.model.FollowUpQuestion
-import ai.toolio.app.ui.wizard.model.WallType
+import ai.toolio.app.models.WallType
 import androidx.compose.ui.draw.clip
 import org.jetbrains.compose.ui.tooling.preview.Preview
 

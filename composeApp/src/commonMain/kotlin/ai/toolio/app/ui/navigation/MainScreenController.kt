@@ -8,13 +8,12 @@ import ai.toolio.app.ui.inventory.QuestionsView
 import ai.toolio.app.ui.inventory.RequiredToolsView
 import ai.toolio.app.ui.wizard.model.Task
 import androidx.compose.runtime.*
-import androidx.compose.material3.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Modifier
 
 import ai.toolio.app.ui.wizard.model.TaskCategory
 import ai.toolio.app.ui.wizard.model.Tasks
-import ai.toolio.app.ui.wizard.model.Tool
+import ai.toolio.app.models.Tool
 import ai.toolio.app.utils.NativeFeatures
 
 // Define the available screens

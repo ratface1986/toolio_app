@@ -33,7 +33,9 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
-import java.time.Clock
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.serialization.json.JsonPrimitive
 import java.util.UUID
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -108,20 +110,19 @@ fun Application.module() {
             val response = callOpenAI(
                 httpClient = call.httpClient,
                 request = ChatGptRequest(
-                    prompt = promptText!!,
+                    prompt = promptText,
                     imageUrl = imageUrl.orEmpty()
                 )
             )
 
-            // Сохраняем историю в файл
             val historyLine = buildJsonObject {
-                put("timestamp", Clock.systemDefaultZone().toString())
-                put("prompt", promptText!!)
-                put("image", imageUrl)
-                put("response", response.content)
-            }.toString()
+                put("timestamp", JsonPrimitive(Clock.System.now().toString()))
+                put("prompt", JsonPrimitive(promptText))
+                put("image", JsonPrimitive(imageUrl))
+                put("response", JsonPrimitive(response.content))
+            }
 
-            File("chat-history.jsonl").appendText(historyLine + "\n")
+            File("chat-history.jsonl").appendText( "$historyLine\n")
 
             call.respond(HttpStatusCode.OK, response)
         }
@@ -180,7 +181,7 @@ fun Application.module() {
                 return@post
             }
 
-            val imageUrl = uploadToStorage(call.httpClient, imageBytes!!, fileName!!)
+            val imageUrl = uploadToStorage(call.httpClient, imageBytes, fileName)
 
             val fullPrompt = """
                 You are a technical assistant. The user claims that the object in the photo is: "$promptText".
@@ -215,7 +216,7 @@ fun Application.module() {
             }
 
             if (!result.matchesExpected) {
-                deleteFromStorage(call.httpClient, fileName!!)
+                deleteFromStorage(call.httpClient, fileName)
                 call.respond(result)
                 return@post
             }
@@ -224,13 +225,13 @@ fun Application.module() {
                 httpClient = call.httpClient,
                 userId = userId,
                 type = result.type ?: "UNKNOWN",
-                name = result.name ?: "",
-                description = result.description ?: "",
+                name = result.name.orEmpty(),
+                description = result.description.orEmpty(),
                 imageUrl = imageUrl
             )
 
             if (!saveSuccess) {
-                deleteFromStorage(call.httpClient, fileName!!)
+                deleteFromStorage(call.httpClient, fileName)
                 call.respond(HttpStatusCode.InternalServerError, "Failed to save tool")
                 return@post
             }
@@ -240,14 +241,15 @@ fun Application.module() {
 
         post("/confirm-tool") {
             val request = call.receive<Map<String, String>>()
-            val toolId = request["tool_id"]
+            val userId = request["user_id"]
+            val toolType = request["tool_type"]
 
-            if (toolId.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "Missing tool_id")
+            if (userId.isNullOrBlank() || toolType.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "Missing user_id or tool_type")
                 return@post
             }
 
-            val success = confirmTool(call.httpClient, toolId)
+            val success = confirmTool(call.httpClient, userId, toolType)
             if (success) {
                 call.respond(HttpStatusCode.OK, "Tool confirmed")
             } else {
@@ -264,15 +266,18 @@ fun Application.module() {
                 return@post
             }
 
-            val userId = findUserByNickname(call.httpClient, nickname)
+            val user = findUserByNickname(call.httpClient, nickname)
                 ?: insertUser(call.httpClient, nickname)
                 ?: run {
                     call.respond(HttpStatusCode.InternalServerError, "Failed to create user")
                     return@post
                 }
 
+            val userId = user.userId
+
             val profile = UserProfile(
-                userId = userId,
+                userId = userId as String,
+                nickname = nickname,
                 inventory = getUserInventory(call.httpClient, userId)
                     .mapValues { (_, value) ->
                         val obj = value.jsonObject

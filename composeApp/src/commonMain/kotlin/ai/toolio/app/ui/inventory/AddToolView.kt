@@ -3,7 +3,7 @@ package ai.toolio.app.ui.inventory
 import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.models.ToolRecognitionResult
 import ai.toolio.app.ui.shared.ToolPhotoView
-import ai.toolio.app.ui.wizard.model.Tool
+import ai.toolio.app.models.Tool
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn

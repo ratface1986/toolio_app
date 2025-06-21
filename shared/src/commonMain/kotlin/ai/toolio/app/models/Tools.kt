@@ -1,4 +1,4 @@
-package ai.toolio.app.ui.wizard.model
+package ai.toolio.app.models
 
 enum class Tool(
     val displayName: String,

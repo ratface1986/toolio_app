@@ -2,7 +2,6 @@ package ai.toolio.app.ui.inventory
 
 import ai.toolio.app.ui.wizard.model.Task
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ai.toolio.app.ui.wizard.model.Tool
+import ai.toolio.app.models.Tool
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import toolio.composeapp.generated.resources.Res

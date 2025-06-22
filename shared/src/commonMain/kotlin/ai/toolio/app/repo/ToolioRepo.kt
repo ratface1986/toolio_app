@@ -112,6 +112,10 @@ class ToolioRepo(private val baseUrl: String) {
         client.close()
     }
 
+    fun getHttpClient(): HttpClient {
+        return client
+    }
+
     companion object {
         @Volatile
         private var instance: ToolioRepo? = null

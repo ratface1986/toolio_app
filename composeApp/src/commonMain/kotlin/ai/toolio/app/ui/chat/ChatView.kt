@@ -1,9 +1,7 @@
 package ai.toolio.app.ui.chat
 
 import ai.toolio.app.di.AppEnvironment
-import ai.toolio.app.repo.ToolioRepo
 import ai.toolio.app.ui.sidemenu.SideMenu
-import ai.toolio.app.utils.PhotoPicker
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -62,8 +60,9 @@ fun ChatView(
         isLoading = true
         try {
             scope.launch {
-                val chatImageResponse = AppEnvironment.repo.chatGpt(prompt = "", imageBytes = imageBytes!!)
+                val chatImageResponse = AppEnvironment.repo.chatGpt(prompt = "", imageBytes = imageBytes)
                 messages.add(ChatMessage.Image(chatImageResponse.imageUrl, isUser = false))
+                messages.add(ChatMessage.Text(chatImageResponse.message, isUser = false))
             }
         } finally {
             isLoading = false

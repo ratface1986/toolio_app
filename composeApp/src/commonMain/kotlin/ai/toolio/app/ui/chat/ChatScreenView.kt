@@ -1,5 +1,7 @@
 package ai.toolio.app.ui.chat
 
+import ai.toolio.app.di.AppEnvironment
+import ai.toolio.app.ui.shared.CrossPlatformImage
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -35,10 +37,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import io.kamel.image.KamelImage
-import io.kamel.image.asyncPainterResource
-import io.ktor.utils.io.ByteReadChannel
+import androidx.compose.runtime.remember
+
 
 sealed class ChatMessage(open val isUser: Boolean) {
     data class Text(
@@ -168,18 +170,12 @@ private fun ChatMessageItem(
                     Box(
                         modifier = Modifier
                             .size(180.dp)
-                            .aspectRatio(3f / 4f) // вертикальное фото
+                            .aspectRatio(3f / 4f)
                             .clip(RoundedCornerShape(20.dp))
                             .background(Color(0xFFE0E0E0)),
                         contentAlignment = Alignment.Center
                     ) {
-                        KamelImage(
-                            resource = asyncPainterResource(data = message.imageUrl),
-                            contentDescription = "Shared image",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                        )
+                        CrossPlatformImage(url = message.imageUrl)
                     }
                 }
             }

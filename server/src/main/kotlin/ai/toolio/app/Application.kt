@@ -6,6 +6,7 @@ import ai.toolio.app.db.getUserInventory
 import ai.toolio.app.db.insertUser
 import ai.toolio.app.db.updateTool
 import ai.toolio.app.models.ChatGptRequest
+import ai.toolio.app.models.ChatImageRecognitionResult
 import ai.toolio.app.models.ToolData
 import ai.toolio.app.models.ToolRecognitionResult
 import ai.toolio.app.models.UserProfile
@@ -77,7 +78,13 @@ fun Application.module() {
 
 
     attributes.put(HttpClientKey, httpClient)
+    /*val historyLine = buildJsonObject {
+                    put("timestamp", JsonPrimitive(Clock.System.now().toString()))
+                    put("prompt", JsonPrimitive(promptText))
+                    put("response", JsonPrimitive(response.content))
+                }
 
+                File("chat-history.jsonl").appendText( "$historyLine\n")*/
     routing {
         get("/") {
             println("==> GET /")
@@ -120,8 +127,26 @@ fun Application.module() {
 
 
         post("/openai") {
+            val request = call.receive<Map<String, String>>()
+            val promptText = request["prompt"]?.takeIf { it.isNotBlank() }
+
+            if (promptText == null) {
+                call.respond(HttpStatusCode.BadRequest, "Missing or empty prompt")
+                return@post
+            }
+
+            val response = callOpenAI(
+                httpClient = call.httpClient,
+                request = ChatGptRequest(prompt = promptText)
+            )
+
+            call.respond(HttpStatusCode.OK, response)
+        }
+
+        post("/openaiImagePrompt") {
             val multipart = call.receiveMultipart()
             var promptText: String? = null
+            var imageBytes: ByteArray? = null
             var imageUrl: String? = null
 
             multipart.forEachPart { part ->
@@ -132,7 +157,7 @@ fun Application.module() {
                     is PartData.FileItem -> {
                         if (part.contentType?.contentType == "image") {
                             val fileName = "${UUID.randomUUID()}.jpg"
-                            val imageBytes = part.provider().readRemaining().readByteArray()
+                            imageBytes = part.provider().readRemaining().readByteArray()
                             imageUrl = saveImageToLocalStorage(imageBytes, fileName)
                         }
                     }
@@ -141,31 +166,26 @@ fun Application.module() {
                 part.dispose()
             }
 
-            logger.debug("MYDATA IMAGE URL: $imageUrl")
-
-            if (promptText == null) {
-                call.respond(HttpStatusCode.BadRequest, "Missing prompt")
+            if (imageBytes == null || imageUrl == null) {
+                call.respond(HttpStatusCode.BadRequest, "Missing image")
                 return@post
             }
 
             val response = callOpenAI(
                 httpClient = call.httpClient,
                 request = ChatGptRequest(
-                    prompt = promptText,
-                    imageUrl = imageUrl.orEmpty()
+                    prompt = promptText.orEmpty(), // может быть пустым
+                    imageBytes = imageBytes
                 )
             )
 
-            val historyLine = buildJsonObject {
-                put("timestamp", JsonPrimitive(Clock.System.now().toString()))
-                put("prompt", JsonPrimitive(promptText))
-                put("image", JsonPrimitive(imageUrl))
-                put("response", JsonPrimitive(response.content))
-            }
-
-            File("chat-history.jsonl").appendText( "$historyLine\n")
-
-            call.respond(HttpStatusCode.OK, response)
+            call.respond(
+                status = HttpStatusCode.OK,
+                message = ChatImageRecognitionResult(
+                    message = response.content,
+                    imageUrl = System.getenv("DOMAIN_URL") + imageUrl
+                )
+            )
         }
 
 

@@ -1,10 +1,8 @@
 package ai.toolio.app
 
 import ai.toolio.app.ToolioConfig.jdbcUrl
-import ai.toolio.app.db.confirmTool
 import ai.toolio.app.db.findUserByNickname
 import ai.toolio.app.db.getUserInventory
-import ai.toolio.app.db.insertTool
 import ai.toolio.app.db.insertUser
 import ai.toolio.app.db.updateTool
 import ai.toolio.app.models.ChatGptRequest

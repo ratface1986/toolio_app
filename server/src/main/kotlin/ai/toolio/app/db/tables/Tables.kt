@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 
 object Tools : Table("tools") {
-    val id = integer("id").autoIncrement()
+    val id = uuid("id")
     val userId = uuid("user_id").references(Users.id)
     val type = varchar("type", 64)
     val name = varchar("name", 255)

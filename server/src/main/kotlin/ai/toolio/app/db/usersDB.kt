@@ -122,6 +122,7 @@ suspend fun insertUser(nickname: String): UserProfile? = withContext(Dispatchers
         // 2. Вставка всех инструментов как "заготовка"
         Tool.entries.forEach { tool ->
             Tools.insert {
+                it[id] = UUID.randomUUID()
                 it[Tools.userId] = userId
                 it[Tools.type] = tool.name
                 it[Tools.name] = "" // пустое имя — заполняется позже

@@ -141,6 +141,8 @@ fun Application.module() {
                 part.dispose()
             }
 
+            logger.debug("MYDATA IMAGE URL: $imageUrl")
+
             if (promptText == null) {
                 call.respond(HttpStatusCode.BadRequest, "Missing prompt")
                 return@post
@@ -318,7 +320,7 @@ fun Application.module() {
             }
         }
 
-        staticFiles("/uploads", File("uploads"))
+        staticFiles("/uploads", File(ToolioConfig.storagePath))
     }
 
 

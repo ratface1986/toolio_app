@@ -1,10 +1,6 @@
 package ai.toolio.app.services
 
 import ai.toolio.app.ToolioConfig
-import io.ktor.client.HttpClient
-import io.ktor.client.request.delete
-import io.ktor.client.request.header
-import io.ktor.http.HttpHeaders
 import java.io.File
 
 fun saveImageToLocalStorage(imageBytes: ByteArray, fileName: String): String {

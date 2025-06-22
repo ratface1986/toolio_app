@@ -7,7 +7,9 @@ data class UserProfile(
     val userId: String,
     val nickname: String,
     val inventory: Map<String, ToolData>
-)
+) {
+    fun getTool(tool: Tool): ToolData? = inventory[tool.name]
+}
 
 @Serializable
 data class ToolData(

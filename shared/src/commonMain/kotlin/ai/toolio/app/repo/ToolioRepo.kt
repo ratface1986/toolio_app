@@ -1,9 +1,11 @@
 package ai.toolio.app.repo
 
 import ai.toolio.app.models.ChatGptResponse
+import ai.toolio.app.models.ChatImageRecognitionResult
 import ai.toolio.app.models.ChatMessage
 import ai.toolio.app.models.OpenAIChatResponse
 import ai.toolio.app.models.OpenAIRequest
+import ai.toolio.app.models.ToolData
 import ai.toolio.app.models.ToolRecognitionResult
 import ai.toolio.app.models.UserProfile
 import io.ktor.client.*
@@ -63,50 +65,47 @@ class ToolioRepo(private val baseUrl: String) {
         return response.body()
     }
 
-    suspend fun confirmTool(userId: String, toolId: String): Boolean {
+    suspend fun confirmTool(userId: String, toolType: String, toolData: ToolData?): Boolean {
         val response = client.post("$baseUrl/confirm-tool") {
             contentType(ContentType.Application.Json)
-            setBody(mapOf("user_id" to userId, "tool_type" to toolId))
+            setBody(
+                mapOf(
+                    "user_id" to userId,
+                    "tool_type" to toolType,
+                    "name" to toolData?.name.orEmpty(),
+                    "description" to toolData?.description.orEmpty(),
+                    "image_url" to toolData?.imageUrl.orEmpty(),
+                    "confirmed" to toolData?.confirmed.toString()
+                )
+            )
         }
         return response.status.isSuccess()
     }
 
-    suspend fun chatGpt(prompt: String): Result<ChatGptResponse> {
-        return try {
-            val response = client.post("$baseUrl/openai") {
-                contentType(ContentType.Application.Json)
-                setBody(mapOf("prompt" to prompt))
-            }
-
-            when (response.status) {
-                HttpStatusCode.OK -> {
-                    val data = response.body<ChatGptResponse>()
-                    Result.success(data)
-                }
-                else -> Result.failure(Exception("Ktor returned ${response.status}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+    suspend fun chatGpt(prompt: String, imageBytes : ByteArray): ChatImageRecognitionResult {
+        val parts = formData {
+            append("prompt", prompt)
+            append("image", imageBytes, Headers.build {
+                append(HttpHeaders.ContentType, "image/jpeg")
+                append(HttpHeaders.ContentDisposition, "filename=\"msg.jpg\"")
+            })
         }
+
+        val response = client.submitFormWithBinaryData(
+            url = "$baseUrl/openaiImagePrompt",
+            formData = parts
+        )
+
+        return response.body()
     }
 
-    suspend fun chatGptImage(prompt: String, base64: String): Result<ChatGptResponse> {
-        return try {
-            val response = client.post("$baseUrl/openai") {
-                contentType(ContentType.Application.Json)
-                setBody(mapOf("prompt" to prompt, "image" to base64))
-            }
-
-            when (response.status) {
-                HttpStatusCode.OK -> {
-                    val data = response.body<ChatGptResponse>()
-                    Result.success(data)
-                }
-                else -> Result.failure(Exception("Ktor returned ${response.status}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+    suspend fun chatGpt(prompt: String): ChatGptResponse {
+        val response = client.post("$baseUrl/openai") {
+            contentType(ContentType.Application.Json)
+            setBody(mapOf("prompt" to prompt))
         }
+
+        return response.body()
     }
 
     fun close() {

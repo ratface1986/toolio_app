@@ -84,7 +84,7 @@ fun RequiredToolsView(
                 items(tools) { tool ->
                     ToolListItem(
                         tool = tool,
-                        isAdded = addedTools.contains(tool),
+                        isAdded = AppEnvironment.userProfile.getTool(tool)?.confirmed ?: false,
                         onAddClick = {
                             onAddToolClicked(tool)
                         }

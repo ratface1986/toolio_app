@@ -95,6 +95,11 @@ data class ToolRecognitionResult(
     val type: String? = null,
     val name: String? = null,
     val description: String? = null,
-    @Transient val imageUrl: String? = null,
-    @Transient val confirmed: Boolean = false
+    @Transient var imageUrl: String? = null
+)
+
+@Serializable
+data class ChatImageRecognitionResult(
+    val message: String,
+    val imageUrl: String
 )

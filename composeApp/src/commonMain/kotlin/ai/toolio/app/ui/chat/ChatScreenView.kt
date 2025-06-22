@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -37,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
+import io.ktor.utils.io.ByteReadChannel
 
 sealed class ChatMessage(open val isUser: Boolean) {
     data class Text(
@@ -45,7 +47,7 @@ sealed class ChatMessage(open val isUser: Boolean) {
     ) : ChatMessage(isUser)
 
     data class Image(
-        val imageBase64: String,
+        val imageUrl: String,
         override val isUser: Boolean
     ) : ChatMessage(isUser)
 }
@@ -163,14 +165,22 @@ private fun ChatMessageItem(
                         .padding(vertical = 4.dp)
                         .size(200.dp)
                 ) {
-                    KamelImage(
-                        resource = asyncPainterResource("data:image/jpeg;base64,${message.imageBase64}"),
-                        contentDescription = "Shared image",
-                        contentScale = ContentScale.Crop,
+                    Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .fillMaxSize()
-                    )
+                            .size(180.dp)
+                            .aspectRatio(3f / 4f) // вертикальное фото
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(Color(0xFFE0E0E0)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        KamelImage(
+                            resource = asyncPainterResource(data = message.imageUrl),
+                            contentDescription = "Shared image",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                        )
+                    }
                 }
             }
         }

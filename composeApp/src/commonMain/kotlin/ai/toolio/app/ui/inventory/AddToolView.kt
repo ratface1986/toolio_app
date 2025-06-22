@@ -47,8 +47,7 @@ fun AddToolView(
                 matchesExpected = false,
                 name = tool.displayName,
                 description = "",
-                imageUrl = "",
-                confirmed = false
+                imageUrl = ""
             )
         )
     }
@@ -78,6 +77,41 @@ fun AddToolView(
             } catch (e: Exception) {
                 // Error during verification
                 errorMsg = "Failed to verify tool: ${e.message}"
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    fun confirmTool() {
+        val updatedInventory = AppEnvironment.userProfile.inventory.toMutableMap()
+        updatedInventory[tool.name] = ToolData(
+            name = result.name ?: tool.displayName,
+            description = result.description ?: "",
+            imageUrl = result.imageUrl ?: "",
+            confirmed = result.matchesExpected
+        )
+
+        AppEnvironment.setUserProfile(
+            AppEnvironment.userProfile.copy(inventory = updatedInventory)
+        )
+
+        scope.launch {
+            isLoading = true
+            errorMsg = null
+
+            try {
+                val confirmResult = AppEnvironment.repo.confirmTool(
+                    userId = AppEnvironment.userProfile.userId,
+                    toolType = tool.name,
+                    toolData = AppEnvironment.userProfile.getTool(tool),
+                )
+
+                onAdded()
+            } catch (e: Exception) {
+                // Error during verification
+                errorMsg = "Failed to verify tool: ${e.message}"
+                error("MYDATA confirmTool result: $errorMsg")
             } finally {
                 isLoading = false
             }
@@ -165,21 +199,7 @@ fun AddToolView(
             enabled = toolImageData != null && toolName.isNotBlank(),
             isLoading = isLoading,
             onAdd = {
-                scope.launch {
-                    AppEnvironment.repo.confirmTool(tool.name)
-
-                    val updatedInventory = AppEnvironment.userProfile.inventory.toMutableMap()
-                    updatedInventory[tool.name] = ToolData(
-                        name = result.name ?: tool.displayName,
-                        description = result.description ?: "",
-                        imageUrl = result.imageUrl ?: "",
-                        confirmed = result.confirmed
-                    )
-                    AppEnvironment.setUserProfile(
-                        AppEnvironment.userProfile.copy(inventory = updatedInventory)
-                    )
-                }
-                onAdded()
+                confirmTool()
             },
             onNoTool = onNoToolClick
         )

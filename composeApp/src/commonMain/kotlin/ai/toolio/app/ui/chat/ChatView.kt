@@ -45,8 +45,31 @@ fun ChatView(
     }
     var isLoading by remember { mutableStateOf(false) }
 
-    // Mock token for development - in production, this should come from auth
-    val mockToken = "You are my friend. Helping me fix anything in my house"
+    fun sendMessage(text: String) {
+        isLoading = true
+        try {
+            scope.launch {
+                println("Sending message to GPT: $text")
+                val response = AppEnvironment.repo.chatGpt(text)
+                messages.add(ChatMessage.Text(content = response.content, isUser = false))
+            }
+        } finally {
+            isLoading = false
+        }
+    }
+
+    fun uploadUserPhoto(imageBytes: ByteArray) {
+        isLoading = true
+        try {
+            scope.launch {
+                val chatImageResponse = AppEnvironment.repo.chatGpt(prompt = "", imageBytes = imageBytes!!)
+                messages.add(ChatMessage.Image(chatImageResponse.imageUrl, isUser = false))
+            }
+        } finally {
+            isLoading = false
+        }
+    }
+
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -96,27 +119,7 @@ fun ChatView(
                     ChatInputView(
                         onSendMessage = { text ->
                             messages.add(ChatMessage.Text(text, isUser = true))
-                            scope.launch {
-                                isLoading = true
-                                try {
-                                    println("Sending message to GPT: $text")
-                                    val response = AppEnvironment.repo.chatGpt(text)
-                                    response.fold(
-                                        onSuccess = { gptResponse ->
-                                            val botMessage = gptResponse.content
-                                            messages.add(ChatMessage.Text(botMessage, isUser = false))
-                                        },
-                                        onFailure = { error ->
-                                            messages.add(ChatMessage.Text(
-                                                "Error: ${error.message ?: "Unknown error"}",
-                                                isUser = false
-                                            ))
-                                        }
-                                    )
-                                } finally {
-                                    isLoading = false
-                                }
-                            }
+                            sendMessage(text)
                         },
                         onAttachmentClick = { },
                         onVoiceClick = { },
@@ -127,8 +130,7 @@ fun ChatView(
                         onPhotoClick = {
                             AppEnvironment.nativeFeatures.photoPicker.pickPhoto { photoBytes ->
                                 photoBytes?.let {
-                                    val base64String = Base64.encode(photoBytes)
-                                    messages.add(ChatMessage.Image(base64String, isUser = false))
+                                    uploadUserPhoto(photoBytes)
                                 }
                             }
                         }

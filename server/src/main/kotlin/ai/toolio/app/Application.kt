@@ -180,7 +180,6 @@ fun Application.module() {
             )
 
             val responseUrl = System.getenv("DOMAIN_URL") + imageUrl
-            logger.debug("MYDATA Saved image to $responseUrl")
 
             call.respond(
                 status = HttpStatusCode.OK,

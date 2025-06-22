@@ -63,10 +63,10 @@ class ToolioRepo(private val baseUrl: String) {
         return response.body()
     }
 
-    suspend fun confirmTool(toolId: String): Boolean {
+    suspend fun confirmTool(userId: String, toolId: String): Boolean {
         val response = client.post("$baseUrl/confirm-tool") {
             contentType(ContentType.Application.Json)
-            setBody(mapOf("tool_id" to toolId))
+            setBody(mapOf("user_id" to userId, "tool_type" to toolId))
         }
         return response.status.isSuccess()
     }

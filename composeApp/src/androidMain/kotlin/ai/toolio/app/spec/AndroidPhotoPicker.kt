@@ -3,11 +3,14 @@ package ai.toolio.app.spec
 import ai.toolio.app.utils.PhotoPicker
 import android.app.Activity
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 class AndroidPhotoPicker(private val activity: Activity) : PhotoPicker {
@@ -60,9 +63,11 @@ private fun createImageFileUri(context: Context): Uri {
 
 private fun getBytesFromUri(context: Context, uri: Uri): ByteArray? {
     return try {
-        context.contentResolver.openInputStream(uri)?.use { inputStream ->
-            inputStream.readBytes()
-        }
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        val output = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, output) // ← СЖАТИЕ!
+        output.toByteArray()
     } catch (e: Exception) {
         null
     }

@@ -41,7 +41,8 @@ class IOSPhotoPicker : PhotoPicker {
             ) {
                 @Suppress("UNCHECKED_CAST")
                 val image = didFinishPickingMediaWithInfo[UIImagePickerControllerOriginalImage] as? UIImage
-                val data = image?.let { UIImageJPEGRepresentation(it, 1.0) }
+                val compressionQuality = 0.5 // 50% JPEG
+                val data = image?.let { UIImageJPEGRepresentation(it, compressionQuality) }
                 val byteArray = data?.toByteArray()
                 onPhotoPicked(byteArray)
                 picker.dismissViewControllerAnimated(true, null)

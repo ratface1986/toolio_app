@@ -1,6 +1,6 @@
 package ai.toolio.app.db
 
-import ai.toolio.app.SupabaseConfig
+import ai.toolio.app.ToolioConfig
 import ai.toolio.app.models.ChatMessageIn
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -29,8 +29,8 @@ suspend fun insertChatMessage(
     type: String = "text",
     imageUrl: String? = null
 ): Boolean {
-    val endpoint = "${SupabaseConfig.url}/rest/v1/chat_messages"
-    val apiKey = SupabaseConfig.apiKey
+    val endpoint = "${ToolioConfig.url}/rest/v1/chat_messages"
+    val apiKey = ToolioConfig.apiKey
 
     val payload = buildJsonObject {
         put("session_id", JsonPrimitive(sessionId))
@@ -55,8 +55,8 @@ suspend fun insertChatSession(
     title: String? = null,
     metadata: JsonObject? = null
 ): String? {
-    val endpoint = "${SupabaseConfig.url}/rest/v1/chat_sessions"
-    val apiKey = SupabaseConfig.apiKey
+    val endpoint = "${ToolioConfig.url}/rest/v1/chat_sessions"
+    val apiKey = ToolioConfig.apiKey
 
     val payload = buildJsonObject {
         if (title != null) put("title", JsonPrimitive(title))
@@ -82,8 +82,8 @@ suspend fun loadChatMessages(
     httpClient: HttpClient,
     sessionId: String
 ): List<ChatMessageIn> {
-    val endpoint = "${SupabaseConfig.url}/rest/v1/chat_messages"
-    val apiKey = SupabaseConfig.apiKey
+    val endpoint = "${ToolioConfig.url}/rest/v1/chat_messages"
+    val apiKey = ToolioConfig.apiKey
 
     val response = httpClient.get(endpoint) {
         header("apikey", apiKey)

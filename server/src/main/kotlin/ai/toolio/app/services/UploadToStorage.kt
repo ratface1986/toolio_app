@@ -1,41 +1,29 @@
 package ai.toolio.app.services
 
-import ai.toolio.app.SupabaseConfig
+import ai.toolio.app.ToolioConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
 import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.client.request.put
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.http.isSuccess
+import java.io.File
 
-suspend fun uploadToStorage(httpClient: HttpClient, imageBytes: ByteArray, fileName: String): String {
-    val bucket = SupabaseConfig.bucket
-    val uploadUrl = "${SupabaseConfig.storageBaseUrl}/$bucket/$fileName"
-    val apiKey = SupabaseConfig.apiKey
+fun saveImageToLocalStorage(imageBytes: ByteArray, fileName: String): String {
+    val storagePath = ToolioConfig.storagePath // уже /app/storage по дефолту
+    val file = File("$storagePath/$fileName")
 
-    val response = httpClient.put(uploadUrl) {
-        header("Authorization", "Bearer $apiKey")
-        header("Content-Type", "image/jpeg")
-        header("x-upsert", "true")
-        setBody(imageBytes)
-    }
+    file.writeBytes(imageBytes)
 
-    if (!response.status.isSuccess()) {
-        val body = response.bodyAsText()
-        throw IllegalStateException("Upload failed: ${response.status} — $body")
-    }
-
-    return "${SupabaseConfig.publicBaseUrl}/$fileName"
+    // Возвращаем относительный путь, если надо отдавать URL — зависит от логики
+    return "/uploads/$fileName"
 }
 
 
-suspend fun deleteFromStorage(httpClient: HttpClient, fileName: String) {
-    val url = "${SupabaseConfig.storageBaseUrl}/${SupabaseConfig.bucket}/$fileName"
-    httpClient.delete(url) {
-        header(HttpHeaders.Authorization, "Bearer ${SupabaseConfig.apiKey}")
+
+fun deleteImageFromLocalStorage(fileName: String) {
+    val storagePath = ToolioConfig.storagePath
+    val file = File("$storagePath/$fileName")
+
+    if (file.exists()) {
+        file.delete()
     }
 }

@@ -9,8 +9,8 @@ import ai.toolio.app.models.ChatGptRequest
 import ai.toolio.app.models.ToolData
 import ai.toolio.app.models.ToolRecognitionResult
 import ai.toolio.app.models.UserProfile
-import ai.toolio.app.services.deleteFromStorage
-import ai.toolio.app.services.uploadToStorage
+import ai.toolio.app.services.deleteImageFromLocalStorage
+import ai.toolio.app.services.saveImageToLocalStorage
 import callOpenAI
 import io.ktor.client.HttpClient
 import io.ktor.http.HttpStatusCode
@@ -36,8 +36,8 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.serialization.json.JsonPrimitive
+import org.jetbrains.exposed.sql.Database
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -65,6 +65,14 @@ fun Application.module() {
         }
     }
 
+    Database.connect(
+        url = System.getenv("DATABASE_URL") ?: error("No DATABASE_URL"),
+        driver = "org.postgresql.Driver",
+        user = System.getenv("POSTGRES_USER") ?: error("No POSTGRES_USER"),
+        password = System.getenv("POSTGRES_PASSWORD") ?: error("No POSTGRES_PASSWORD")
+    )
+
+
     val logger = LoggerFactory.getLogger("MYDATA:")
 
 
@@ -76,20 +84,43 @@ fun Application.module() {
             call.respondText("OK")
         }
 
-        /*post("/openai") {
-            println("==> POST /openai")
-            try {
-                val request = call.receive<ChatGptRequest>()
-                println("==> Request prompt: ${request.prompt}")
-                val response = callOpenAI(call.httpClient, request)
-                delay(3000)
-                call.respond(HttpStatusCode.OK, response)
-            } catch (e: Exception) {
-                println("💥 ERROR in /openai: ${e.message}")
-                e.printStackTrace()
-                call.respond(HttpStatusCode.InternalServerError, "Internal error: ${e.message}")
+        post("/login") {
+            val request = call.receive<Map<String, String>>()
+            val nickname = request["nickname"]
+
+            if (nickname.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "Missing nickname")
+                return@post
             }
-        }*/
+
+            val user = findUserByNickname(nickname)
+                ?: insertUser(nickname)
+                ?: run {
+                    call.respond(HttpStatusCode.InternalServerError, "Failed to create user")
+                    return@post
+                }
+
+            val userId = user.userId
+
+            val profile = UserProfile(
+                userId = userId as String,
+                nickname = nickname,
+                inventory = getUserInventory(userId)
+                    .mapValues { (_, value) ->
+                        val obj = value.jsonObject
+                        ToolData(
+                            name = obj["name"]?.jsonPrimitive?.content.orEmpty(),
+                            description = obj["description"]?.jsonPrimitive?.content.orEmpty(),
+                            imageUrl = obj["imageUrl"]?.jsonPrimitive?.content.orEmpty(),
+                            confirmed = obj["confirmed"]?.jsonPrimitive?.boolean ?: false
+                        )
+                    }
+            )
+
+            call.respond(profile)
+        }
+
+
         post("/openai") {
             val multipart = call.receiveMultipart()
             var promptText: String? = null
@@ -104,7 +135,7 @@ fun Application.module() {
                         if (part.contentType?.contentType == "image") {
                             val fileName = "${UUID.randomUUID()}.jpg"
                             val imageBytes = part.provider().readRemaining().readByteArray()
-                            imageUrl = uploadToStorage(call.httpClient, imageBytes, fileName)
+                            imageUrl = saveImageToLocalStorage(imageBytes, fileName)
                         }
                     }
                     else -> {}
@@ -147,8 +178,7 @@ fun Application.module() {
                     val fileName = "${UUID.randomUUID()}.jpg"
                     val imageBytes = part.provider().readRemaining().readByteArray()
 
-                    uploadedUrl = uploadToStorage(
-                        httpClient = call.httpClient,
+                    uploadedUrl = saveImageToLocalStorage(
                         imageBytes = imageBytes,
                         fileName = fileName
                     )
@@ -195,7 +225,7 @@ fun Application.module() {
                 return@post
             }
 
-            val imageUrl = uploadToStorage(call.httpClient, imageBytes, fileName)
+            val imageUrl = saveImageToLocalStorage(imageBytes, fileName)
 
             val fullPrompt = """
                 You are a technical assistant. The user claims that the object in the photo is: "$promptText".
@@ -246,13 +276,12 @@ fun Application.module() {
             }
 
             if (!result.matchesExpected) {
-                deleteFromStorage(call.httpClient, fileName)
+                deleteImageFromLocalStorage(fileName)
                 call.respond(result)
                 return@post
             }
 
             val saveSuccess = insertTool(
-                httpClient = call.httpClient,
                 userId = userId,
                 type = result.type ?: "UNKNOWN",
                 name = result.name.orEmpty(),
@@ -261,7 +290,7 @@ fun Application.module() {
             )
 
             if (!saveSuccess) {
-                deleteFromStorage(call.httpClient, fileName)
+                deleteImageFromLocalStorage(fileName)
                 call.respond(HttpStatusCode.InternalServerError, "Failed to save tool")
                 return@post
             }
@@ -279,50 +308,13 @@ fun Application.module() {
                 return@post
             }
 
-            val success = confirmTool(call.httpClient, userId, toolType)
+            val success = confirmTool(userId, toolType)
             if (success) {
                 call.respond(HttpStatusCode.OK, "Tool confirmed")
             } else {
                 call.respond(HttpStatusCode.InternalServerError, "Failed to confirm tool")
             }
         }
-
-        post("/login") {
-            val request = call.receive<Map<String, String>>()
-            val nickname = request["nickname"]
-
-            if (nickname.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "Missing nickname")
-                return@post
-            }
-
-            val user = findUserByNickname(call.httpClient, nickname)
-                ?: insertUser(call.httpClient, nickname)
-                ?: run {
-                    call.respond(HttpStatusCode.InternalServerError, "Failed to create user")
-                    return@post
-                }
-
-            val userId = user.userId
-
-            val profile = UserProfile(
-                userId = userId as String,
-                nickname = nickname,
-                inventory = getUserInventory(call.httpClient, userId)
-                    .mapValues { (_, value) ->
-                        val obj = value.jsonObject
-                        ToolData(
-                            name = obj["name"]?.jsonPrimitive?.content.orEmpty(),
-                            description = obj["description"]?.jsonPrimitive?.content.orEmpty(),
-                            imageUrl = obj["imageUrl"]?.jsonPrimitive?.content.orEmpty(),
-                            confirmed = obj["confirmed"]?.jsonPrimitive?.boolean ?: false
-                        )
-                    }
-            )
-
-            call.respond(profile)
-        }
-
 
         staticFiles("/uploads", File("uploads"))
     }

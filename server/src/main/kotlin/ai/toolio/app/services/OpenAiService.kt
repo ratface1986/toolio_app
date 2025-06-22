@@ -39,7 +39,7 @@ suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ChatGpt
     )
 
     val jsonPayload = Json.encodeToString(OpenAIRequest.serializer(), openAIRequest)
-    log.info("📤 Запрос в OpenAI:\n$jsonPayload")
+    log.info("MYDATA REQUEST OpenAI:\n$jsonPayload")
 
     val response = httpClient.post("https://api.openai.com/v1/chat/completions") {
         header(HttpHeaders.Authorization, "Bearer $apiKey")

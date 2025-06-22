@@ -232,6 +232,7 @@ fun Application.module() {
             }
 
             val imageUrl = saveImageToLocalStorage(imageBytes, fileName)
+            logger.debug("MYDATA Saved image to $imageUrl")
 
             val fullPrompt = """
                 You are a technical assistant. The user claims that the object in the photo is: "$promptText".

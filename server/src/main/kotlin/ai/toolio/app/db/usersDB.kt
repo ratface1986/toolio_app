@@ -2,6 +2,7 @@ package ai.toolio.app.db
 
 import ai.toolio.app.db.tables.Tools
 import ai.toolio.app.db.tables.Users
+import ai.toolio.app.ext.toUUID
 import ai.toolio.app.models.Tool
 import ai.toolio.app.models.ToolData
 import ai.toolio.app.models.UserProfile
@@ -28,7 +29,7 @@ suspend fun insertTool(
 ): Boolean = withContext(Dispatchers.IO) {
     try {
         transaction {
-            Tools.update({ Tools.userId eq userId and (Tools.type eq type) }) {
+            Tools.update({ Tools.userId eq userId.toUUID() and (Tools.type eq type) }) {
                 it[Tools.name] = name
                 it[Tools.description] = description
                 it[Tools.imageUrl] = imageUrl
@@ -45,7 +46,7 @@ suspend fun insertTool(
 suspend fun confirmTool(userId: String, toolType: String): Boolean = withContext(Dispatchers.IO) {
     try {
         transaction {
-            Tools.update({ Tools.userId eq userId and (Tools.type eq toolType) }) {
+            Tools.update({ Tools.userId eq userId.toUUID() and (Tools.type eq toolType) }) {
                 it[confirmed] = true
             }
         }
@@ -58,7 +59,7 @@ suspend fun confirmTool(userId: String, toolType: String): Boolean = withContext
 suspend fun getUserInventory(userId: String): JsonObject = withContext(Dispatchers.IO) {
     transaction {
         val tools = Tools
-            .selectAll().where { Tools.userId eq userId }
+            .selectAll().where { Tools.userId eq userId.toUUID() }
             .orderBy(Tools.createdAt to SortOrder.ASC)
 
         buildJsonObject {
@@ -98,7 +99,7 @@ suspend fun findUserByNickname(nickname: String): UserProfile? = withContext(Dis
             }
 
         UserProfile(
-            userId = userId,
+            userId = userId.toString(),
             nickname = nickname,
             inventory = inventory
         )
@@ -107,7 +108,7 @@ suspend fun findUserByNickname(nickname: String): UserProfile? = withContext(Dis
 
 
 suspend fun insertUser(nickname: String): UserProfile? = withContext(Dispatchers.IO) {
-    val userId = UUID.randomUUID().toString()
+    val userId = UUID.randomUUID()
     val now = LocalDateTime.now()
 
     transaction {
@@ -132,7 +133,7 @@ suspend fun insertUser(nickname: String): UserProfile? = withContext(Dispatchers
         }
 
         UserProfile(
-            userId = userId,
+            userId = userId.toString(),
             nickname = nickname,
             inventory = Tool.entries.associate {
                 it.name to ToolData(it.displayName, "", "", false)

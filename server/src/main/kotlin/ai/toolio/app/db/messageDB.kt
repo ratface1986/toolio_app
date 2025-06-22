@@ -2,6 +2,7 @@ package ai.toolio.app.db
 
 import ai.toolio.app.db.tables.ChatMessages
 import ai.toolio.app.db.tables.ChatSessions
+import ai.toolio.app.ext.toUUID
 import ai.toolio.app.models.ChatMessageIn
 import org.jetbrains.exposed.sql.selectAll
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +22,7 @@ suspend fun insertChatMessage(
     try {
         transaction {
             ChatMessages.insert {
-                it[ChatMessages.sessionId] = sessionId
+                it[ChatMessages.sessionId] = sessionId.toUUID()
                 it[ChatMessages.sender] = role
                 it[ChatMessages.content] = content
                 it[ChatMessages.imageUrl] = imageUrl
@@ -34,14 +35,14 @@ suspend fun insertChatMessage(
     }
 }
 
-suspend fun insertChatSession(userId: String, sessionType: String): String = withContext(Dispatchers.IO) {
-    val id = UUID.randomUUID().toString()
+suspend fun insertChatSession(userId: String, sessionType: String): UUID = withContext(Dispatchers.IO) {
+    val id = UUID.randomUUID()
     val now = LocalDateTime.now()
 
     transaction {
         ChatSessions.insert {
             it[ChatSessions.id] = id
-            it[ChatSessions.userId] = userId
+            it[ChatSessions.userId] = userId.toUUID()
             it[ChatSessions.sessionType] = sessionType
             it[ChatSessions.createdAt] = now
         }
@@ -53,7 +54,7 @@ suspend fun insertChatSession(userId: String, sessionType: String): String = wit
 suspend fun loadChatMessages(sessionId: String): List<ChatMessageIn> = withContext(Dispatchers.IO) {
     transaction {
         ChatMessages
-            .selectAll().where { ChatMessages.sessionId eq sessionId }
+            .selectAll().where { ChatMessages.sessionId eq sessionId.toUUID() }
             .orderBy(ChatMessages.createdAt to SortOrder.ASC)
             .mapNotNull { row ->
                 val role = row[ChatMessages.sender]

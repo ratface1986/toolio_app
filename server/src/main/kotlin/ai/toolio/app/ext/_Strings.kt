@@ -1,5 +1,5 @@
 package ai.toolio.app.ext
 
-internal fun String.toSlug() = lowercase().replace("\n", " ").replace("[^a-z\\d\\s]".toRegex(), " ")
+import java.util.UUID
 
-internal fun String?.orEmpty() = this ?: ""
+internal fun String?.toUUID() = UUID.fromString(this)

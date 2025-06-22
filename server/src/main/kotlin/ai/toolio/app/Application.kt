@@ -101,12 +101,10 @@ fun Application.module() {
                     return@post
                 }
 
-            val userId = user.userId
-
             val profile = UserProfile(
-                userId = userId as String,
+                userId = user.userId,
                 nickname = nickname,
-                inventory = getUserInventory(userId)
+                inventory = getUserInventory(user.userId)
                     .mapValues { (_, value) ->
                         val obj = value.jsonObject
                         ToolData(
@@ -201,7 +199,7 @@ fun Application.module() {
             var promptText: String? = null
             var imageBytes: ByteArray? = null
             var fileName: String? = null
-            var userId = "mock-user-id"
+            var userId: String? = null
 
             multipart.forEachPart { part ->
                 when (part) {
@@ -216,6 +214,12 @@ fun Application.module() {
                     else -> {}
                 }
                 part.dispose()
+            }
+
+            if (userId == null) {
+                logger.warn("Missing user_id")
+                call.respond(HttpStatusCode.BadRequest, "Missing user_id")
+                return@post
             }
 
             logger.debug("Received multipart data")
@@ -304,7 +308,7 @@ fun Application.module() {
             val userId = request["user_id"]
             val toolType = request["tool_type"]
 
-            if (userId.isNullOrBlank() || toolType.isNullOrBlank()) {
+            if (userId == null || toolType.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest, "Missing user_id or tool_type")
                 return@post
             }

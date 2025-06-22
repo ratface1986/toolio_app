@@ -6,6 +6,7 @@ import ai.toolio.app.db.findUserByNickname
 import ai.toolio.app.db.getUserInventory
 import ai.toolio.app.db.insertTool
 import ai.toolio.app.db.insertUser
+import ai.toolio.app.db.updateTool
 import ai.toolio.app.models.ChatGptRequest
 import ai.toolio.app.models.ToolData
 import ai.toolio.app.models.ToolRecognitionResult
@@ -286,20 +287,6 @@ fun Application.module() {
                 return@post
             }
 
-            val saveSuccess = insertTool(
-                userId = userId,
-                type = result.type ?: "UNKNOWN",
-                name = result.name.orEmpty(),
-                description = result.description.orEmpty(),
-                imageUrl = imageUrl
-            )
-
-            if (!saveSuccess) {
-                deleteImageFromLocalStorage(fileName)
-                call.respond(HttpStatusCode.InternalServerError, "Failed to save tool")
-                return@post
-            }
-
             call.respond(result)
         }
 
@@ -307,14 +294,26 @@ fun Application.module() {
             val request = call.receive<Map<String, String>>()
             val userId = request["user_id"]
             val toolType = request["tool_type"]
+            val name = request["name"] ?: ""
+            val description = request["description"] ?: ""
+            val imageUrl = request["image_url"] ?: ""
+            val confirmed = request["confirmed"]?.toBooleanStrictOrNull() ?: false
 
             if (userId == null || toolType.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest, "Missing user_id or tool_type")
                 return@post
             }
 
-            val success = confirmTool(userId, toolType)
-            if (success) {
+            val updateSuccess = updateTool(
+                userId = userId,
+                type = toolType,
+                name = name,
+                description = description.ifBlank { "No description provided" },
+                imageUrl = imageUrl,
+                confirmed = confirmed
+            )
+
+            if (updateSuccess) {
                 call.respond(HttpStatusCode.OK, "Tool confirmed")
             } else {
                 call.respond(HttpStatusCode.InternalServerError, "Failed to confirm tool")

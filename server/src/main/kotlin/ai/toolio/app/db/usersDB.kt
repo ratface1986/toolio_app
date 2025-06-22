@@ -20,12 +20,13 @@ import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
 import java.util.UUID
 
-suspend fun insertTool(
+suspend fun updateTool(
     userId: String,
     type: String,
     name: String,
     description: String,
-    imageUrl: String
+    imageUrl: String,
+    confirmed: Boolean
 ): Boolean = withContext(Dispatchers.IO) {
     try {
         transaction {
@@ -33,21 +34,8 @@ suspend fun insertTool(
                 it[Tools.name] = name
                 it[Tools.description] = description
                 it[Tools.imageUrl] = imageUrl
-                it[Tools.confirmed] = false
+                it[Tools.confirmed] = confirmed
                 it[Tools.createdAt] = LocalDateTime.now()
-            }
-        }
-        true
-    } catch (e: Exception) {
-        false
-    }
-}
-
-suspend fun confirmTool(userId: String, toolType: String): Boolean = withContext(Dispatchers.IO) {
-    try {
-        transaction {
-            Tools.update({ Tools.userId eq userId.toUUID() and (Tools.type eq toolType) }) {
-                it[confirmed] = true
             }
         }
         true

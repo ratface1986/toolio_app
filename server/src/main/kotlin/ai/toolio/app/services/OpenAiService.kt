@@ -18,16 +18,11 @@ suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ChatGpt
     val log = LoggerFactory.getLogger("OpenAIDebug")
     val apiKey = System.getenv("OPENAI_API_KEY") ?: error("Missing OPENAI_API_KEY")
 
-    val base64 = request.imageBytes?.encodeBase64()
-        ?: error("Missing imageBytes for Vision request")
+    val messages = if (request.imageBytes != null) {
+        val base64 = request.imageBytes!!.encodeBase64()
+        val imageDataUrl = "data:image/jpeg;base64,$base64"
 
-    val imageDataUrl = "data:image/jpeg;base64,$base64"
-
-    val openAIRequest = OpenAIRequest(
-        model = "gpt-4o",
-        temperature = 0.7,
-        maxTokens = 1000,
-        messages = listOf(
+        listOf(
             ChatMessageOut(
                 role = "user",
                 content = listOf(
@@ -36,6 +31,20 @@ suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ChatGpt
                 )
             )
         )
+    } else {
+        listOf(
+            ChatMessageOut(
+                role = "user",
+                content = listOf(ContentPart.Text(request.prompt))
+            )
+        )
+    }
+
+    val openAIRequest = OpenAIRequest(
+        model = "gpt-4o",
+        temperature = 0.7,
+        maxTokens = 1000,
+        messages = messages
     )
 
     val jsonPayload = Json.encodeToString(OpenAIRequest.serializer(), openAIRequest)
@@ -47,7 +56,9 @@ suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ChatGpt
     }
 
     return try {
-        val parsed = Json { ignoreUnknownKeys = true }.decodeFromString<OpenAIChatResponse>(response.bodyAsText())
+        val parsed = Json { ignoreUnknownKeys = true }
+            .decodeFromString<OpenAIChatResponse>(response.bodyAsText())
+
         val reply = parsed.choices.firstOrNull()?.message?.content ?: "OpenAI ничего не вернул"
 
         ChatGptResponse(

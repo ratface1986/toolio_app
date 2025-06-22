@@ -275,6 +275,7 @@ fun Application.module() {
                     .trim()
 
                 Json.decodeFromString<ToolRecognitionResult>(cleanJson).copy(
+                    imageUrl = imageUrl
                 )
             } catch (e: Exception) {
                 logger.error(e.message)

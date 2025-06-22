@@ -1,5 +1,6 @@
 package ai.toolio.app
 
+import ai.toolio.app.ToolioConfig.jdbcUrl
 import ai.toolio.app.db.confirmTool
 import ai.toolio.app.db.findUserByNickname
 import ai.toolio.app.db.getUserInventory
@@ -66,7 +67,7 @@ fun Application.module() {
     }
 
     Database.connect(
-        url = System.getenv("DATABASE_URL") ?: error("No DATABASE_URL"),
+        url = jdbcUrl,
         driver = "org.postgresql.Driver",
         user = System.getenv("POSTGRES_USER") ?: error("No POSTGRES_USER"),
         password = System.getenv("POSTGRES_PASSWORD") ?: error("No POSTGRES_PASSWORD")

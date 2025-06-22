@@ -174,16 +174,19 @@ fun Application.module() {
             val response = callOpenAI(
                 httpClient = call.httpClient,
                 request = ChatGptRequest(
-                    prompt = promptText.orEmpty(), // может быть пустым
+                    prompt = "check photo and let me know what do you think", // может быть пустым
                     imageBytes = imageBytes
                 )
             )
+
+            val responseUrl = System.getenv("DOMAIN_URL") + imageUrl
+            logger.debug("MYDATA Saved image to $responseUrl")
 
             call.respond(
                 status = HttpStatusCode.OK,
                 message = ChatImageRecognitionResult(
                     message = response.content,
-                    imageUrl = System.getenv("DOMAIN_URL") + imageUrl
+                    imageUrl = responseUrl
                 )
             )
         }

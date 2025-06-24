@@ -1,5 +1,6 @@
 package ai.toolio.app
 
+import ai.toolio.app.di.AppSessions
 import ai.toolio.app.spec.AndroidPhotoPicker
 import ai.toolio.app.utils.NativeFeatures
 import android.Manifest
@@ -31,6 +32,8 @@ class MainActivity : ComponentActivity(), ActivityResultCaller {
 
         // Register the picker in onCreate *before* any async logic!
         photoPicker = AndroidPhotoPicker(this)
+
+        AppSessions.init(applicationContext)
 
         val permissions = buildPermissionsList()
         val grantedState = mutableStateOf(

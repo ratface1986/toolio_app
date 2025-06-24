@@ -1,12 +1,8 @@
 package ai.toolio.app.repo
 
-import ai.toolio.app.models.ChatGptResponse
-import ai.toolio.app.models.ChatImageRecognitionResult
-import ai.toolio.app.models.ChatMessage
-import ai.toolio.app.models.OpenAIChatResponse
-import ai.toolio.app.models.OpenAIRequest
 import ai.toolio.app.models.ToolData
 import ai.toolio.app.models.ToolRecognitionResult
+import ai.toolio.app.models.ToolioChatMessage
 import ai.toolio.app.models.UserProfile
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -82,7 +78,7 @@ class ToolioRepo(private val baseUrl: String) {
         return response.status.isSuccess()
     }
 
-    suspend fun chatGpt(prompt: String, imageBytes : ByteArray): ChatImageRecognitionResult {
+    suspend fun chatGpt(prompt: String, imageBytes : ByteArray): ToolioChatMessage {
         val parts = formData {
             append("prompt", prompt)
             append("image", imageBytes, Headers.build {
@@ -99,13 +95,17 @@ class ToolioRepo(private val baseUrl: String) {
         return response.body()
     }
 
-    suspend fun chatGpt(prompt: String): ChatGptResponse {
+    suspend fun chatGpt(prompt: String): ToolioChatMessage {
         val response = client.post("$baseUrl/openai") {
             contentType(ContentType.Application.Json)
             setBody(mapOf("prompt" to prompt))
         }
 
         return response.body()
+    }
+
+    suspend fun fetchImageByUrl(imageUrl: String): ByteArray {
+        return client.get(imageUrl).body()
     }
 
     fun close() {

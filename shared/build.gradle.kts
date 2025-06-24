@@ -8,6 +8,16 @@ plugins {
 }
 
 kotlin {
+    targets.configureEach {
+        compilations.configureEach {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    freeCompilerArgs.add("-Xexpect-actual-classes")
+                }
+            }
+        }
+    }
+
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
@@ -57,7 +67,7 @@ kotlin {
             
             // Kotlinx Serialization
             implementation(libs.kotlinx.serialization.json)
-            
+            implementation(libs.uuid)
             // Coroutines
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.skiko)
@@ -70,6 +80,7 @@ kotlin {
             implementation(libs.skiko)
             implementation(libs.ui)
             implementation(libs.ui.graphics)
+            implementation("androidx.core:core-ktx:1.16.0")
         }
         
         iosMain.dependencies {

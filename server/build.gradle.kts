@@ -27,9 +27,8 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.4.11")
     // === Ktor Client ===
     implementation("io.ktor:ktor-client-core:3.1.3")
-    implementation("io.ktor:ktor-client-cio:3.1.3") // или okhttp, но CIO проще
+    implementation("io.ktor:ktor-client-cio:3.1.3")
     implementation("io.ktor:ktor-client-content-negotiation:3.1.3")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:3.1.3")
     implementation("io.ktor:ktor-server-html-builder:3.1.3")
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
@@ -38,6 +37,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:0.50.1")
     implementation("org.postgresql:postgresql:42.7.2")
     implementation("org.jetbrains.exposed:exposed-java-time:0.50.1")
+    //implementation("ktor-client-core-jvm:3.2.0")
 
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)

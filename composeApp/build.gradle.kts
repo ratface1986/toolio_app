@@ -46,12 +46,9 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(projects.shared)
-            implementation(libs.kamel.image)
-            implementation(libs.skiko)
             implementation(libs.ui)
             implementation(libs.ui.graphics)
             implementation(libs.kotlinx.serialization.json.v163)
-
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

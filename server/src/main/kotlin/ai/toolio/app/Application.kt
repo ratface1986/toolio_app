@@ -6,7 +6,6 @@ import ai.toolio.app.db.getUserInventory
 import ai.toolio.app.db.insertUser
 import ai.toolio.app.db.updateTool
 import ai.toolio.app.models.ChatGptRequest
-import ai.toolio.app.models.ChatImageRecognitionResult
 import ai.toolio.app.models.ToolData
 import ai.toolio.app.models.ToolRecognitionResult
 import ai.toolio.app.models.UserProfile
@@ -140,7 +139,10 @@ fun Application.module() {
                 request = ChatGptRequest(prompt = promptText)
             )
 
-            call.respond(HttpStatusCode.OK, response)
+            call.respond(
+                status = HttpStatusCode.OK,
+                message = response
+            )
         }
 
         post("/openaiImagePrompt") {
@@ -174,22 +176,20 @@ fun Application.module() {
             val response = callOpenAI(
                 httpClient = call.httpClient,
                 request = ChatGptRequest(
-                    prompt = "check photo and let me know what do you think", // может быть пустым
+                    prompt = "check photo and let me know what do you think",
                     imageBytes = imageBytes
                 )
             )
 
-            val responseUrl = System.getenv("DOMAIN_URL") + imageUrl
+            val downloadImageURL = System.getenv("DOMAIN_URL") + imageUrl
 
             call.respond(
                 status = HttpStatusCode.OK,
-                message = ChatImageRecognitionResult(
-                    message = response.content,
-                    imageUrl = responseUrl
+                message = response.copy(
+                    imageUrl = downloadImageURL,
                 )
             )
         }
-
 
         post("/upload") {
             val multipart = call.receiveMultipart()

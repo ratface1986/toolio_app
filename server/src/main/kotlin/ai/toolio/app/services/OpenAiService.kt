@@ -1,10 +1,11 @@
+import ai.toolio.app.misc.Roles
 import ai.toolio.app.models.ChatGptRequest
-import ai.toolio.app.models.ChatGptResponse
 import ai.toolio.app.models.ChatMessageOut
 import ai.toolio.app.models.ContentPart
 import ai.toolio.app.models.ImagePayload
 import ai.toolio.app.models.OpenAIChatResponse
 import ai.toolio.app.models.OpenAIRequest
+import ai.toolio.app.models.ToolioChatMessage
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
@@ -14,7 +15,7 @@ import io.ktor.util.encodeBase64
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
-suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ChatGptResponse {
+suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ToolioChatMessage {
     val log = LoggerFactory.getLogger("OpenAIDebug")
     val apiKey = System.getenv("OPENAI_API_KEY") ?: error("Missing OPENAI_API_KEY")
 
@@ -61,14 +62,19 @@ suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ChatGpt
 
         val reply = parsed.choices.firstOrNull()?.message?.content ?: "OpenAI ничего не вернул"
 
-        ChatGptResponse(
+        ToolioChatMessage(
+            sessionId = "",
             content = reply,
-            model = parsed.model,
+            role = Roles.ASSISTANT,
             tokensUsed = parsed.usage?.totalTokens
         )
     } catch (e: Exception) {
         log.error("💥 Ошибка парсинга OpenAI-ответа: ${e.message}")
-        ChatGptResponse(content = "Ошибка: ${e.message.orEmpty()}")
+        ToolioChatMessage(
+            sessionId = "",
+            content = "Ошибка: ${e.message.orEmpty()}",
+            role = Roles.SYSTEM
+        )
     }
 }
 

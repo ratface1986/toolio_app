@@ -49,7 +49,7 @@ fun ChatView(
             scope.launch {
                 println("Sending message to GPT: $text")
                 val response = AppEnvironment.repo.chatGpt(text)
-                messages.add(ChatMessage.Text(content = response.content, isUser = false))
+                messages.add(ChatMessage.Text(content = response.content, isUser = true))
             }
         } finally {
             isLoading = false
@@ -60,9 +60,11 @@ fun ChatView(
         isLoading = true
         try {
             scope.launch {
-                val chatImageResponse = AppEnvironment.repo.chatGpt(prompt = "", imageBytes = imageBytes)
-                messages.add(ChatMessage.Image(chatImageResponse.imageUrl, isUser = false))
-                messages.add(ChatMessage.Text(chatImageResponse.message, isUser = false))
+                val chatResponse = AppEnvironment.repo.chatGpt(prompt = "", imageBytes = imageBytes)
+                chatResponse.imageUrl?.let { url ->
+                    messages.add(ChatMessage.Image(url, isUser = true))
+                }
+                messages.add(ChatMessage.Text(chatResponse.content, isUser = false))
             }
         } finally {
             isLoading = false

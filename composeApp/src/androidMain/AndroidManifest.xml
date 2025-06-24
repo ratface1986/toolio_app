@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android"
+          tools:ignore="SelectedPhotoAccess">
 
     <!-- Camera feature (optional: set android:required="false" if camera is not mandatory) -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
@@ -9,7 +10,7 @@
     <!-- Microphone permission for audio recording -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- Permission for reading image files on Android 13+ (API 33+) -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:ignore="SelectedPhotoAccess"/>
     <!-- Permission for reading files on Android 32 and below -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
 

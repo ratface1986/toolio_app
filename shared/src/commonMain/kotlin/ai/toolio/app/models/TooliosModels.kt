@@ -1,9 +1,11 @@
 package ai.toolio.app.models
 
+import ai.toolio.app.misc.Roles
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.JsonElement
+import kotlin.time.Clock
 
 @Serializable
 data class OpenAIRequest(
@@ -83,13 +85,6 @@ data class ChatGptRequest(
 )
 
 @Serializable
-data class ChatGptResponse(
-    val content: String,
-    val model: String? = null,
-    val tokensUsed: Int? = null
-)
-
-@Serializable
 data class ToolRecognitionResult(
     val matchesExpected: Boolean,
     val type: String? = null,
@@ -99,7 +94,12 @@ data class ToolRecognitionResult(
 )
 
 @Serializable
-data class ChatImageRecognitionResult(
-    val message: String,
-    val imageUrl: String
+data class ToolioChatMessage(
+    val sessionId: String,
+    val role: Roles,
+    val content: String,
+    val imageUrl: String? = null,
+    val tokensUsed: Int? = null,
+    val timestamp: Long = 0
 )
+

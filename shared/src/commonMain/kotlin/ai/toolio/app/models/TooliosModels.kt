@@ -5,7 +5,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.JsonElement
-import kotlin.time.Clock
 
 @Serializable
 data class OpenAIRequest(
@@ -80,7 +79,7 @@ data class Usage(
 @Serializable
 data class ChatGptRequest(
     val prompt: String,
-    val imageUrl: String = "",
+    val sessionId: String,
     val imageBytes: ByteArray? = null
 )
 
@@ -102,4 +101,15 @@ data class ToolioChatMessage(
     val tokensUsed: Int? = null,
     val timestamp: Long = 0
 )
+
+data class RepairTaskSession(
+    val sessionId: String,
+    val title: String,
+    val type: TaskCategory,
+    val status: Task,
+    val startedAt: Long,
+    val initialPrompt: String,
+    val messages: List<ToolioChatMessage> = emptyList()
+)
+
 

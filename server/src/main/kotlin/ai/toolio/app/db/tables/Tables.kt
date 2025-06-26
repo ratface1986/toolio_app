@@ -33,7 +33,11 @@ object Users : Table("users") {
 object ChatSessions : Table("chat_sessions") {
     val id = uuid("id")
     val userId = uuid("user_id").references(Users.id)
-    val sessionType = varchar("session_type", 64)
+    val title = varchar("title", 128)
+    val type = varchar("type", 64)
+    val status = varchar("status", 32)
+    val startPrompt = text("start_prompt").nullable()
+    val lastActive = datetime("last_active").clientDefault { LocalDateTime.now() }
     val createdAt = datetime("created_at").clientDefault { LocalDateTime.now() }
 
     override val primaryKey = PrimaryKey(id)
@@ -42,7 +46,7 @@ object ChatSessions : Table("chat_sessions") {
 object ChatMessages : Table("chat_messages") {
     val id = integer("id").autoIncrement()
     val sessionId = uuid("session_id").references(ChatSessions.id)
-    val sender = varchar("sender", 64) // "user" или "assistant"
+    val role = varchar("sender", 64) // "user" или "assistant"
     val content = text("content")
     val imageUrl = text("image_url").nullable()
     val createdAt = datetime("created_at").clientDefault { LocalDateTime.now() }

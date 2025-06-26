@@ -1,38 +1,25 @@
 package ai.toolio.app.ui.sidemenu
 
+import ai.toolio.app.models.CategoryType
+import ai.toolio.app.models.TaskItem
+import ai.toolio.app.models.TaskStatus
+import ai.toolio.app.theme.TaskView
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.clickable
-import androidx.compose.material.icons.automirrored.filled.Logout
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
-data class TaskItem(
-    val title: String,
-    val icon: ImageVector,
-    val status: TaskStatus
-)
-
-enum class TaskStatus {
-    IN_PROGRESS,
-    COMPLETED,
-    ABORTED;
-
-    fun toDisplayText(): String = when (this) {
-        IN_PROGRESS -> "In Progress..."
-        COMPLETED -> "Completed"
-        ABORTED -> "Aborted"
-    }
-}
 
 @Composable
 fun SideMenu(
@@ -42,7 +29,7 @@ fun SideMenu(
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.surface
+        color = Color(0xFF2F403E),
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -70,7 +57,7 @@ private fun TasksSection(modifier: Modifier = Modifier) {
         listOf(
             TaskItem("Fix Car", Icons.Default.DirectionsCar, TaskStatus.IN_PROGRESS),
             TaskItem("Household", Icons.Default.Home, TaskStatus.COMPLETED),
-            TaskItem("Garden", Icons.Default.Yard, TaskStatus.IN_PROGRESS),
+            TaskItem("Garden", Icons.Default.Yard, TaskStatus.COMPLETED),
             TaskItem("Mount", Icons.Default.Landscape, TaskStatus.ABORTED)
         )
     }
@@ -81,7 +68,7 @@ private fun TasksSection(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(tasks) { task ->
-            TaskItem(task)
+            TaskView(task.title, CategoryType.MAINTAIN, task.status)
         }
     }
 }

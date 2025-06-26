@@ -20,9 +20,10 @@ enum class Tool(
     ELECTRICAL_TAPE("Electrical Tape")
 }
 
-enum class WallType {
-    GYPSUM,
-    CONCRETE,
-    BRICK,
-    STONE
+enum class CategoryType {
+    MOUNT,
+    FIX,
+    INSTALL,
+    DECORATE,
+    MAINTAIN
 }

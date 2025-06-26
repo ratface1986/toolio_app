@@ -1,5 +1,7 @@
 package ai.toolio.app.repo
 
+import ai.toolio.app.di.AppSessions
+import ai.toolio.app.models.ChatGptRequest
 import ai.toolio.app.models.ToolData
 import ai.toolio.app.models.ToolRecognitionResult
 import ai.toolio.app.models.ToolioChatMessage
@@ -81,6 +83,7 @@ class ToolioRepo(private val baseUrl: String) {
     suspend fun chatGpt(prompt: String, imageBytes : ByteArray): ToolioChatMessage {
         val parts = formData {
             append("prompt", prompt)
+            append("sessionId", AppSessions.getLastSessionId())
             append("image", imageBytes, Headers.build {
                 append(HttpHeaders.ContentType, "image/jpeg")
                 append(HttpHeaders.ContentDisposition, "filename=\"msg.jpg\"")
@@ -96,13 +99,16 @@ class ToolioRepo(private val baseUrl: String) {
     }
 
     suspend fun chatGpt(prompt: String): ToolioChatMessage {
+        val request = ChatGptRequest(prompt = prompt, sessionId = AppSessions.getLastSessionId())
+
         val response = client.post("$baseUrl/openai") {
             contentType(ContentType.Application.Json)
-            setBody(mapOf("prompt" to prompt))
+            setBody(request)
         }
 
         return response.body()
     }
+
 
     suspend fun fetchImageByUrl(imageUrl: String): ByteArray {
         return client.get(imageUrl).body()

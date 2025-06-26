@@ -1,11 +1,10 @@
 package ai.toolio.app.ui.inventory
 
-import ai.toolio.app.data.VerifyStatus
 import ai.toolio.app.di.AppEnvironment
-import ai.toolio.app.models.ToolRecognitionResult
-import ai.toolio.app.ui.shared.ToolPhotoView
 import ai.toolio.app.models.Tool
 import ai.toolio.app.models.ToolData
+import ai.toolio.app.models.ToolRecognitionResult
+import ai.toolio.app.ui.shared.ToolPhotoView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,9 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.InternalResourceApi
-import kotlin.io.encoding.ExperimentalEncodingApi
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import androidx.compose.runtime.Composable
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 @OptIn(ExperimentalEncodingApi::class, InternalResourceApi::class)
 @Composable

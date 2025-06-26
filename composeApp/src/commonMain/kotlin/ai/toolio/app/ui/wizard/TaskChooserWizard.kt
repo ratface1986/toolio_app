@@ -1,85 +1,122 @@
 package ai.toolio.app.ui.wizard
 
-import ai.toolio.app.ui.wizard.model.Task
-import ai.toolio.app.ui.wizard.model.TaskCategory
-import ai.toolio.app.ui.wizard.model.Tasks
+import ai.toolio.app.data.toDrawableResource
+import ai.toolio.app.models.CategoryType
+import ai.toolio.app.models.Task
+import ai.toolio.app.models.TaskCategory
+import ai.toolio.app.models.Tasks
+import ai.toolio.app.theme.BackButton
+import ai.toolio.app.theme.HeadlineMediumText
+import ai.toolio.app.theme.ListItemView
+import ai.toolio.app.theme.TitleMediumText
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import toolio.composeapp.generated.resources.Res
+import toolio.composeapp.generated.resources.decorate
+import toolio.composeapp.generated.resources.drill
+import toolio.composeapp.generated.resources.fix
+import toolio.composeapp.generated.resources.install
+import toolio.composeapp.generated.resources.maintain
+import toolio.composeapp.generated.resources.mount
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun TaskChooserWizardScreen(
     categories: List<TaskCategory>,
-    onCategoryChosen: (task: Task) -> Unit
+    onCategoryChosen: (task: Task) -> Unit,
+    onBack: () -> Unit = {}
 ) {
     // null = main screen; else = selected category
     var selectedCategory by remember { mutableStateOf<TaskCategory?>(null) }
-
+    //var selectedCategory by remember { mutableStateOf<TaskCategory?>(Tasks.categories.first()) }
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // Background spans all
+            .background(Color(0x282F32).copy(alpha = 1.0f))
     ) {
-        AnimatedContent(
-            targetState = selectedCategory,
-            transitionSpec = {
-                if (targetState != null && initialState == null) {
-                    slideInHorizontally { width -> width } + fadeIn() togetherWith
-                        slideOutHorizontally { width -> -width } + fadeOut()
-                } else if (targetState == null && initialState != null) {
-                    slideInHorizontally { width -> -width } + fadeIn() togetherWith
-                        slideOutHorizontally { width -> width } + fadeOut()
-                } else {
-                    fadeIn() togetherWith fadeOut()
-                }
-            }
-        ) { category ->
-            if (category == null) {
-                Column(
+        Scaffold(
+            containerColor = Color.Transparent,
+            modifier = Modifier.fillMaxSize()
+        ) { innerPadding ->
+            Surface(
+                modifier = Modifier
+                    .padding(innerPadding),
+                color = Color.Transparent
+            ) {
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(horizontal = 24.dp)
                 ) {
-                    Text(
-                        text = "What are we going do?",
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        modifier = Modifier
-                            .padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 32.dp)
-                            .fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    CategoryGridView(
-                        categories = categories,
-                        onCategoryClick = { selected ->
-                            selectedCategory = selected
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
+                    AnimatedContent(
+                        targetState = selectedCategory,
+                        transitionSpec = {
+                            if (targetState != null && initialState == null) {
+                                slideInHorizontally { width -> width } + fadeIn() togetherWith
+                                        slideOutHorizontally { width -> -width } + fadeOut()
+                            } else if (targetState == null && initialState != null) {
+                                slideInHorizontally { width -> -width } + fadeIn() togetherWith
+                                        slideOutHorizontally { width -> width } + fadeOut()
+                            } else {
+                                fadeIn() togetherWith fadeOut()
+                            }
+                        }
+                    ) { category ->
+                        if (category == null) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                            ) {
+                                Row(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 40.dp, start = 16.dp, end = 16.dp, bottom = 24.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    BackButton(onClick = onBack)
+                                    Spacer(Modifier.width(16.dp))
+                                    HeadlineMediumText("What are you going to do?")
+                                }
+                                CategoryGridView(
+                                    categories = categories,
+                                    onCategoryClick = { selected ->
+                                        selectedCategory = selected
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        } else {
+                            SubcategoryListView(
+                                category = category,
+                                onClick = onCategoryChosen,
+                                onBack = { selectedCategory = null }
+                            )
+                        }
+                    }
                 }
-            } else {
-                SubcategoryListView(
-                    category = category,
-                    onClick = onCategoryChosen,
-                    onBack = { selectedCategory = null }
-                )
             }
         }
     }
@@ -91,20 +128,20 @@ private fun CategoryGridView(
     onCategoryClick: (TaskCategory) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val columns = 3
+    val columns = 2
     LazyVerticalGrid(
         columns = GridCells.Fixed(columns),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
+        userScrollEnabled = true,
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 16.dp, vertical = 16.dp) // Padding grid edges only
     ) {
         items(categories) { category ->
             CategoryButton(
                 title = category.title,
-                icon = Icons.Default.Category,
+                categoryDrawableResource = category.type.toDrawableResource(),
                 onClick = { onCategoryClick(category) }
             )
         }
@@ -114,50 +151,41 @@ private fun CategoryGridView(
 @Composable
 private fun CategoryButton(
     title: String,
-    icon: ImageVector,
+    categoryDrawableResource: DrawableResource,
     onClick: () -> Unit
 ) {
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        tonalElevation = 2.dp,
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f) // ensures square in grid cell
-            .clickable(onClick = onClick),
-        color = MaterialTheme.colorScheme.primaryContainer
+            .size(width = 159.dp, height = 180.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(Color(0xFF616161))
+            .clickable(onClick = onClick)
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(Color.White.copy(alpha = 0.25f), Color.Transparent),
+                    start = Offset.Zero,
+                    end = Offset.Infinite
+                ),
+                shape = RoundedCornerShape(24.dp)
+            ),
+        contentAlignment = Alignment.Center
     ) {
         Column(
-            Modifier
-                .padding(12.dp) // Reduced padding to maximize text space
-                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Icon(
-                imageVector = icon,
+                painter = painterResource(categoryDrawableResource),
                 contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = Color.White,
+                modifier = Modifier.size(48.dp)
             )
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center
-                    ),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    maxLines = 3,
-                    minLines = 1,
-                    softWrap = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            TitleMediumText(
+                text = title,
+                color = Color.White,
+                alignment = TextAlign.Center
+            )
         }
     }
 }
@@ -171,7 +199,6 @@ private fun SubcategoryListView(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
     ) {
         Row(
             Modifier
@@ -179,54 +206,22 @@ private fun SubcategoryListView(
                 .padding(top = 40.dp, start = 16.dp, end = 16.dp, bottom = 24.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Default.Category, // Substitute with back arrow if desired
-                    contentDescription = "Back"
-                )
-            }
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = category.prompt,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.weight(1f)
-            )
+            BackButton { onBack() }
+            Spacer(Modifier.width(16.dp))
+            HeadlineMediumText(category.prompt)
         }
 
-        LazyColumn(
-            contentPadding = PaddingValues(vertical = 8.dp, horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            items(category.tasks) { task ->
-                Surface(
-                    onClick = { onClick(task) },
-                    shape = RoundedCornerShape(14.dp),
-                    tonalElevation = 1.dp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 56.dp),
-                    color = MaterialTheme.colorScheme.secondaryContainer,
-                    shadowElevation = 1.dp
-                ) {
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp, horizontal = 18.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = task.name,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                textAlign = TextAlign.Center,
-                                fontWeight = FontWeight.Bold,
-                            ),
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
+            category.tasks.forEach { task ->
+                ListItemView(
+                    text = task.name,
+                    textColor = Color.White,
+                    alignment = Alignment.Center,
+                    isLarge = true,
+                    onClick = { onClick(task) }
+                )
             }
         }
     }
@@ -235,6 +230,6 @@ private fun SubcategoryListView(
 @Preview
 @Composable
 fun TaskChooserWizardScreenPreview() {
-    //TaskChooserWizardScreen(categories = Tasks.categories, {})
-    SubcategoryListView(category = Tasks.categories.first(), {}, {})
+    TaskChooserWizardScreen(categories = Tasks.categories, {})
+    //SubcategoryListView(category = Tasks.categories.first(), {}, {})
 }

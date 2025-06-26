@@ -1,24 +1,30 @@
 package ai.toolio.app.ui
 
+import ai.toolio.app.models.Task
+import ai.toolio.app.models.TaskCategory
+import ai.toolio.app.models.TaskItem
+import ai.toolio.app.models.TaskStatus
+import ai.toolio.app.models.Tasks
 import ai.toolio.app.di.AppEnvironment
-import ai.toolio.app.ui.wizard.TaskChooserWizardScreen
+import ai.toolio.app.models.*
 import ai.toolio.app.ui.chat.ChatView
+import ai.toolio.app.ui.dashboard.MainMenuScreen
 import ai.toolio.app.ui.inventory.AddToolView
 import ai.toolio.app.ui.inventory.QuestionsView
 import ai.toolio.app.ui.inventory.RequiredToolsView
-import ai.toolio.app.ui.wizard.model.Task
-import androidx.compose.runtime.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.ui.Modifier
-
-import ai.toolio.app.ui.wizard.model.TaskCategory
-import ai.toolio.app.ui.wizard.model.Tasks
-import ai.toolio.app.models.Tool
+import ai.toolio.app.ui.wizard.TaskChooserWizardScreen
 import ai.toolio.app.utils.NativeFeatures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 
 // Define the available screens
 sealed class AppScreen {
     object Login : AppScreen()
+    object MainMenu : AppScreen()
     object Wizard : AppScreen()
     object Questions : AppScreen()
     object Inventory : AppScreen()
@@ -37,15 +43,25 @@ fun MainScreenController(
     var selectedTask: Task by remember { mutableStateOf(Tasks.categories.first().tasks.first()) }
     var requiredTool: Tool by remember { mutableStateOf(Tool.DRILL) }
 
-    Box(Modifier.fillMaxSize()) {
+    Box(
+        Modifier.fillMaxSize()
+    ) {
         when (screen) {
             AppScreen.Login -> {
                 // Replace this with your actual LoginForm composable
                 LoginForm(
                     nativeFeatures = nativeFeatures,
                     onLoginSuccess = { profile ->
-                        screen = AppScreen.Wizard
+                        screen = AppScreen.MainMenu
                     }
+                )
+            }
+            AppScreen.MainMenu -> {
+                MainMenuScreen(
+                    lastActiveTask = TaskItem("Fix shelve", Icons.Default.Category, TaskStatus.IN_PROGRESS), // Task? object
+                    completedTaskNames = listOf("Hang shelf", "Install TV"), // or emptyList()
+                    onContinueTask = { /* handle continue */ },
+                    onStartNewProject = { screen = AppScreen.Wizard }
                 )
             }
             AppScreen.Wizard -> {
@@ -59,6 +75,9 @@ fun MainScreenController(
                             screen = AppScreen.Questions
                         }
 
+                    },
+                    onBack = {
+                        screen = AppScreen.MainMenu
                     }
                 )
             }
@@ -106,9 +125,12 @@ fun MainScreenController(
             }
             AppScreen.Questions -> {
                 QuestionsView(
-                    followUpQuestions = selectedTask?.followUpQuestions ?: emptyList(),
-                    onConfirm = { question, string ->
+                    followUpQuestions = selectedTask.followUpQuestions,
+                    onComplete = { answers ->
                         screen = AppScreen.RequiredTools
+                    },
+                    onBack = {
+                        screen = AppScreen.Wizard
                     }
                 )
             }

@@ -2,28 +2,19 @@ package ai.toolio.app.ui.chat
 
 import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.ui.sidemenu.SideMenu
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.Surface
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import kotlin.io.encoding.Base64
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 @OptIn(ExperimentalEncodingApi::class)
@@ -42,6 +33,7 @@ fun ChatView(
         )
     }
     var isLoading by remember { mutableStateOf(false) }
+    val inputHeightPx = remember { mutableStateOf(0) }
 
     fun sendMessage(text: String) {
         isLoading = true
@@ -72,72 +64,98 @@ fun ChatView(
     }
 
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet {
-                SideMenu(
-                    onAccountsClick = {
-                        scope.launch { drawerState.close() }
-                    },
-                    onSettingsClick = {
-                        scope.launch { drawerState.close() }
-                    },
-                    onLogoutClick = {
-                        scope.launch { drawerState.close() }
-                    }
-                )
-            }
-        }
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                ChatView(
-                    messagesInput = messages,
-                    isLoading = isLoading,
-                    onMenuClick = {
-                        scope.launch {
-                            if (drawerState.isClosed) {
-                                drawerState.open()
-                            } else {
-                                drawerState.close()
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .weight(1f, fill = true)
-                        .fillMaxWidth()
-                )
-
-                Surface(
-                    tonalElevation = 3.dp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .imePadding()
-                ) {
-                    ChatInputView(
-                        onSendMessage = { text ->
-                            messages.add(ChatMessage.Text(text, isUser = true))
-                            sendMessage(text)
-                        },
-                        onAttachmentClick = { },
-                        onVoiceClick = { },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        isInputEnabled = !isLoading,
-                        onPhotoClick = {
-                            AppEnvironment.nativeFeatures.photoPicker.pickPhoto { photoBytes ->
-                                photoBytes?.let {
-                                    uploadUserPhoto(photoBytes)
-                                }
-                            }
-                        }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF2F403E),
+                        Color(0xFF1A1C1D)
                     )
+                )
+            )
+    ) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            modifier = Modifier.fillMaxSize()
+        ) { innerPadding ->
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                color = Color.Transparent
+            ) {
+                ModalNavigationDrawer(
+                    drawerState = drawerState,
+                    drawerContent = {
+                        ModalDrawerSheet {
+                            SideMenu(
+                                onAccountsClick = {
+                                    scope.launch { drawerState.close() }
+                                },
+                                onSettingsClick = {
+                                    scope.launch { drawerState.close() }
+                                },
+                                onLogoutClick = {
+                                    scope.launch { drawerState.close() }
+                                }
+                            )
+                        }
+                    }
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        // Сообщения
+                        ChatMessagesView(
+                            messagesInput = messages,
+                            isLoading = isLoading,
+                            onMenuClick = {
+                                scope.launch {
+                                    if (drawerState.isClosed) drawerState.open() else drawerState.close()
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(bottom = with(LocalDensity.current) { inputHeightPx.value.toDp() })
+                        )
+
+                        // Ввод внизу
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .imePadding()
+                                .background(Color(0xFF1A1A1A)) // задаём нужный фон прямо тут
+                        ) {
+                            ChatInputView(
+                                onSendMessage = { text ->
+                                    messages.add(ChatMessage.Text(text, isUser = true))
+                                    sendMessage(text)
+                                },
+                                onVoiceClick = {},
+                                onPhotoClick = {
+                                    AppEnvironment.nativeFeatures.photoPicker.pickPhoto { photoBytes ->
+                                        photoBytes?.let { uploadUserPhoto(photoBytes) }
+                                    }
+                                },
+                                isInputEnabled = !isLoading,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                                    .onGloballyPositioned {
+                                        inputHeightPx.value = it.size.height
+                                    }
+                            )
+                        }
+                    }
                 }
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun FullChatPreview() {
+    ChatView( {  })
 }

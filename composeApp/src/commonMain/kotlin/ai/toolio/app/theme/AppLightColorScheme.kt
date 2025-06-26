@@ -1,42 +1,39 @@
 package ai.toolio.app.ui.theme
 
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
 // Your primary colors
-private val BackgroundColor = Color(0xFF474954)
-private val InteractiveColor = Color(0xFF7CDEDC)
-private val MiddleColor = Color(0xFF62B3B8)
+private val Background = Color(0xFF1C1F1D)       // тёмный фон (как на 2–3 экране)
+private val Primary = Color(0xFF9ED586)          // зелёный (слово "capabilities")
+private val PrimaryVariant = Color(0xFF7CAB6C)   // чуть темнее
+private val Surface = Color(0xFF2A2D2B)          // карточки, поля
+private val Secondary = Color(0xFFB4B4B4)        // иконки, вторичный текст
+private val OnPrimary = Color.Black              // текст на зелёных кнопках
+private val OnSurface = Color.White              // текст на фоне
+private val Outline = Color(0xFF3C403D)          // границы и разделители
 
-// Additional shades for better contrast and hierarchy
-private val DarkerBackground = Color(0xFF373943)
-private val LighterBackground = Color(0xFF575A66)
-private val DarkerInteractive = Color(0xFF5FB3B1)
-private val LighterInteractive = Color(0xFF8FE5E3)
+val AppDarkColorScheme = darkColorScheme(
+    primary = Primary,
+    onPrimary = OnPrimary,
+    primaryContainer = PrimaryVariant,
+    onPrimaryContainer = OnPrimary,
 
-val AppLightColorScheme = lightColorScheme(
-    primary = InteractiveColor,
-    onPrimary = Color.White,
-    primaryContainer = DarkerInteractive,
-    onPrimaryContainer = Color.White,
-    
-    secondary = MiddleColor,
-    onSecondary = Color.White,
-    secondaryContainer = MiddleColor,
-    onSecondaryContainer = Color.White,
-    
-    surface = BackgroundColor,
-    onSurface = Color.White,
-    surfaceVariant = LighterBackground,
-    onSurfaceVariant = Color.White,
-    
-    background = BackgroundColor,
-    onBackground = Color.White,
-    
-    outline = LighterInteractive
+    secondary = Secondary,
+    onSecondary = Color.Black,
+
+    /*surface = Surface,
+    onSurface = OnSurface,
+    surfaceVariant = Background,
+    onSurfaceVariant = OnSurface,
+
+    background = Background,
+    onBackground = OnSurface,
+
+    outline = Outline*/
 )
+/*
+
 
 val AppDarkColorScheme = darkColorScheme(
     primary = InteractiveColor,
@@ -58,4 +55,4 @@ val AppDarkColorScheme = darkColorScheme(
     onBackground = Color.White,
     
     outline = DarkerInteractive
-)
+)*/

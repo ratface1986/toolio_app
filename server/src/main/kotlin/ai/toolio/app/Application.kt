@@ -1,10 +1,13 @@
 package ai.toolio.app
 
 import ai.toolio.app.ToolioConfig.jdbcUrl
+import ai.toolio.app.api.handleOpenAIImagePrompt
 import ai.toolio.app.db.findUserByNickname
 import ai.toolio.app.db.getUserInventory
+import ai.toolio.app.db.insertChatMessage
 import ai.toolio.app.db.insertUser
 import ai.toolio.app.db.updateTool
+import ai.toolio.app.misc.Roles
 import ai.toolio.app.models.ChatGptRequest
 import ai.toolio.app.models.ToolData
 import ai.toolio.app.models.ToolRecognitionResult
@@ -31,7 +34,6 @@ import io.ktor.utils.io.readRemaining
 import kotlinx.io.readByteArray
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.boolean
-import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
@@ -126,17 +128,23 @@ fun Application.module() {
 
 
         post("/openai") {
-            val request = call.receive<Map<String, String>>()
-            val promptText = request["prompt"]?.takeIf { it.isNotBlank() }
+            val request = call.receive<ChatGptRequest>()
 
-            if (promptText == null) {
-                call.respond(HttpStatusCode.BadRequest, "Missing or empty prompt")
-                return@post
-            }
+            insertChatMessage(
+                request.sessionId,
+                role = "user",
+                content = request.prompt
+            )
 
             val response = callOpenAI(
                 httpClient = call.httpClient,
-                request = ChatGptRequest(prompt = promptText)
+                request = ChatGptRequest(prompt = request.prompt, sessionId = request.sessionId)
+            )
+
+            insertChatMessage(
+                sessionId = request.sessionId,
+                role = Roles.ASSISTANT.name.lowercase(),
+                content = response.content
             )
 
             call.respond(
@@ -146,49 +154,7 @@ fun Application.module() {
         }
 
         post("/openaiImagePrompt") {
-            val multipart = call.receiveMultipart()
-            var promptText: String? = null
-            var imageBytes: ByteArray? = null
-            var imageUrl: String? = null
-
-            multipart.forEachPart { part ->
-                when (part) {
-                    is PartData.FormItem -> {
-                        if (part.name == "prompt") promptText = part.value
-                    }
-                    is PartData.FileItem -> {
-                        if (part.contentType?.contentType == "image") {
-                            val fileName = "${UUID.randomUUID()}.jpg"
-                            imageBytes = part.provider().readRemaining().readByteArray()
-                            imageUrl = saveImageToLocalStorage(imageBytes, fileName)
-                        }
-                    }
-                    else -> {}
-                }
-                part.dispose()
-            }
-
-            if (imageBytes == null || imageUrl == null) {
-                call.respond(HttpStatusCode.BadRequest, "Missing image")
-                return@post
-            }
-
-            val response = callOpenAI(
-                httpClient = call.httpClient,
-                request = ChatGptRequest(
-                    prompt = "check photo and let me know what do you think",
-                    imageBytes = imageBytes
-                )
-            )
-
-            val downloadImageURL = System.getenv("DOMAIN_URL") + imageUrl
-
-            call.respond(
-                status = HttpStatusCode.OK,
-                message = response.copy(
-                    imageUrl = downloadImageURL,
-                )
-            )
+            handleOpenAIImagePrompt()
         }
 
         post("/upload") {
@@ -223,12 +189,14 @@ fun Application.module() {
             var imageBytes: ByteArray? = null
             var fileName: String? = null
             var userId: String? = null
+            var sessionId: String? = null
 
             multipart.forEachPart { part ->
                 when (part) {
                     is PartData.FormItem -> when (part.name) {
                         "prompt" -> promptText = part.value
                         "user_id" -> userId = part.value
+                        "sessionId" -> sessionId = part.value
                     }
                     is PartData.FileItem -> if (part.contentType?.contentType == "image") {
                         fileName = "${UUID.randomUUID()}.jpg"
@@ -239,7 +207,7 @@ fun Application.module() {
                 part.dispose()
             }
 
-            if (userId == null) {
+            if (userId == null || sessionId.isNullOrBlank()) {
                 logger.warn("Missing user_id")
                 call.respond(HttpStatusCode.BadRequest, "Missing user_id")
                 return@post
@@ -277,7 +245,7 @@ fun Application.module() {
                     httpClient = call.httpClient,
                     request = ChatGptRequest(
                         prompt = fullPrompt,
-                        imageUrl = imageUrl,
+                        sessionId = sessionId,
                         imageBytes = imageBytes
                     )
                 )

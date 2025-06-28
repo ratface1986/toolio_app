@@ -4,6 +4,7 @@ import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.models.Tool
 import ai.toolio.app.models.ToolData
 import ai.toolio.app.models.ToolRecognitionResult
+import ai.toolio.app.ui.shared.ScreenWrapper
 import ai.toolio.app.ui.shared.ToolPhotoView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -116,91 +117,90 @@ fun AddToolView(
         }
     }
 
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Tool Image Area
-        Box(
+    ScreenWrapper(isLoading = isLoading) {
+        Column(
             modifier = Modifier
-                .size(180.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(Color(0xFFE0E0E0)),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ToolPhotoView(toolImageData)
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            // Camera
-            Button(
-                onClick = {
-                    AppEnvironment.nativeFeatures.photoPicker.pickPhoto { photoBytes ->
-                        if (photoBytes != null) {
-                            toolImageData = photoBytes
-                            processPhoto(photoBytes)
+            // Tool Image Area
+            Box(
+                modifier = Modifier
+                    .size(180.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color(0xFFE0E0E0)),
+                contentAlignment = Alignment.Center
+            ) {
+                ToolPhotoView(toolImageData)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Camera
+                Button(
+                    onClick = {
+                        AppEnvironment.nativeFeatures.photoPicker.pickPhoto { photoBytes ->
+                            if (photoBytes != null) {
+                                toolImageData = photoBytes
+                                processPhoto(photoBytes)
+                            }
                         }
                     }
-                },
-                enabled = !isLoading
-            ) {
-                Icon(Icons.Default.CameraAlt, contentDescription = "Take Photo")
-                Spacer(Modifier.width(8.dp))
-                Text("Camera")
-            }
-            Spacer(Modifier.width(16.dp))
-            // Library (simulate as same as camera for this demo)
-            Button(
-                onClick = {
-                    AppEnvironment.nativeFeatures.photoPicker.pickPhoto { photoBytes ->
-                        if (photoBytes != null) {
-                            toolImageData = photoBytes
-                            processPhoto(photoBytes)
+                ) {
+                    Icon(Icons.Default.CameraAlt, contentDescription = "Take Photo")
+                    Spacer(Modifier.width(8.dp))
+                    Text("Camera")
+                }
+                Spacer(Modifier.width(16.dp))
+                // Library (simulate as same as camera for this demo)
+                Button(
+                    onClick = {
+                        AppEnvironment.nativeFeatures.photoPicker.pickPhoto { photoBytes ->
+                            if (photoBytes != null) {
+                                toolImageData = photoBytes
+                                processPhoto(photoBytes)
+                            }
                         }
                     }
-                },
-                enabled = !isLoading
-            ) {
-                Icon(Icons.Default.PhotoLibrary, contentDescription = "Pick from Library")
-                Spacer(Modifier.width(8.dp))
-                Text("Gallery")
+                ) {
+                    Icon(Icons.Default.PhotoLibrary, contentDescription = "Pick from Library")
+                    Spacer(Modifier.width(8.dp))
+                    Text("Gallery")
+                }
             }
-        }
-        Spacer(modifier = Modifier.height(18.dp))
-        // Tool Name Field
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFFFAFAFA), RoundedCornerShape(8.dp))
-                .padding(12.dp)
-        ) {
-            Text("Tool:", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-            Spacer(Modifier.width(12.dp))
-            Text(toolName.ifBlank { "..." }, fontSize = 17.sp)
-        }
-        Spacer(Modifier.height(18.dp))
-        if (errorMsg != null) {
-            Text(
-                text = errorMsg!!,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(vertical = 8.dp)
+            Spacer(modifier = Modifier.height(18.dp))
+            // Tool Name Field
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFFAFAFA), RoundedCornerShape(8.dp))
+                    .padding(12.dp)
+            ) {
+                Text("Tool:", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                Spacer(Modifier.width(12.dp))
+                Text(toolName.ifBlank { "..." }, fontSize = 17.sp)
+            }
+            Spacer(Modifier.height(18.dp))
+            if (errorMsg != null) {
+                Text(
+                    text = errorMsg!!,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+            val confirmEnabled = toolImageData != null && toolName.isNotBlank() && !isLoading && errorMsg == null
+            AddToolButtons(
+                enabled = confirmEnabled,
+                onAdd = {
+                    confirmTool()
+                },
+                onNoTool = onNoToolClick
             )
         }
-        AddToolButtons(
-            enabled = toolImageData != null && toolName.isNotBlank(),
-            isLoading = isLoading,
-            onAdd = {
-                confirmTool()
-            },
-            onNoTool = onNoToolClick
-        )
     }
 }
 
@@ -218,7 +218,6 @@ fun AddToolViewPreview() {
 @Composable
 fun AddToolButtons(
     enabled: Boolean,
-    isLoading: Boolean,
     onAdd: () -> Unit,
     onNoTool: () -> Unit
 ) {
@@ -234,7 +233,7 @@ fun AddToolButtons(
                 .fillMaxWidth()
                 .height(55.dp)
                 .align(Alignment.TopCenter),
-            enabled = enabled && !isLoading,
+            enabled = enabled
         ) {
             Text("Add To Inventory")
         }

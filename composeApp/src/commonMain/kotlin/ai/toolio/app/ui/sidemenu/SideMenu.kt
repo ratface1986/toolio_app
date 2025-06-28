@@ -1,8 +1,8 @@
 package ai.toolio.app.ui.sidemenu
 
-import ai.toolio.app.models.CategoryType
-import ai.toolio.app.models.TaskItem
-import ai.toolio.app.models.TaskStatus
+import ai.toolio.app.data.toColor
+import ai.toolio.app.data.toDrawableResource
+import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.theme.TaskView
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,14 +10,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -52,65 +51,23 @@ fun SideMenu(
 }
 
 @Composable
-private fun TasksSection(modifier: Modifier = Modifier) {
-    val tasks = remember {
-        listOf(
-            TaskItem("Fix Car", Icons.Default.DirectionsCar, TaskStatus.IN_PROGRESS),
-            TaskItem("Household", Icons.Default.Home, TaskStatus.COMPLETED),
-            TaskItem("Garden", Icons.Default.Yard, TaskStatus.COMPLETED),
-            TaskItem("Mount", Icons.Default.Landscape, TaskStatus.ABORTED)
-        )
-    }
+private fun TasksSection(
+    modifier: Modifier = Modifier
+) {
+    val sessions = remember { AppEnvironment.userProfile.sessions }
 
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(tasks) { task ->
-            TaskView(task.title, CategoryType.MAINTAIN, task.status)
-        }
-    }
-}
-
-@Composable
-private fun TaskItem(task: TaskItem) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = task.icon,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.primary
+        items(sessions) { session ->
+            TaskView(
+                header = session.title,
+                subHeader = session.task.status.toDisplayText(),
+                subHeaderColor = session.task.status.toColor(),
+                icon = session.category.type.toDrawableResource()
             )
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column {
-                Text(
-                    text = task.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = task.status.toDisplayText(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = when (task.status) {
-                        TaskStatus.IN_PROGRESS -> MaterialTheme.colorScheme.primary
-                        TaskStatus.COMPLETED -> MaterialTheme.colorScheme.secondary
-                        TaskStatus.ABORTED -> MaterialTheme.colorScheme.error
-                    }
-                )
-            }
         }
     }
 }

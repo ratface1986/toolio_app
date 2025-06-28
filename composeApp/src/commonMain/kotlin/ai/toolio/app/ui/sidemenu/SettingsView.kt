@@ -1,12 +1,6 @@
 package ai.toolio.app.ui.sidemenu
 
-import ai.toolio.app.theme.BackButton
-import ai.toolio.app.theme.BodyText
-import ai.toolio.app.theme.HeadlineLargeText
-import ai.toolio.app.theme.MyTextField
-import ai.toolio.app.theme.TitleMediumText
-import ai.toolio.app.theme.TitleText
-import androidx.compose.foundation.background
+import ai.toolio.app.theme.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape

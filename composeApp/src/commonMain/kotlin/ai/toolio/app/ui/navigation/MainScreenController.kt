@@ -1,29 +1,21 @@
 package ai.toolio.app.ui
 
-import ai.toolio.app.models.Task
-import ai.toolio.app.models.TaskCategory
-import ai.toolio.app.models.TaskItem
-import ai.toolio.app.models.TaskStatus
-import ai.toolio.app.models.Tasks
 import ai.toolio.app.di.AppEnvironment
-import ai.toolio.app.models.*
+import ai.toolio.app.models.RepairTaskSession
+import ai.toolio.app.models.TaskCategory
+import ai.toolio.app.models.Tool
 import ai.toolio.app.ui.chat.ChatView
 import ai.toolio.app.ui.dashboard.MainMenuScreen
 import ai.toolio.app.ui.inventory.AddToolView
 import ai.toolio.app.ui.inventory.QuestionsView
 import ai.toolio.app.ui.inventory.RequiredToolsView
 import ai.toolio.app.ui.wizard.TaskChooserWizardScreen
-import ai.toolio.app.utils.NativeFeatures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Category
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 
-// Define the available screens
 sealed class AppScreen {
-    object Login : AppScreen()
     object MainMenu : AppScreen()
     object Wizard : AppScreen()
     object Questions : AppScreen()
@@ -36,39 +28,35 @@ sealed class AppScreen {
 @Composable
 fun MainScreenController(
     categories: List<TaskCategory>,
-    startScreen: AppScreen = AppScreen.Login,
-    nativeFeatures: NativeFeatures
+    startScreen: AppScreen = AppScreen.MainMenu
 ) {
     var screen by remember { mutableStateOf(startScreen) }
-    var selectedTask: Task by remember { mutableStateOf(Tasks.categories.first().tasks.first()) }
     var requiredTool: Tool by remember { mutableStateOf(Tool.DRILL) }
+    var userProfile by remember { mutableStateOf(AppEnvironment.userProfile) }
 
     Box(
         Modifier.fillMaxSize()
     ) {
         when (screen) {
-            AppScreen.Login -> {
-                // Replace this with your actual LoginForm composable
-                LoginForm(
-                    nativeFeatures = nativeFeatures,
-                    onLoginSuccess = { profile ->
-                        screen = AppScreen.MainMenu
-                    }
-                )
-            }
             AppScreen.MainMenu -> {
                 MainMenuScreen(
-                    lastActiveTask = TaskItem("Fix shelve", Icons.Default.Category, TaskStatus.IN_PROGRESS), // Task? object
+                    lastActiveTask = userProfile.sessions.firstOrNull()?.task,
                     completedTaskNames = listOf("Hang shelf", "Install TV"), // or emptyList()
                     onContinueTask = { /* handle continue */ },
-                    onStartNewProject = { screen = AppScreen.Wizard }
+                    onStartNewProject = {
+                        userProfile.sessions.add(RepairTaskSession())
+                        screen = AppScreen.Wizard
+                    }
                 )
             }
             AppScreen.Wizard -> {
                 TaskChooserWizardScreen(
                     categories = categories,
-                    onCategoryChosen = { task ->
-                        selectedTask = task
+                    onCategoryChosen = { category, task ->
+                        userProfile.sessions.firstOrNull()?.copy(
+                            category = category,
+                            task = task
+                        )
                         if (task.followUpQuestions.isEmpty()) {
                             screen = AppScreen.RequiredTools
                         } else {
@@ -91,21 +79,12 @@ fun MainScreenController(
             AppScreen.RequiredTools -> {
                 RequiredToolsView(
                     title = "Required Tools",
-                    task = selectedTask,
                     onAddToolClicked = { tool ->
                         requiredTool = tool
                         screen = AppScreen.AddTool
                     },
                     onConfirm = {
                         screen = AppScreen.Chat
-                    },
-                    isToolAdded = { tool ->
-                        val isAdded = AppEnvironment
-                            .userProfile
-                            .inventory
-                            .getOrElse(tool.name) { null }
-
-                        isAdded?.confirmed ?: false
                     }
                 )
             }
@@ -125,8 +104,11 @@ fun MainScreenController(
             }
             AppScreen.Questions -> {
                 QuestionsView(
-                    followUpQuestions = selectedTask.followUpQuestions,
+                    followUpQuestions = userProfile.sessions.first().task.followUpQuestions,
                     onComplete = { answers ->
+                        userProfile.sessions.first().copy(
+                            answers = answers.associate { it.first.question to it.second }
+                        )
                         screen = AppScreen.RequiredTools
                     },
                     onBack = {

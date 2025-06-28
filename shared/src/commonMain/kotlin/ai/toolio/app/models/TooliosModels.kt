@@ -102,13 +102,21 @@ data class ToolioChatMessage(
     val timestamp: Long = 0
 )
 
+@Serializable
+data class SaveSessionRequest(
+    val userId: String,
+    val session: RepairTaskSession
+)
+
+@Serializable
 data class RepairTaskSession(
-    val sessionId: String,
-    val title: String,
-    val type: TaskCategory,
-    val status: Task,
-    val startedAt: Long,
-    val initialPrompt: String,
+    val sessionId: String = "",
+    val title: String = "",
+    val category: TaskCategory = Tasks.categories.first(),
+    val task: Task = category.tasks.first(),
+    val answers: Map<String, String> = emptyMap(),
+    val startedAt: Long = 0,
+    val initialPrompt: String = "",
     val messages: List<ToolioChatMessage> = emptyList()
 )
 

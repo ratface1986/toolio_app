@@ -1,128 +1,129 @@
 package ai.toolio.app.models
 
-import androidx.compose.ui.graphics.vector.ImageVector
+import com.benasher44.uuid.uuid4
+import kotlinx.serialization.Serializable
 
 object Tasks {
 
     val categories = listOf(
         TaskCategory(
-            id = "mount",
+            id = "591cb661-8cdd-47f8-9d69-927093a934e7",
             title = "Mount",
             prompt = "What are you going to mount today?",
             type = CategoryType.MOUNT,
             tasks = listOf(
-                Task("TV",
+                Task("2700f39a-f383-47ae-b942-877223b048c3", "TV",
                     listOf(Tool.DRILL, Tool.SCREWS, Tool.LEVEL), listOf(
                         FollowUpQuestion.WallTypeQuestion,
                         FollowUpQuestion.TvSizeQuestion
                     )),
-                Task("Shelf", listOf(Tool.DRILL, Tool.WALL_PLUGS, Tool.LEVEL), listOf(
+                Task("a5eb34b3-f672-4029-a716-fcc68dea2e1d","Shelf", listOf(Tool.DRILL, Tool.WALL_PLUGS, Tool.LEVEL), listOf(
                     FollowUpQuestion.WallTypeQuestion,
                     FollowUpQuestion.ShelfTypeQuestion
                 )),
-                Task("Mirror", listOf(Tool.DRILL, Tool.WALL_PLUGS, Tool.LEVEL), listOf(
+                Task("36d1d969-2df5-4dd7-bb65-573e1db0b077","Mirror", listOf(Tool.DRILL, Tool.WALL_PLUGS, Tool.LEVEL), listOf(
                     FollowUpQuestion.WallTypeQuestion
                 )),
-                Task("Picture or Photo Frame", listOf(Tool.LEVEL, Tool.HAMMER, Tool.WALL_PLUGS), listOf(
+                Task("5599d9f0-290c-4460-844b-a4f13149e42b","Picture or Photo Frame", listOf(Tool.LEVEL, Tool.HAMMER, Tool.WALL_PLUGS), listOf(
                     FollowUpQuestion.WallTypeQuestion,
                     FollowUpQuestion.WeightClassQuestion
                 )),
-                Task("Curtains or Blinds", listOf(Tool.DRILL, Tool.TAPE_MEASURE, Tool.SCREWS), listOf(
+                Task("2af3e7e8-0311-4db8-a90b-b263a39cf6e4","Curtains or Blinds", listOf(Tool.DRILL, Tool.TAPE_MEASURE, Tool.SCREWS), listOf(
                     FollowUpQuestion.WallTypeQuestion,
                     FollowUpQuestion.WindowWidthQuestion
                 )),
-                Task("Wall Hook or Rack", listOf(Tool.DRILL, Tool.SCREWS, Tool.STUD_FINDER), listOf(
+                Task("562cb296-e8b0-45e8-882b-4f75d9727fb2","Wall Hook or Rack", listOf(Tool.DRILL, Tool.SCREWS, Tool.STUD_FINDER), listOf(
                     FollowUpQuestion.WallTypeQuestion,
                     FollowUpQuestion.WeightClassQuestion
                 ))
             )
         ),
         TaskCategory(
-            id = "fix_replace",
+            id = "bdcefe4f-6379-4584-825d-c0af6ff2ef46",
             title = "Fix or Replace",
             prompt = "What needs fixing or replacing?",
             type = CategoryType.FIX,
             tasks = listOf(
-                Task("Electrical Outlet", listOf(Tool.SCREWDRIVER, Tool.WIRE_STRIPPER, Tool.ELECTRICAL_TAPE), listOf(
+                Task("38eb4373-4f04-4252-97f8-efdc0fb62631", "Electrical Outlet", listOf(Tool.SCREWDRIVER, Tool.WIRE_STRIPPER, Tool.ELECTRICAL_TAPE), listOf(
                     FollowUpQuestion.OutletTypeQuestion
                 )),
-                Task("Light Switch", listOf(Tool.SCREWDRIVER, Tool.ELECTRICAL_TAPE)),
-                Task("Door Knob", listOf(Tool.SCREWDRIVER, Tool.WRENCH), listOf(
+                Task("3201d5d3-1df2-49b6-8ffc-b4f10fca1287","Light Switch", listOf(Tool.SCREWDRIVER, Tool.ELECTRICAL_TAPE)),
+                Task("8a57fe97-d4a3-43f7-83d9-2b5cccf32545","Door Knob", listOf(Tool.SCREWDRIVER, Tool.WRENCH), listOf(
                     FollowUpQuestion.LockTypeQuestion
                 )),
-                Task("Faucet", listOf(Tool.WRENCH, Tool.PLIERS)),
-                Task("Shower Head", listOf(Tool.WRENCH, Tool.TAPE_MEASURE)),
-                Task("Running Toilet", listOf(Tool.WRENCH, Tool.UTILITY_KNIFE)),
-                Task("Squeaky Door", listOf(Tool.SCREWDRIVER, Tool.PLIERS)),
-                Task("Ceiling Fan", listOf(Tool.SCREWDRIVER, Tool.WIRE_STRIPPER, Tool.LEVEL), listOf(
+                Task("60fb12ac-388e-426c-ad39-e8d2cc8e9960","Faucet", listOf(Tool.WRENCH, Tool.PLIERS)),
+                Task("ee036748-6534-4f2d-aff1-01c44effcfd9","Shower Head", listOf(Tool.WRENCH, Tool.TAPE_MEASURE)),
+                Task("184d5f55-9aa0-4022-9f3b-7f3ffbf10416","Running Toilet", listOf(Tool.WRENCH, Tool.UTILITY_KNIFE)),
+                Task("6da04e3e-39ce-4e71-a2b6-3b567b70f99b","Squeaky Door", listOf(Tool.SCREWDRIVER, Tool.PLIERS)),
+                Task("1dd9fa43-8511-4793-a59a-4d9c3ec48cb3","Ceiling Fan", listOf(Tool.SCREWDRIVER, Tool.WIRE_STRIPPER, Tool.LEVEL), listOf(
                     FollowUpQuestion.CeilingTypeQuestion,
                     FollowUpQuestion.WeightClassQuestion
                 ))
             )
         ),
         TaskCategory(
-            id = "install_assemble",
+            id = "0893d855-e6ef-4a5e-8f37-9a3d027d3940",
             title = "Install or Assemble",
             prompt = "What are you going to install or assemble?",
             type = CategoryType.INSTALL,
             tasks = listOf(
-                Task("Furniture (e.g. IKEA)", listOf(Tool.SCREWDRIVER, Tool.HAMMER), listOf(
+                Task("fc3928f2-8c03-4ce6-a28a-9ed76e55421a","Furniture (e.g. IKEA)", listOf(Tool.SCREWDRIVER, Tool.HAMMER), listOf(
                     FollowUpQuestion.WeightClassQuestion
                 )),
-                Task("Closet Shelf", listOf(Tool.DRILL, Tool.LEVEL, Tool.SCREWS), listOf(
+                Task("295e4ae8-e655-48ba-8964-92a4924692b7","Closet Shelf", listOf(Tool.DRILL, Tool.LEVEL, Tool.SCREWS), listOf(
                     FollowUpQuestion.WallTypeQuestion
                 )),
-                Task("Wall Bracket", listOf(Tool.DRILL, Tool.SCREWS, Tool.LEVEL), listOf(
+                Task("70fae98b-1d5b-430a-8323-a08ee67e44da","Wall Bracket", listOf(Tool.DRILL, Tool.SCREWS, Tool.LEVEL), listOf(
                     FollowUpQuestion.WallTypeQuestion,
                     FollowUpQuestion.WeightClassQuestion
                 )),
-                Task("Towel Bar", listOf(Tool.DRILL, Tool.LEVEL), listOf(
+                Task("986140f5-ba2e-4865-8db6-e4b9a2bf633b","Towel Bar", listOf(Tool.DRILL, Tool.LEVEL), listOf(
                     FollowUpQuestion.WallTypeQuestion
                 )),
-                Task("Child Safety Lock", listOf(Tool.SCREWDRIVER, Tool.UTILITY_KNIFE)),
-                Task("TV Mount Hardware", listOf(Tool.DRILL, Tool.STUD_FINDER, Tool.LEVEL), listOf(
+                Task("3c909e5e-1c5a-4ced-bd2d-cf7ef7d4099c","Child Safety Lock", listOf(Tool.SCREWDRIVER, Tool.UTILITY_KNIFE)),
+                Task("0e95dbaf-80a7-41f4-a665-7b4268b40ea0","TV Mount Hardware", listOf(Tool.DRILL, Tool.STUD_FINDER, Tool.LEVEL), listOf(
                     FollowUpQuestion.WallTypeQuestion,
                     FollowUpQuestion.TvSizeQuestion
                 )),
-                Task("Door Lock", listOf(Tool.SCREWDRIVER, Tool.WRENCH))
+                Task("2c31c9d8-32cf-4ec8-b768-3bb3eaaa90f1","Door Lock", listOf(Tool.SCREWDRIVER, Tool.WRENCH))
             )
         ),
         TaskCategory(
-            id = "light_decorate",
+            id = "aedaa50e-e2ac-4991-919a-0b8e45455138",
             title = "Light or Decorate",
             prompt = "What do you want to light or decorate?",
             type = CategoryType.DECORATE,
             tasks = listOf(
-                Task("Wall Lamp", listOf(Tool.SCREWDRIVER, Tool.DRILL), listOf(
+                Task("fcf13786-35bb-4fa5-be2b-6a6871484ed2","Wall Lamp", listOf(Tool.SCREWDRIVER, Tool.DRILL), listOf(
                     FollowUpQuestion.WallTypeQuestion,
                     FollowUpQuestion.LightTypeQuestion
                 )),
-                Task("LED Light Strip", listOf(Tool.UTILITY_KNIFE, Tool.ELECTRICAL_TAPE), listOf(
+                Task("1e56bdfc-bd7c-4b35-a563-ebfad0aad075","LED Light Strip", listOf(Tool.UTILITY_KNIFE, Tool.ELECTRICAL_TAPE), listOf(
                     FollowUpQuestion.LightTypeQuestion
                 )),
-                Task("Clock", listOf(Tool.HAMMER, Tool.LEVEL), listOf(
+                Task("c4d01b2c-08af-44ea-9c71-23f68d5a2e28","Clock", listOf(Tool.HAMMER, Tool.LEVEL), listOf(
                     FollowUpQuestion.WallTypeQuestion
                 )),
-                Task("Picture Frames", listOf(Tool.HAMMER, Tool.LEVEL), listOf(
+                Task("c7ffcc8d-02e1-4075-aa54-d494df8bceaa","Picture Frames", listOf(Tool.HAMMER, Tool.LEVEL), listOf(
                     FollowUpQuestion.WallTypeQuestion
                 )),
-                Task("Seasonal Lights or Garland", listOf(Tool.TAPE_MEASURE, Tool.UTILITY_KNIFE)),
-                Task("Wall Decals or Stickers", listOf(Tool.UTILITY_KNIFE))
+                Task("b98ce1a2-aa1c-4acf-9df8-0ffe33f34590","Seasonal Lights or Garland", listOf(Tool.TAPE_MEASURE, Tool.UTILITY_KNIFE)),
+                Task("19d30764-e014-44c7-9e71-37904724a3f0","Wall Decals or Stickers", listOf(Tool.UTILITY_KNIFE))
             )
         ),
         TaskCategory(
-            id = "maintain_clean",
+            id = "212af4eb-4659-4500-9347-09c33429acdc",
             title = "Maintain or Clean",
             prompt = "What needs cleaning or maintenance?",
             type = CategoryType.MAINTAIN,
             tasks = listOf(
-                Task("Clogged Sink or Drain", listOf(Tool.UTILITY_KNIFE), listOf(FollowUpQuestion.DrainTypeQuestion)),
-                Task("Stove or Range Hood Filter", listOf(Tool.UTILITY_KNIFE)),
-                Task("Washing Machine Smell", listOf(Tool.UTILITY_KNIFE)),
-                Task("Smoke Detector Battery", listOf(Tool.SCREWDRIVER)),
-                Task("Air Filter", listOf(Tool.UTILITY_KNIFE)),
-                Task("Behind Refrigerator", listOf(Tool.UTILITY_KNIFE)),
-                Task("Sticky Drawer or Cabinet", listOf(Tool.SCREWDRIVER, Tool.UTILITY_KNIFE))
+                Task("a52c644a-e564-43ce-bbaf-0fb42be2a841","Clogged Sink or Drain", listOf(Tool.UTILITY_KNIFE), listOf(FollowUpQuestion.DrainTypeQuestion)),
+                Task("993e4ba5-7f88-4879-b74e-f7d974e0d436","Stove or Range Hood Filter", listOf(Tool.UTILITY_KNIFE)),
+                Task("3e24c532-7dbd-4de0-b822-d4cbedd37052","Washing Machine Smell", listOf(Tool.UTILITY_KNIFE)),
+                Task("8ed43eb9-532e-4a70-802d-84290551bee4","Smoke Detector Battery", listOf(Tool.SCREWDRIVER)),
+                Task("326aa7b6-5543-4c60-88f0-285fb5e03ad3","Air Filter", listOf(Tool.UTILITY_KNIFE)),
+                Task("0f82e18b-f70a-4223-836c-3351544bfba6","Behind Refrigerator", listOf(Tool.UTILITY_KNIFE)),
+                Task("088ec7c4-ef85-4042-9be3-6473622edfe7","Sticky Drawer or Cabinet", listOf(Tool.SCREWDRIVER, Tool.UTILITY_KNIFE))
             )
         )
     )
@@ -166,6 +167,7 @@ object Tasks {
     }
 }
 
+@Serializable
 data class TaskCategory(
     val id: String,
     val title: String,
@@ -174,12 +176,16 @@ data class TaskCategory(
     val tasks: List<Task>
 )
 
+@Serializable
 data class Task(
+    val id: String,
     val name: String,
     val tools: List<Tool>,
-    val followUpQuestions: List<FollowUpQuestion> = emptyList()
+    val followUpQuestions: List<FollowUpQuestion> = emptyList(),
+    val status: TaskStatus = TaskStatus.IN_PROGRESS
 )
 
+@Serializable
 sealed class FollowUpQuestion(val question: String, open val options: List<String> = emptyList()) {
     object WallTypeQuestion : FollowUpQuestion(
         "What type of wall is it?",
@@ -232,18 +238,20 @@ sealed class FollowUpQuestion(val question: String, open val options: List<Strin
     )
 }
 
-data class TaskItem(
+/*data class TaskItem(
     val title: String,
     val icon: ImageVector,
     val status: TaskStatus
-)
+)*/
 
 enum class TaskStatus {
+    IDLE,
     IN_PROGRESS,
     COMPLETED,
     ABORTED;
 
     fun toDisplayText(): String = when (this) {
+        IDLE -> "Idle..."
         IN_PROGRESS -> "In Progress..."
         COMPLETED -> "Completed"
         ABORTED -> "Aborted"

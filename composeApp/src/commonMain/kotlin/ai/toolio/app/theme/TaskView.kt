@@ -6,25 +6,12 @@ import ai.toolio.app.models.CategoryType
 import ai.toolio.app.models.TaskStatus
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,17 +21,20 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun TaskView(
-    taskName: String,
-    categoryType: CategoryType,
-    taskStatus: TaskStatus,
+    header: String,
+    subHeader: String,
+    subHeaderColor: Color = Color.White,
+    icon: DrawableResource,
     showButton: Boolean = false,
+    showChecked: Boolean = false,
+    buttonLabel: String = "Continue",
     onClick: (() -> Unit)? = null,
 ) {
     Row(
@@ -82,7 +72,7 @@ fun TaskView(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(categoryType.toDrawableResource()),
+                painter = painterResource(icon),
                 contentDescription = null,
                 tint = Color.White,
                 modifier = Modifier.size(24.dp)
@@ -99,8 +89,31 @@ fun TaskView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                TitleMediumText(text = taskName)
-                BodyText(text = taskStatus.toDisplayText(), color = taskStatus.toColor())
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    TitleMediumText(text = header, color = Color.White)
+
+                    if (showChecked) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(
+                            Modifier
+                                .size(16.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF2ECC40)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Added",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                }
+
+
+                if (subHeader.isNotEmpty())
+                    BodyText(text = subHeader, color = subHeaderColor)
             }
 
             if (showButton) {
@@ -113,7 +126,7 @@ fun TaskView(
                     )
                 ) {
                     Text(
-                        text = "Continue",
+                        text = buttonLabel,
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -127,8 +140,12 @@ fun TaskView(
 @Composable
 fun TaskViewPreview() {
     TaskView(
-        taskName = "Fix shelve",
-        categoryType = CategoryType.FIX,
-        taskStatus = TaskStatus.IN_PROGRESS
+        header = "Fix shelve",
+        subHeader = TaskStatus.IN_PROGRESS.toDisplayText(),
+        subHeaderColor = TaskStatus.IN_PROGRESS.toColor(),
+        icon = CategoryType.FIX.toDrawableResource(),
+        showButton = true,
+        buttonLabel = "Edit",
+        onClick = {}
     )
 }

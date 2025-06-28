@@ -2,46 +2,35 @@ package ai.toolio.app
 
 import ai.toolio.app.ToolioConfig.jdbcUrl
 import ai.toolio.app.api.handleOpenAIImagePrompt
-import ai.toolio.app.db.findUserByNickname
-import ai.toolio.app.db.getUserInventory
-import ai.toolio.app.db.insertChatMessage
-import ai.toolio.app.db.insertUser
-import ai.toolio.app.db.updateTool
+import ai.toolio.app.db.*
 import ai.toolio.app.misc.Roles
-import ai.toolio.app.models.ChatGptRequest
-import ai.toolio.app.models.ToolData
-import ai.toolio.app.models.ToolRecognitionResult
-import ai.toolio.app.models.UserProfile
+import ai.toolio.app.models.*
 import ai.toolio.app.services.deleteImageFromLocalStorage
 import ai.toolio.app.services.saveImageToLocalStorage
 import callOpenAI
-import io.ktor.client.HttpClient
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.PartData
-import io.ktor.http.content.forEachPart
+import io.ktor.client.*
+import io.ktor.http.*
+import io.ktor.http.content.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.engine.*
+import io.ktor.server.http.content.*
+import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.http.content.staticFiles
-import io.ktor.server.netty.Netty
-import io.ktor.server.request.receive
-import io.ktor.server.request.receiveMultipart
-import io.ktor.util.AttributeKey
-import io.ktor.utils.io.readRemaining
+import io.ktor.util.*
+import io.ktor.utils.io.*
 import kotlinx.io.readByteArray
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import java.io.File
-import kotlinx.datetime.Clock
-import kotlinx.serialization.json.JsonPrimitive
 import org.jetbrains.exposed.sql.Database
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.io.File
+import java.util.*
 
 fun main() {
     val port = System.getenv("PORT")?.toInt() ?: 8080
@@ -74,18 +63,10 @@ fun Application.module() {
         password = System.getenv("POSTGRES_PASSWORD") ?: error("No POSTGRES_PASSWORD")
     )
 
-
     val logger = LoggerFactory.getLogger("MYDATA:")
 
-
     attributes.put(HttpClientKey, httpClient)
-    /*val historyLine = buildJsonObject {
-                    put("timestamp", JsonPrimitive(Clock.System.now().toString()))
-                    put("prompt", JsonPrimitive(promptText))
-                    put("response", JsonPrimitive(response.content))
-                }
 
-                File("chat-history.jsonl").appendText( "$historyLine\n")*/
     routing {
         get("/") {
             println("==> GET /")
@@ -120,12 +101,12 @@ fun Application.module() {
                             imageUrl = obj["imageUrl"]?.jsonPrimitive?.content.orEmpty(),
                             confirmed = obj["confirmed"]?.jsonPrimitive?.boolean ?: false
                         )
-                    }
+                    },
+                sessions = loadTaskSessions(user.userId).toMutableList()
             )
 
             call.respond(profile)
         }
-
 
         post("/openai") {
             val request = call.receive<ChatGptRequest>()
@@ -311,6 +292,14 @@ fun Application.module() {
                 call.respond(HttpStatusCode.InternalServerError, "Failed to confirm tool")
             }
         }
+
+        post("/save-session") {
+            val request = call.receive<SaveSessionRequest>()
+            saveTaskSession(request.userId, request.session)
+            call.respond(HttpStatusCode.Created)
+        }
+
+
 
         staticFiles("/uploads", File(ToolioConfig.storagePath))
     }

@@ -6,11 +6,13 @@ import ai.toolio.app.utils.NativeFeatures
 
 object AppEnvironment {
     private var _userProfile: UserProfile? = null
-    val userProfile: UserProfile get() = _userProfile ?: error("AppEnvironment not initialized")
+    val userProfile: UserProfile get() = _userProfile ?: error("AppEnvironment:UserProfile not initialized")
+
     private var _nativeFeatures: NativeFeatures? = null
-    val nativeFeatures: NativeFeatures get() = _nativeFeatures ?: error("AppEnvironment not initialized")
+    val nativeFeatures: NativeFeatures get() = _nativeFeatures ?: error("AppEnvironment:NativeFeatures not initialized")
+
     private var _repo: ToolioRepo? = null
-    val repo: ToolioRepo get() = _repo ?: error("AppEnvironment not initialized")
+    val repo: ToolioRepo get() = _repo ?: error("AppEnvironment:Repo not initialized")
 
 
     fun init(userProfile: UserProfile, nativeFeatures: NativeFeatures, repo: ToolioRepo) {

@@ -2,6 +2,7 @@ package ai.toolio.app
 
 import ai.toolio.app.di.AppSessions
 import ai.toolio.app.models.Tasks
+import ai.toolio.app.ui.LoginForm
 import ai.toolio.app.ui.MainScreenController
 import ai.toolio.app.ui.theme.AppDarkColorScheme
 import ai.toolio.app.utils.NativeFeatures
@@ -9,9 +10,7 @@ import ai.toolio.app.utils.PhotoPicker
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -83,15 +82,22 @@ fun App(nativeFeatures: NativeFeatures) {
         // добавь другие стили при необходимости
     )
 
+    var onLoginSuccess by mutableStateOf(false)
 
     MaterialTheme(
         colorScheme = AppDarkColorScheme,
         typography = AppTypography
     ) {
-        MainScreenController(
-            categories = Tasks.categories,
-            nativeFeatures = nativeFeatures,
-        )
+        if (onLoginSuccess) {
+            MainScreenController(
+                categories = Tasks.categories
+            )
+        } else {
+            LoginForm(
+                nativeFeatures = nativeFeatures,
+                onLoginSuccess = { onLoginSuccess = true }
+            )
+        }
     }
 }
 

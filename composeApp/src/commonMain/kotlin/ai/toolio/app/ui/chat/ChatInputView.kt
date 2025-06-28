@@ -1,13 +1,7 @@
 package ai.toolio.app.ui.chat
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,8 +32,7 @@ fun ChatInputView(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0xFF1A1A1A), RoundedCornerShape(0.dp)) // если надо фон всё же
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .background(Color(0xFFADADAD), RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)) // если надо фон всё же
     ) {
         MessageInput(
             onSendMessage = onSendMessage,
@@ -59,7 +51,7 @@ fun ChatInputView(
                 Icon(
                     imageVector = Icons.Default.CameraAlt,
                     contentDescription = "Attach photo",
-                    tint = Color.White
+                    tint = Color.Black
                 )
             }
 
@@ -67,7 +59,7 @@ fun ChatInputView(
                 Icon(
                     imageVector = Icons.Default.Mic,
                     contentDescription = "Voice input",
-                    tint = Color.White
+                    tint = Color.Black
                 )
             }
         }
@@ -90,7 +82,7 @@ fun MessageInput(
         placeholder = {
             Text(
                 text = "Ask anything",
-                color = Color.Gray
+                color = Color.White
             )
         },
         singleLine = true,

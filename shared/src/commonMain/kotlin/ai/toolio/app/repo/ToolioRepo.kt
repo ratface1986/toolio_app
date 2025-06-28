@@ -1,20 +1,16 @@
 package ai.toolio.app.repo
 
+import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.di.AppSessions
-import ai.toolio.app.models.ChatGptRequest
-import ai.toolio.app.models.ToolData
-import ai.toolio.app.models.ToolRecognitionResult
-import ai.toolio.app.models.ToolioChatMessage
-import ai.toolio.app.models.UserProfile
+import ai.toolio.app.models.*
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.request.forms.formData
-import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.client.request.forms.*
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import kotlin.concurrent.Volatile
 
@@ -107,6 +103,18 @@ class ToolioRepo(private val baseUrl: String) {
         }
 
         return response.body()
+    }
+
+    suspend fun saveNewSession(session: RepairTaskSession) {
+        val request = SaveSessionRequest(
+            userId = AppEnvironment.userProfile.userId,
+            session = session
+        )
+
+        client.post("$baseUrl/save-session") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
     }
 
 

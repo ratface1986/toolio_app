@@ -1,52 +1,55 @@
 package ai.toolio.app.ui.inventory
 
 import ai.toolio.app.di.AppEnvironment
-import ai.toolio.app.models.Task
 import ai.toolio.app.models.Tool
+import ai.toolio.app.theme.TaskView
+import ai.toolio.app.ui.shared.ScreenWrapper
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.jetbrains.compose.resources.painterResource
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import toolio.composeapp.generated.resources.*
 
 @Composable
 fun RequiredToolsView(
     title: String,
-    task: Task,
     onAddToolClicked: (tool: Tool) -> Unit,
-    onConfirm: () -> Unit,
-    isToolAdded: (Tool) -> Boolean = { false }
+    onConfirm: () -> Unit
 ) {
-    val tools = task.tools
     val scope = rememberCoroutineScope()
-    var addedTools by remember { mutableStateOf(mutableSetOf<Tool>()) }
+    val tools by remember { mutableStateOf(AppEnvironment.userProfile.sessions.first().task.tools) }
 
-    // Allow external state override for "tool added"
-    LaunchedEffect(Unit) {
-        addedTools = tools.filter { isToolAdded(it) }.toMutableSet()
+    fun saveNewRepairTaskSession() {
+        scope.launch {
+            try {
+                AppEnvironment.repo.saveNewSession(AppEnvironment.userProfile.sessions.first())
+            } catch (e: Error) {
+
+            } finally {
+                onConfirm()
+            }
+
+        }
+
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.6f))
-            .padding(horizontal = 24.dp)
-    ) {
+    ScreenWrapper {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -68,10 +71,16 @@ fun RequiredToolsView(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(tools) { tool ->
-                    ToolListItem(
-                        tool = tool,
-                        isAdded = AppEnvironment.userProfile.getTool(tool)?.confirmed ?: false,
-                        onAddClick = {
+                    val toolData = AppEnvironment.userProfile.getTool(tool)
+                    TaskView(
+                        header = tool.displayName,
+                        subHeader = toolData?.name ?: "",
+                        subHeaderColor = Color.Blue,
+                        icon = getToolIconRes(tool),
+                        showButton = true,
+                        showChecked = toolData?.confirmed ?: false,
+                        buttonLabel = if (toolData?.confirmed == true) "Edit" else "Add",
+                        onClick = {
                             onAddToolClicked(tool)
                         }
                     )
@@ -87,79 +96,13 @@ fun RequiredToolsView(
                 .padding(bottom = 32.dp)
         ) {
             Button(
-                onClick = { onConfirm() },
+                onClick = { saveNewRepairTaskSession() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp),
                 shape = RoundedCornerShape(18.dp)
             ) {
                 Text("Confirm", fontSize = 19.sp)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ToolListItem(
-    tool: Tool,
-    isAdded: Boolean,
-    onAddClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFFF5F5F5), RoundedCornerShape(14.dp))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Tool icon
-        Icon(
-            painter = painterResource(getToolIconRes(tool)),
-            contentDescription = tool.displayName,
-            tint = Color.Unspecified,
-            modifier = Modifier
-                .size(36.dp)
-                .background(Color.White, shape = CircleShape)
-                .padding(4.dp)
-        )
-        Spacer(Modifier.width(16.dp))
-
-        // Tool name
-        Text(
-            text = tool.displayName,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(1f)
-        )
-
-        Spacer(Modifier.width(8.dp))
-
-        if (!isAdded) {
-            Button(
-                onClick = onAddClick,
-                shape = RoundedCornerShape(50),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.White
-                ),
-                modifier = Modifier.height(36.dp)
-            ) {
-                Text("Add")
-            }
-        } else {
-            Box(
-                Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF2ECC40)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "Added",
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
             }
         }
     }
@@ -188,14 +131,8 @@ private fun getToolIconRes(tool: Tool): org.jetbrains.compose.resources.Drawable
 fun PreviewRequiredToolsView() {
     RequiredToolsView(
         title = "Tools you need",
-        task = Task(
-            name = "Task",
-            followUpQuestions = emptyList(),
-            tools = listOf(Tool.DRILL, Tool.HAMMER, Tool.SCREWDRIVER)
-        ),
         onAddToolClicked = {},
-        onConfirm = {},
-        isToolAdded = { true }
+        onConfirm = {}
     )
 
 }

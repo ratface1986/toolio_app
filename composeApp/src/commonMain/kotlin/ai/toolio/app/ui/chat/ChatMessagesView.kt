@@ -76,7 +76,7 @@ fun ChatMessagesView(
             modifier = Modifier.fillMaxSize()
         ) {
             TopAppBar(
-                title = { Text("Toolio") },
+                title = { Text("") },
                 navigationIcon = {
                     IconButton(onClick = onMenuClick) {
                         Icon(
@@ -87,7 +87,7 @@ fun ChatMessagesView(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Black,
+                    containerColor = Color.Transparent,
                     titleContentColor = Color.White
                 )
             )

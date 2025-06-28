@@ -6,15 +6,14 @@ import ai.toolio.app.misc.Roles
 import ai.toolio.app.models.ChatGptRequest
 import ai.toolio.app.services.saveImageToLocalStorage
 import callOpenAI
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.PartData
-import io.ktor.http.content.forEachPart
-import io.ktor.server.request.receiveMultipart
-import io.ktor.server.response.respond
-import io.ktor.server.routing.RoutingContext
-import io.ktor.utils.io.readRemaining
+import io.ktor.http.*
+import io.ktor.http.content.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.utils.io.*
 import kotlinx.io.readByteArray
-import java.util.UUID
+import java.util.*
 
 suspend fun RoutingContext.handleOpenAIImagePrompt() {
     val imagePromptMultipart = call.receiveMultipart()

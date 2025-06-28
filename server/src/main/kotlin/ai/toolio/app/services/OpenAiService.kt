@@ -1,17 +1,11 @@
 import ai.toolio.app.misc.Roles
-import ai.toolio.app.models.ChatGptRequest
-import ai.toolio.app.models.ChatMessageOut
-import ai.toolio.app.models.ContentPart
-import ai.toolio.app.models.ImagePayload
-import ai.toolio.app.models.OpenAIChatResponse
-import ai.toolio.app.models.OpenAIRequest
-import ai.toolio.app.models.ToolioChatMessage
+import ai.toolio.app.models.*
 import io.ktor.client.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.http.content.TextContent
-import io.ktor.util.encodeBase64
+import io.ktor.http.content.*
+import io.ktor.util.*
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 

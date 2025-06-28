@@ -105,16 +105,18 @@ class ToolioRepo(private val baseUrl: String) {
         return response.body()
     }
 
-    suspend fun saveNewSession(session: RepairTaskSession) {
+    suspend fun saveNewSession(session: RepairTaskSession): Boolean {
         val request = SaveSessionRequest(
             userId = AppEnvironment.userProfile.userId,
             session = session
         )
 
-        client.post("$baseUrl/save-session") {
+        val response = client.post("$baseUrl/save-session") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }
+
+        return false//response.status.isSuccess()
     }
 
 

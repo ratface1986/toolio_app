@@ -27,6 +27,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
 import org.jetbrains.exposed.sql.Database
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -38,12 +40,36 @@ fun main() {
 
 }
 
+val followUpQuestionModule = SerializersModule {
+    polymorphic(FollowUpQuestion::class) {
+        subclass(FollowUpQuestion.WallTypeQuestion::class, FollowUpQuestion.WallTypeQuestion.serializer())
+        subclass(FollowUpQuestion.TvSizeQuestion::class, FollowUpQuestion.TvSizeQuestion.serializer())
+        subclass(FollowUpQuestion.WeightClassQuestion::class, FollowUpQuestion.WeightClassQuestion.serializer())
+        subclass(FollowUpQuestion.LightTypeQuestion::class, FollowUpQuestion.LightTypeQuestion.serializer())
+        subclass(FollowUpQuestion.LockTypeQuestion::class, FollowUpQuestion.LockTypeQuestion.serializer())
+        subclass(FollowUpQuestion.CeilingTypeQuestion::class, FollowUpQuestion.CeilingTypeQuestion.serializer())
+        subclass(FollowUpQuestion.DrainTypeQuestion::class, FollowUpQuestion.DrainTypeQuestion.serializer())
+        subclass(FollowUpQuestion.OutletTypeQuestion::class, FollowUpQuestion.OutletTypeQuestion.serializer())
+        subclass(FollowUpQuestion.ShelfTypeQuestion::class, FollowUpQuestion.ShelfTypeQuestion.serializer())
+        subclass(FollowUpQuestion.WindowWidthQuestion::class, FollowUpQuestion.WindowWidthQuestion.serializer())
+
+    }
+}
+
+val json = Json {
+    serializersModule = followUpQuestionModule
+    classDiscriminator = "type"
+    ignoreUnknownKeys = true
+    encodeDefaults = true
+}
+
+
 val HttpClientKey = AttributeKey<HttpClient>("HttpClient")
 val ApplicationCall.httpClient: HttpClient
     get() = this.application.attributes[HttpClientKey]
 fun Application.module() {
     install(ContentNegotiation) {
-        json()
+        json(json)
     }
 
     val httpClient = HttpClient {

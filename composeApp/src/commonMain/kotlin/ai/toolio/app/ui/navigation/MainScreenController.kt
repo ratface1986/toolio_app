@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import com.benasher44.uuid.uuid4
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 sealed class AppScreen {
     object MainMenu : AppScreen()
@@ -26,6 +29,7 @@ sealed class AppScreen {
     object Chat : AppScreen()
 }
 
+@OptIn(ExperimentalUuidApi::class)
 @Composable
 fun MainScreenController(
     categories: List<TaskCategory>,
@@ -33,7 +37,6 @@ fun MainScreenController(
 ) {
     var screen by remember { mutableStateOf(startScreen) }
     var requiredTool: Tool by remember { mutableStateOf(Tool.DRILL) }
-    var userProfile by remember { mutableStateOf(AppEnvironment.userProfile) }
 
     Box(
         Modifier.fillMaxSize()
@@ -41,11 +44,11 @@ fun MainScreenController(
         when (screen) {
             AppScreen.MainMenu -> {
                 MainMenuScreen(
-                    lastActiveTask = userProfile.sessions.firstOrNull()?.task,
+                    lastActiveTask = AppEnvironment.userProfile.sessions.firstOrNull()?.task,
                     completedTaskNames = listOf("Hang shelf", "Install TV"), // or emptyList()
                     onContinueTask = { /* handle continue */ },
                     onStartNewProject = {
-                        userProfile.sessions.add(RepairTaskSession())
+                        AppEnvironment.userProfile.sessions.add(RepairTaskSession())
                         screen = AppScreen.Wizard
                     }
                 )
@@ -54,7 +57,9 @@ fun MainScreenController(
                 TaskChooserWizardScreen(
                     categories = categories,
                     onCategoryChosen = { category, task ->
-                        userProfile.sessions.firstOrNull()?.copy(
+                        AppEnvironment.updateSession(
+                            sessionId = uuid4().toString(),
+                            title = "${category.title} - ${task.name}",
                             category = category,
                             task = task.copy(status = TaskStatus.IN_PROGRESS)
                         )
@@ -105,9 +110,9 @@ fun MainScreenController(
             }
             AppScreen.Questions -> {
                 QuestionsView(
-                    followUpQuestions = userProfile.sessions.first().task.followUpQuestions,
+                    followUpQuestions = AppEnvironment.userProfile.sessions.first().task.followUpQuestions,
                     onComplete = { answers ->
-                        userProfile.sessions.first().copy(
+                        AppEnvironment.updateSession(
                             answers = answers.associate { it.first.question to it.second }
                         )
                         screen = AppScreen.RequiredTools

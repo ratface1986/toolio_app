@@ -187,51 +187,52 @@ data class Task(
 
 @Serializable
 sealed class FollowUpQuestion(val question: String, open val options: List<String> = emptyList()) {
+    @Serializable
     object WallTypeQuestion : FollowUpQuestion(
         "What type of wall is it?",
         WallType.entries.map { it.label }
     )
-
+    @Serializable
     object TvSizeQuestion : FollowUpQuestion(
         "What is the size of the TV?",
         TvSize.entries.map { it.label }
     )
-
+    @Serializable
     object ShelfTypeQuestion : FollowUpQuestion(
         "What type of shelf is it?",
         ShelfType.entries.map { it.label }
     )
-
+    @Serializable
     object WindowWidthQuestion : FollowUpQuestion(
         "What is the approximate window width?",
         WindowWidth.entries.map { it.label }
     )
-
+    @Serializable
     object WeightClassQuestion : FollowUpQuestion(
         "How heavy is the item?",
         WeightClass.entries.map { it.label }
     )
-
+    @Serializable
     object OutletTypeQuestion : FollowUpQuestion(
         "What type of electrical outlet is it?",
         OutletType.entries.map { it.label }
     )
-
+    @Serializable
     object LockTypeQuestion : FollowUpQuestion(
         "What kind of lock is it?",
         LockType.entries.map { it.label }
     )
-
+    @Serializable
     object CeilingTypeQuestion : FollowUpQuestion(
         "What type of ceiling are you installing into?",
         CeilingType.entries.map { it.label }
     )
-
+    @Serializable
     object LightTypeQuestion : FollowUpQuestion(
         "What type of light are you installing?",
         LightType.entries.map { it.label }
     )
-
+    @Serializable
     object DrainTypeQuestion : FollowUpQuestion(
         "What kind of drain is it?",
         DrainType.entries.map { it.label }

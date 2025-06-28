@@ -38,9 +38,12 @@ fun RequiredToolsView(
     fun saveNewRepairTaskSession() {
         scope.launch {
             try {
-                AppEnvironment.repo.saveNewSession(AppEnvironment.userProfile.sessions.first())
+                val response = AppEnvironment.repo.saveNewSession(AppEnvironment.userProfile.sessions.first())
+                if (response) {
+                    AppEnvironment.updateSession(isSaved = true)
+                }
             } catch (e: Error) {
-
+                println("Error saving new repair task session: ${e.message}")
             } finally {
                 onConfirm()
             }

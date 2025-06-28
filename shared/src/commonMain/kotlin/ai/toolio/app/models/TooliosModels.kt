@@ -117,7 +117,8 @@ data class RepairTaskSession(
     val answers: Map<String, String> = emptyMap(),
     val startedAt: Long = 0,
     val initialPrompt: String = "",
-    val messages: List<ToolioChatMessage> = emptyList()
+    val messages: List<ToolioChatMessage> = emptyList(),
+    @Transient val isSaved: Boolean = false
 )
 
 

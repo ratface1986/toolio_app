@@ -1,5 +1,7 @@
 package ai.toolio.app.di
 
+import ai.toolio.app.models.Task
+import ai.toolio.app.models.TaskCategory
 import ai.toolio.app.models.TaskStatus
 import ai.toolio.app.models.UserProfile
 import ai.toolio.app.repo.ToolioRepo
@@ -28,6 +30,25 @@ object AppEnvironment {
 
     fun getSessionId() =
         userProfile.sessions.find { it.task.status == TaskStatus.IN_PROGRESS }?.sessionId.orEmpty()
+
+    fun updateSession(
+        sessionId: String? = null,
+        title: String? = null ,
+        category: TaskCategory? = null,
+        task: Task? = null,
+        answers: Map<String, String> = emptyMap(),
+        isSaved: Boolean = false
+    ) {
+        userProfile.sessions[0] =
+            userProfile.sessions.first().copy(
+                sessionId = sessionId ?: userProfile.sessions.first().sessionId,
+                title = title ?: userProfile.sessions.first().title,
+                category = category ?: userProfile.sessions.first().category,
+                task = task ?: userProfile.sessions.first().task,
+                answers = answers,
+                isSaved = isSaved
+            )
+    }
 
     fun reset() {
         _userProfile = null

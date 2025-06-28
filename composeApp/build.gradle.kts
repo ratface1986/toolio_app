@@ -47,6 +47,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(projects.shared)
             implementation(libs.ui)
+            implementation(libs.uuid)
             implementation(libs.ui.graphics)
             implementation(libs.kotlinx.serialization.json.v163)
         }

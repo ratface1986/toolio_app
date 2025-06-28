@@ -3,6 +3,7 @@ package ai.toolio.app.ui
 import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.models.RepairTaskSession
 import ai.toolio.app.models.TaskCategory
+import ai.toolio.app.models.TaskStatus
 import ai.toolio.app.models.Tool
 import ai.toolio.app.ui.chat.ChatView
 import ai.toolio.app.ui.dashboard.MainMenuScreen
@@ -55,7 +56,7 @@ fun MainScreenController(
                     onCategoryChosen = { category, task ->
                         userProfile.sessions.firstOrNull()?.copy(
                             category = category,
-                            task = task
+                            task = task.copy(status = TaskStatus.IN_PROGRESS)
                         )
                         if (task.followUpQuestions.isEmpty()) {
                             screen = AppScreen.RequiredTools

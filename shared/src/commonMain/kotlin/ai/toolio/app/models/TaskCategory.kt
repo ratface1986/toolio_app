@@ -182,7 +182,7 @@ data class Task(
     val name: String,
     val tools: List<Tool>,
     val followUpQuestions: List<FollowUpQuestion> = emptyList(),
-    val status: TaskStatus = TaskStatus.IN_PROGRESS
+    val status: TaskStatus = TaskStatus.IDLE
 )
 
 @Serializable

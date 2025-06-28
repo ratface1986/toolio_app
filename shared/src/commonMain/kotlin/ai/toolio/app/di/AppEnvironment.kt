@@ -1,5 +1,6 @@
 package ai.toolio.app.di
 
+import ai.toolio.app.models.TaskStatus
 import ai.toolio.app.models.UserProfile
 import ai.toolio.app.repo.ToolioRepo
 import ai.toolio.app.utils.NativeFeatures
@@ -24,6 +25,9 @@ object AppEnvironment {
     fun setUserProfile(profile: UserProfile) {
         _userProfile = profile
     }
+
+    fun getSessionId() =
+        userProfile.sessions.find { it.task.status == TaskStatus.IN_PROGRESS }?.sessionId.orEmpty()
 
     fun reset() {
         _userProfile = null

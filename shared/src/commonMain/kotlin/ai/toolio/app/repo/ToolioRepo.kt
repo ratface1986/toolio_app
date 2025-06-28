@@ -79,7 +79,7 @@ class ToolioRepo(private val baseUrl: String) {
     suspend fun chatGpt(prompt: String, imageBytes : ByteArray): ToolioChatMessage {
         val parts = formData {
             append("prompt", prompt)
-            append("sessionId", AppSessions.getLastSessionId())
+            append("sessionId", AppEnvironment.getSessionId())
             append("image", imageBytes, Headers.build {
                 append(HttpHeaders.ContentType, "image/jpeg")
                 append(HttpHeaders.ContentDisposition, "filename=\"msg.jpg\"")
@@ -95,7 +95,7 @@ class ToolioRepo(private val baseUrl: String) {
     }
 
     suspend fun chatGpt(prompt: String): ToolioChatMessage {
-        val request = ChatGptRequest(prompt = prompt, sessionId = AppSessions.getLastSessionId())
+        val request = ChatGptRequest(prompt = prompt, sessionId = AppEnvironment.getSessionId())
 
         val response = client.post("$baseUrl/openai") {
             contentType(ContentType.Application.Json)

@@ -1,6 +1,7 @@
 package ai.toolio.app.db.tables
 
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 
@@ -63,7 +64,8 @@ object ChatMessages : Table("chat_messages") {
     val role = varchar("role", 64)
     val content = text("content")
     val imageUrl = text("image_url").nullable()
-    val createdAt = datetime("created_at").clientDefault { LocalDateTime.now() }
+    val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
+
 
     override val primaryKey = PrimaryKey(id)
 }

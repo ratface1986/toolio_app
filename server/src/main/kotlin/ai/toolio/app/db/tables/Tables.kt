@@ -60,7 +60,7 @@ object TaskSessions : Table("task_sessions") {
 object ChatMessages : Table("chat_messages") {
     val id = integer("id").autoIncrement()
     val sessionId = uuid("session_id").references(TaskSessions.id)
-    val role = varchar("sender", 64) // "user" или "assistant"
+    val role = varchar("role", 64)
     val content = text("content")
     val imageUrl = text("image_url").nullable()
     val createdAt = datetime("created_at").clientDefault { LocalDateTime.now() }

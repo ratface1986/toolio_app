@@ -138,17 +138,19 @@ fun Application.module() {
             val request = call.receive<ChatGptRequest>()
 
             insertChatMessage(
-                request.sessionId,
+                userId = request.userId,
+                sessionId = request.sessionId,
                 role = "user",
                 content = request.prompt
             )
 
             val response = callOpenAI(
                 httpClient = call.httpClient,
-                request = ChatGptRequest(prompt = request.prompt, sessionId = request.sessionId)
+                request = ChatGptRequest(userId = request.userId, prompt = request.prompt, sessionId = request.sessionId)
             )
 
             insertChatMessage(
+                userId = request.userId,
                 sessionId = request.sessionId,
                 role = Roles.ASSISTANT.name.lowercase(),
                 content = response.content
@@ -251,6 +253,7 @@ fun Application.module() {
                 callOpenAI(
                     httpClient = call.httpClient,
                     request = ChatGptRequest(
+                        userId = userId,
                         prompt = fullPrompt,
                         sessionId = sessionId,
                         imageBytes = imageBytes

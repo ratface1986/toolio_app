@@ -17,6 +17,7 @@ import java.util.*
 
 suspend fun RoutingContext.handleOpenAIImagePrompt() {
     val imagePromptMultipart = call.receiveMultipart()
+    var userId: String? = null
     var promptText: String? = null
     var imageBytes: ByteArray? = null
     var imageUrl: String? = null
@@ -26,6 +27,7 @@ suspend fun RoutingContext.handleOpenAIImagePrompt() {
         when (part) {
             is PartData.FormItem -> {
                 when (part.name) {
+                    "userId" -> userId = part.value
                     "prompt" -> promptText = part.value
                     "sessionId" -> sessionId = part.value
                 }
@@ -42,12 +44,13 @@ suspend fun RoutingContext.handleOpenAIImagePrompt() {
         part.dispose()
     }
 
-    if (imageBytes == null || imageUrl == null || sessionId.isNullOrBlank()) {
+    if (imageBytes == null || imageUrl == null || sessionId.isNullOrBlank() || userId.isNullOrBlank()) {
         call.respond(HttpStatusCode.BadRequest, "Missing image or sessionId")
         return
     }
 
     insertChatMessage(
+        userId = userId,
         sessionId = sessionId,
         role = Roles.USER.name.lowercase(),
         content = promptText.orEmpty(),
@@ -57,6 +60,7 @@ suspend fun RoutingContext.handleOpenAIImagePrompt() {
     val response = callOpenAI(
         httpClient = call.httpClient,
         request = ChatGptRequest(
+            userId = userId,
             prompt = "check photo and let me know what do you think",
             sessionId = sessionId,
             imageBytes = imageBytes
@@ -64,6 +68,7 @@ suspend fun RoutingContext.handleOpenAIImagePrompt() {
     )
 
     insertChatMessage(
+        userId = userId,
         sessionId = sessionId,
         role = Roles.ASSISTANT.name.lowercase(),
         content = response.content

@@ -79,6 +79,7 @@ data class Usage(
 @Serializable
 data class ChatGptRequest(
     val prompt: String,
+    val userId: String,
     val sessionId: String,
     val imageBytes: ByteArray? = null
 )

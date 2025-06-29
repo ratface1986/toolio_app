@@ -46,6 +46,7 @@ object TaskSessions : Table("task_sessions") {
 
 object ChatMessages : Table("chat_messages") {
     val id = integer("id").autoIncrement()
+    val userId = uuid("user_id").references(Users.id)
     val sessionId = uuid("session_id").references(TaskSessions.id)
     val role = varchar("role", 64)
     val content = text("content")

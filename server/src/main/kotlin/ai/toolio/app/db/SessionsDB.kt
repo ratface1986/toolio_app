@@ -42,7 +42,7 @@ suspend fun loadTaskSessions(userId: String): List<RepairTaskSession> = withCont
 
                 val answers: Map<String, String> = Json.decodeFromString(row[TaskSessions.answers])
 
-                val messages = loadChatMessagesFromDb(sessionId.toUUID())
+                val messages = loadChatMessagesForUser(sessionId.toUUID())
 
                 RepairTaskSession(
                     sessionId = sessionId,

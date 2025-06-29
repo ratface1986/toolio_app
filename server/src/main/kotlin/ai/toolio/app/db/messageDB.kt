@@ -14,6 +14,7 @@ import java.time.ZoneId
 import java.util.*
 
 suspend fun insertChatMessage(
+    userId: String,
     sessionId: String,
     role: String,
     content: String,
@@ -22,6 +23,7 @@ suspend fun insertChatMessage(
     try {
         transaction {
             ChatMessages.insert {
+                it[ChatMessages.userId] = userId.toUUID()
                 it[ChatMessages.sessionId] = sessionId.toUUID()
                 it[ChatMessages.role] = role
                 it[ChatMessages.content] = content
@@ -34,7 +36,7 @@ suspend fun insertChatMessage(
     }
 }
 
-fun loadChatMessagesFromDb(sessionId: UUID): List<ToolioChatMessage> {
+fun loadChatMessagesForUser(sessionId: UUID): List<ToolioChatMessage> {
     return ChatMessages
         .selectAll().where { ChatMessages.sessionId eq sessionId }
         .orderBy(ChatMessages.createdAt to SortOrder.ASC)

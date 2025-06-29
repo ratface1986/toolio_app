@@ -1,7 +1,6 @@
 package ai.toolio.app.db.tables
 
 import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 
@@ -29,18 +28,6 @@ object Users : Table("users") {
     override val primaryKey = PrimaryKey(id)
 }
 
-/*object ChatSessions : Table("chat_sessions") {
-    val id = uuid("id")
-    val userId = uuid("user_id").references(Users.id)
-    val title = varchar("title", 128)
-    val type = varchar("type", 64)
-    val status = varchar("status", 32)
-    val startPrompt = text("start_prompt").nullable()
-    val lastActive = datetime("last_active").clientDefault { LocalDateTime.now() }
-    val createdAt = datetime("created_at").clientDefault { LocalDateTime.now() }
-
-    override val primaryKey = PrimaryKey(id)
-}*/
 object TaskSessions : Table("task_sessions") {
     val id = uuid("id")
     val userId = uuid("user_id").references(Users.id)
@@ -51,7 +38,6 @@ object TaskSessions : Table("task_sessions") {
     val taskStatus = varchar("task_status", 32)
     val answers = text("answers")
     val startPrompt = text("start_prompt").nullable()
-    val startedAt = long("started_at")
     val createdAt = datetime("created_at").clientDefault { LocalDateTime.now() }
 
     override val primaryKey = PrimaryKey(id)
@@ -64,8 +50,7 @@ object ChatMessages : Table("chat_messages") {
     val role = varchar("role", 64)
     val content = text("content")
     val imageUrl = text("image_url").nullable()
-    val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
-
+    val createdAt = datetime("created_at").clientDefault { LocalDateTime.now() }
 
     override val primaryKey = PrimaryKey(id)
 }

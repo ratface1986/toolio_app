@@ -24,7 +24,6 @@ suspend fun saveTaskSession(userId: String, session: RepairTaskSession) = withCo
             it[taskStatus] = session.task.status.name
             it[answers] = Json.encodeToString(session.answers)
             it[startPrompt] = session.initialPrompt
-            it[startedAt] = session.startedAt
         }
     }
 }
@@ -51,7 +50,7 @@ suspend fun loadTaskSessions(userId: String): List<RepairTaskSession> = withCont
                     category = category,
                     task = task.copy(status = TaskStatus.valueOf(row[TaskSessions.taskStatus])),
                     answers = answers,
-                    startedAt = row[TaskSessions.startedAt],
+                    createdAt = row[TaskSessions.createdAt].toString(),
                     initialPrompt = row[TaskSessions.startPrompt] ?: "",
                     messages = messages
                 )

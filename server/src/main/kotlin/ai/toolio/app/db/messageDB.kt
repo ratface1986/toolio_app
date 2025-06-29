@@ -47,7 +47,7 @@ fun loadChatMessagesFromDb(sessionId: UUID): List<ToolioChatMessage> {
                 role = role,
                 content = row[ChatMessages.content],
                 imageUrl = row[ChatMessages.imageUrl],
-                timestamp = row[ChatMessages.createdAt].atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                timestamp = row[ChatMessages.createdAt].toString()
             )
         }
 }

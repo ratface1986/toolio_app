@@ -99,7 +99,7 @@ data class ToolioChatMessage(
     val content: String,
     val imageUrl: String? = null,
     val tokensUsed: Int? = null,
-    val timestamp: Long = 0
+    val timestamp: String = ""
 )
 
 @Serializable
@@ -115,7 +115,7 @@ data class RepairTaskSession(
     val category: TaskCategory = Tasks.categories.first(),
     val task: Task = category.tasks.first(),
     val answers: Map<String, String> = emptyMap(),
-    val startedAt: Long = 0,
+    val createdAt: String = "",
     val initialPrompt: String = "",
     val messages: List<ToolioChatMessage> = emptyList(),
     @Transient val isSaved: Boolean = false

@@ -37,7 +37,6 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:0.50.1")
     implementation("org.postgresql:postgresql:42.7.2")
     implementation("org.jetbrains.exposed:exposed-java-time:0.50.1")
-    //implementation("ktor-client-core-jvm:3.2.0")
 
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)

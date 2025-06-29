@@ -136,7 +136,7 @@ private fun ChatMessageItem(
 ) {
     val isUser = message.isUser
 
-    val alignment = if (isUser) Alignment.CenterHorizontally else Alignment.Start
+    val alignment = if (isUser) Alignment.End else Alignment.Start
 
     val customFont = FontFamily(
         Font(
@@ -149,7 +149,7 @@ private fun ChatMessageItem(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .padding(horizontal = 0.dp, vertical = 6.dp),
         horizontalAlignment = alignment
     ) {
         when (message) {
@@ -159,20 +159,21 @@ private fun ChatMessageItem(
                         text = message.content,
                         color = Color.White,
                         fontFamily = customFont,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        textAlign = TextAlign.Right,
+                        modifier = Modifier.fillMaxWidth(0.70f)
                     )
                 } else {
                     Surface(
                         shape = RoundedCornerShape(18.dp),
-                        color = Color(0xFF2C2C2C),
+                        color = Color(0xFFFFFFFF),
                         modifier = Modifier
-                            .fillMaxWidth(0.95f)
+                            .padding(4.dp) // чтобы не прилипал к краям
                     ) {
                         Text(
                             text = message.content,
-                            color = Color.White,
-                            modifier = Modifier.padding(16.dp)
+                            color = Color.Black,
+                            modifier = Modifier.padding(12.dp),
+                            softWrap = true
                         )
                     }
                 }

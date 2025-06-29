@@ -10,6 +10,7 @@ import ai.toolio.app.ui.dashboard.MainMenuScreen
 import ai.toolio.app.ui.inventory.AddToolView
 import ai.toolio.app.ui.inventory.QuestionsView
 import ai.toolio.app.ui.inventory.RequiredToolsView
+import ai.toolio.app.ui.sidemenu.SettingsView
 import ai.toolio.app.ui.wizard.TaskChooserWizardScreen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +28,7 @@ sealed class AppScreen {
     object RequiredTools : AppScreen()
     object AddTool : AppScreen()
     object Chat : AppScreen()
+    object Settings : AppScreen()
 }
 
 @OptIn(ExperimentalUuidApi::class)
@@ -46,7 +48,7 @@ fun MainScreenController(
                 MainMenuScreen(
                     lastActiveTask = AppEnvironment.userProfile.sessions.firstOrNull()?.task,
                     completedTaskNames = listOf("Hang shelf", "Install TV"), // or emptyList()
-                    onContinueTask = { /* handle continue */ },
+                    onContinueTask = { screen = AppScreen.Chat },
                     onStartNewProject = {
                         AppEnvironment.userProfile.sessions.add(RepairTaskSession())
                         screen = AppScreen.Wizard
@@ -77,20 +79,25 @@ fun MainScreenController(
             }
             AppScreen.Chat -> {
                 ChatView(
+                    onShowSettings = {
+                        screen = AppScreen.Settings
+                    },
                     onBack = {
-                        screen = AppScreen.Wizard
+                        screen = AppScreen.MainMenu
                     }
                 )
             }
             AppScreen.RequiredTools -> {
                 RequiredToolsView(
-                    title = "Required Tools",
                     onAddToolClicked = { tool ->
                         requiredTool = tool
                         screen = AppScreen.AddTool
                     },
                     onConfirm = {
                         screen = AppScreen.Chat
+                    },
+                    onBack = {
+                        screen = AppScreen.Wizard
                     }
                 )
             }
@@ -122,7 +129,25 @@ fun MainScreenController(
                     }
                 )
             }
+            AppScreen.Settings -> {
+                SettingsView(
+                    nickname = AppEnvironment.userProfile.nickname,
+                    onNicknameChange = {},
+                    language = "en",
+                    languages = emptyList(),
+                    onLanguageChange = {},
+                    useMm = false,
+                    onUnitsChange = {
 
+                    },
+                    onDeleteAllData = {
+
+                    },
+                    onBack = {
+                        screen = AppScreen.Chat
+                    }
+                )
+            }
             AppScreen.Inventory -> TODO()
         }
     }

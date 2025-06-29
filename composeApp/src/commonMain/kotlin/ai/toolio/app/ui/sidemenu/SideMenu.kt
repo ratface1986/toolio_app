@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -24,11 +24,12 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun SideMenu(
     onAccountsClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {}
+    onExitClick: () -> Unit = {}
 ) {
     Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color(0xFF2F403E),
+        modifier = Modifier.fillMaxSize().systemBarsPadding(),
+        color = Color(0xFF000000)
+        //color = Color(0xFF2F403E),
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -44,7 +45,7 @@ fun SideMenu(
             BottomPanel(
                 onAccountsClick = onAccountsClick,
                 onSettingsClick = onSettingsClick,
-                onLogoutClick = onLogoutClick
+                onExitClick = onExitClick
             )
         }
     }
@@ -76,7 +77,7 @@ private fun TasksSection(
 private fun BottomPanel(
     onAccountsClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onLogoutClick: () -> Unit
+    onExitClick: () -> Unit
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
@@ -100,11 +101,11 @@ private fun BottomPanel(
             )
             
             ListItem(
-                headlineContent = { Text("Log out") },
+                headlineContent = { Text("Exit") },
                 leadingContent = { 
-                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
+                    Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
                 },
-                modifier = Modifier.clickable { onLogoutClick() }
+                modifier = Modifier.clickable { onExitClick() }
             )
         }
     }

@@ -2,6 +2,8 @@ package ai.toolio.app.ui.inventory
 
 import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.models.Tool
+import ai.toolio.app.theme.BackButton
+import ai.toolio.app.theme.HeadlineMediumText
 import ai.toolio.app.theme.TaskView
 import ai.toolio.app.ui.shared.ScreenWrapper
 import androidx.compose.foundation.background
@@ -28,9 +30,9 @@ import toolio.composeapp.generated.resources.*
 
 @Composable
 fun RequiredToolsView(
-    title: String,
     onAddToolClicked: (tool: Tool) -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
+    onBack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val tools by remember { mutableStateOf(AppEnvironment.userProfile.sessions.first().task.tools) }
@@ -59,13 +61,16 @@ fun RequiredToolsView(
                 .padding(top = 24.dp, bottom = 86.dp), // space for confirm btn
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = title,
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.padding(bottom = 24.dp).fillMaxWidth()
-            )
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 40.dp, start = 16.dp, end = 16.dp, bottom = 24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                BackButton(onClick = onBack)
+                Spacer(Modifier.width(16.dp))
+                HeadlineMediumText("Required Tools")
+            }
 
             LazyColumn(
                 modifier = Modifier
@@ -133,9 +138,9 @@ private fun getToolIconRes(tool: Tool): org.jetbrains.compose.resources.Drawable
 @Composable
 fun PreviewRequiredToolsView() {
     RequiredToolsView(
-        title = "Tools you need",
         onAddToolClicked = {},
-        onConfirm = {}
+        onConfirm = {},
+        onBack = {}
     )
 
 }

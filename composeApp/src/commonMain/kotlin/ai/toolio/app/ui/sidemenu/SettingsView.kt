@@ -1,6 +1,7 @@
 package ai.toolio.app.ui.sidemenu
 
 import ai.toolio.app.theme.*
+import ai.toolio.app.ui.shared.ScreenWrapper
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,108 +36,112 @@ fun SettingsView(
     var nicknameState by remember { mutableStateOf(nickname) }
     var expandLangDropdown by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 32.dp)
-    ) {
-        Row {
-            BackButton { onBack.invoke() }
-            Spacer(modifier = Modifier.width(16.dp))
-            HeadlineLargeText("Settings")
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-        // Nickname
-        TitleMediumText("Nickname")
-        Spacer(modifier = Modifier.height(8.dp))
-        MyTextField(
-            nicknameState = nicknameState,
-            onNicknameChange = {
-                onNicknameChange(it)
+    ScreenWrapper {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp, vertical = 32.dp)
+        ) {
+            Row {
+                BackButton { onBack.invoke() }
+                Spacer(modifier = Modifier.width(16.dp))
+                HeadlineLargeText("Settings")
             }
-        )
 
-        // Language
-        TitleMediumText(text = "Voice Language")
-        Spacer(modifier = Modifier.height(8.dp))
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 18.dp)) {
-            OutlinedButton(
-                onClick = { expandLangDropdown = true },
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth()
+            Spacer(modifier = Modifier.height(32.dp))
+            // Nickname
+            TitleMediumText("Nickname")
+            Spacer(modifier = Modifier.height(8.dp))
+            MyTextField(
+                nicknameState = nicknameState,
+                onNicknameChange = {
+                    onNicknameChange(it)
+                }
+            )
+
+            // Language
+            TitleMediumText(text = "Voice Language")
+            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 18.dp)
             ) {
-                BodyText(text = language)
-            }
-            DropdownMenu(
-                expanded = expandLangDropdown,
-                onDismissRequest = { expandLangDropdown = false },
-                modifier = Modifier.fillMaxWidth(0.9f)
-            ) {
-                languages.forEach { lang ->
-                    DropdownMenuItem(
-                        text = {
-                            BodyText(text = lang)
-                        },
-                        onClick = {
-                            onLanguageChange(lang)
-                            expandLangDropdown = false
-                        }
-                    )
+                OutlinedButton(
+                    onClick = { expandLangDropdown = true },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    BodyText(text = language)
+                }
+                DropdownMenu(
+                    expanded = expandLangDropdown,
+                    onDismissRequest = { expandLangDropdown = false },
+                    modifier = Modifier.fillMaxWidth(0.9f)
+                ) {
+                    languages.forEach { lang ->
+                        DropdownMenuItem(
+                            text = {
+                                BodyText(text = lang)
+                            },
+                            onClick = {
+                                onLanguageChange(lang)
+                                expandLangDropdown = false
+                            }
+                        )
+                    }
                 }
             }
-        }
 
-        // Units
-        TitleMediumText(text = "Units")
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            UnitChip(
-                text = "mm",
-                selected = useMm,
-                onClick = { onUnitsChange(true) }
-            )
-            UnitChip(
-                text = "inches",
-                selected = !useMm,
-                onClick = { onUnitsChange(false) }
-            )
-        }
+            // Units
+            TitleMediumText(text = "Units")
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                UnitChip(
+                    text = "mm",
+                    selected = useMm,
+                    onClick = { onUnitsChange(true) }
+                )
+                UnitChip(
+                    text = "inches",
+                    selected = !useMm,
+                    onClick = { onUnitsChange(false) }
+                )
+            }
 
-        Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1f))
 
-        // Danger Zone
-        Text(
-            text = "Danger Zone",
-            style = MaterialTheme.typography.labelMedium,
-            color = Color.Red,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        Button(
-            onClick = onDeleteAllData,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFFFE5E5),
-                contentColor = Color.Red
-            ),
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 40.dp)
-        ) {
+            // Danger Zone
             Text(
-                text = "Delete all my data",
-                fontWeight = FontWeight.Bold,
-                fontSize = 17.sp,
-                textAlign = TextAlign.Center
+                text = "Danger Zone",
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.Red,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
+            Button(
+                onClick = onDeleteAllData,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFFE5E5),
+                    contentColor = Color.Red
+                ),
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 40.dp)
+            ) {
+                Text(
+                    text = "Delete all my data",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 17.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }

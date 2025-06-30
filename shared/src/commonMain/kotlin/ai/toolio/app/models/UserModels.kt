@@ -1,12 +1,13 @@
 package ai.toolio.app.models
 
+import ai.toolio.app.misc.MeasureType
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserProfile(
     val userId: String,
-    val nickname: String,
     val inventory: Map<String, ToolData>,
+    val settings: UserSettings,
     val sessions: MutableList<RepairTaskSession> = mutableListOf()
 ) {
     fun getTool(tool: Tool): ToolData? = inventory[tool.name]
@@ -18,4 +19,12 @@ data class ToolData(
     val description: String,
     val imageUrl: String,
     val confirmed: Boolean
+)
+
+@Serializable
+data class UserSettings(
+    val nickname: String,
+    val email: String,
+    val language: String,
+    val measure: MeasureType
 )

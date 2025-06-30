@@ -3,9 +3,11 @@ package ai.toolio.app.db
 import ai.toolio.app.db.tables.Tools
 import ai.toolio.app.db.tables.Users
 import ai.toolio.app.ext.toUUID
+import ai.toolio.app.misc.MeasureType
 import ai.toolio.app.models.Tool
 import ai.toolio.app.models.ToolData
 import ai.toolio.app.models.UserProfile
+import ai.toolio.app.models.UserSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
@@ -69,6 +71,9 @@ suspend fun findUserByNickname(nickname: String): UserProfile? = withContext(Dis
             .firstOrNull() ?: return@transaction null
 
         val userId = userRow[Users.id]
+        val email = userRow[Users.email].orEmpty()
+        val language = userRow[Users.language].orEmpty()
+        val measure = userRow[Users.measure]
 
         val inventory = Tools
             .selectAll().where { Tools.userId eq userId }
@@ -84,14 +89,19 @@ suspend fun findUserByNickname(nickname: String): UserProfile? = withContext(Dis
 
         UserProfile(
             userId = userId.toString(),
-            nickname = nickname,
-            inventory = inventory
+            inventory = inventory,
+            settings = UserSettings(
+                nickname = nickname,
+                email = email,
+                language = language,
+                measure = measure
+            )
         )
     }
 }
 
 
-suspend fun insertUser(nickname: String): UserProfile? = withContext(Dispatchers.IO) {
+suspend fun insertUser(nickname: String, email: String = "rust.m@gmail.com"): UserProfile? = withContext(Dispatchers.IO) {
     val userId = UUID.randomUUID()
     val now = LocalDateTime.now()
 
@@ -101,6 +111,9 @@ suspend fun insertUser(nickname: String): UserProfile? = withContext(Dispatchers
             it[id] = userId
             it[Users.nickname] = nickname
             it[createdAt] = now
+            it[Users.email] = email
+            it[language] = "en"
+            it[measure] = MeasureType.INCH
         }
 
         // 2. Вставка всех инструментов как "заготовка"
@@ -109,7 +122,7 @@ suspend fun insertUser(nickname: String): UserProfile? = withContext(Dispatchers
                 it[id] = UUID.randomUUID()
                 it[Tools.userId] = userId
                 it[Tools.type] = tool.name
-                it[Tools.name] = "" // пустое имя — заполняется позже
+                it[Tools.name] = ""
                 it[Tools.description] = ""
                 it[Tools.imageUrl] = ""
                 it[Tools.confirmed] = false
@@ -119,10 +132,15 @@ suspend fun insertUser(nickname: String): UserProfile? = withContext(Dispatchers
 
         UserProfile(
             userId = userId.toString(),
-            nickname = nickname,
             inventory = Tool.entries.associate {
                 it.name to ToolData(it.displayName, "", "", false)
-            }
+            },
+            settings = UserSettings(
+                nickname = nickname,
+                email = email,
+                language = "en",
+                measure = MeasureType.INCH
+            )
         )
     }
 }

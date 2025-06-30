@@ -115,9 +115,8 @@ fun Application.module() {
                     return@post
                 }
 
-            val profile = UserProfile(
+            val profile = user.copy(
                 userId = user.userId,
-                nickname = nickname,
                 inventory = getUserInventory(user.userId)
                     .mapValues { (_, value) ->
                         val obj = value.jsonObject
@@ -224,7 +223,7 @@ fun Application.module() {
 
             logger.debug("Received multipart data")
 
-            if (promptText == null || imageBytes == null || fileName == null || userId == null) {
+            if (promptText == null || imageBytes == null || fileName == null) {
                 logger.warn("Missing prompt or image")
                 call.respond(HttpStatusCode.BadRequest, "Missing data")
                 return@post

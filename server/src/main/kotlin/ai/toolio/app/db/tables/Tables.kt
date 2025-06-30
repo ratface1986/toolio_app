@@ -1,5 +1,6 @@
 package ai.toolio.app.db.tables
 
+import ai.toolio.app.misc.MeasureType
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
@@ -24,6 +25,9 @@ object Users : Table("users") {
     val id = uuid("id")
     val nickname = varchar("nickname", 64)
     val createdAt = datetime("created_at").clientDefault { LocalDateTime.now() }
+    val measure = enumerationByName("measure", 10, MeasureType::class)
+    val language = varchar("language", 10).nullable()
+    val email = varchar("email", 120).nullable()
 
     override val primaryKey = PrimaryKey(id)
 }

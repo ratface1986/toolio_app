@@ -1,6 +1,7 @@
 package ai.toolio.app.ui
 
 import ai.toolio.app.di.AppEnvironment
+import ai.toolio.app.misc.MeasureType
 import ai.toolio.app.models.RepairTaskSession
 import ai.toolio.app.models.TaskCategory
 import ai.toolio.app.models.TaskStatus
@@ -18,7 +19,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.benasher44.uuid.uuid4
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 sealed class AppScreen {
     object MainMenu : AppScreen()
@@ -131,12 +131,12 @@ fun MainScreenController(
             }
             AppScreen.Settings -> {
                 SettingsView(
-                    nickname = AppEnvironment.userProfile.nickname,
+                    nickname = AppEnvironment.userProfile.settings.nickname,
                     onNicknameChange = {},
-                    language = "en",
+                    language = AppEnvironment.userProfile.settings.language,
                     languages = emptyList(),
                     onLanguageChange = {},
-                    useMm = false,
+                    useInches = AppEnvironment.userProfile.settings.measure == MeasureType.INCH,
                     onUnitsChange = {
 
                     },

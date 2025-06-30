@@ -28,7 +28,7 @@ fun SettingsView(
     language: String,
     languages: List<String>,
     onLanguageChange: (String) -> Unit,
-    useMm: Boolean,
+    useInches: Boolean,
     onUnitsChange: (Boolean) -> Unit,
     onDeleteAllData: () -> Unit,
     onBack: () -> Unit,
@@ -105,12 +105,12 @@ fun SettingsView(
             ) {
                 UnitChip(
                     text = "mm",
-                    selected = useMm,
+                    selected = useInches,
                     onClick = { onUnitsChange(true) }
                 )
                 UnitChip(
                     text = "inches",
-                    selected = !useMm,
+                    selected = !useInches,
                     onClick = { onUnitsChange(false) }
                 )
             }
@@ -192,7 +192,7 @@ fun PreviewSettingsView() {
         language = "English",
         languages = listOf("English", "Deutsch"),
         onLanguageChange = {},
-        useMm = true,
+        useInches = true,
         onUnitsChange = {},
         onDeleteAllData = {},
         onBack = {}

@@ -46,7 +46,7 @@ fun MainScreenController(
         when (screen) {
             AppScreen.MainMenu -> {
                 MainMenuScreen(
-                    lastActiveTask = AppEnvironment.userProfile.sessions.firstOrNull()?.task,
+                    lastActiveTask = AppEnvironment.userProfile.sessions.lastOrNull()?.task,
                     completedTaskNames = listOf("Hang shelf", "Install TV"), // or emptyList()
                     onContinueTask = { screen = AppScreen.Chat },
                     onStartNewProject = {
@@ -117,7 +117,7 @@ fun MainScreenController(
             }
             AppScreen.Questions -> {
                 QuestionsView(
-                    followUpQuestions = AppEnvironment.userProfile.sessions.first().task.followUpQuestions,
+                    followUpQuestions = AppEnvironment.userProfile.sessions.last().task.followUpQuestions,
                     onComplete = { answers ->
                         AppEnvironment.updateSession(
                             answers = answers.associate { it.first.question to it.second }

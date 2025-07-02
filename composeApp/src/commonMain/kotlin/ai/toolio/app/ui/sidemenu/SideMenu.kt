@@ -1,6 +1,7 @@
 package ai.toolio.app.ui.sidemenu
 
 import ai.toolio.app.data.toColor
+import ai.toolio.app.data.toDisplayText
 import ai.toolio.app.data.toDrawableResource
 import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.theme.TaskView

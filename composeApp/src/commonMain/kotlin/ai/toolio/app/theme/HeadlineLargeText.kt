@@ -2,7 +2,10 @@ package ai.toolio.app.theme
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -15,10 +18,10 @@ import toolio.composeapp.generated.resources.Satoshi_Bold
 fun HeadlineLargeText(text: String) {
     Text(
         text = text,
-        color = Color.White,
-        fontFamily = FontFamily(Font(resource = Res.font.Satoshi_Black, weight = FontWeight.Bold)),
-        fontSize = 32.sp,
-        fontWeight = FontWeight.Bold
+        color = Color(0xFF443A94),
+        fontFamily = FontFamily(Font(resource = Res.font.Satoshi_Black, weight = FontWeight.Black)),
+        fontSize = 38.sp,
+        maxLines = 2
     )
 }
 
@@ -26,7 +29,7 @@ fun HeadlineLargeText(text: String) {
 fun HeadlineMediumText(text: String) {
     Text(
         text = text,
-        color = Color.White,
+        color = Color.Black,
         fontFamily = FontFamily(Font(resource = Res.font.Satoshi_Bold, weight = FontWeight.Bold)),
         fontSize = 24.sp,
         fontWeight = FontWeight.Bold

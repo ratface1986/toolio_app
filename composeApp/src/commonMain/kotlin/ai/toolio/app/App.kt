@@ -4,6 +4,8 @@ import ai.toolio.app.di.AppSessions
 import ai.toolio.app.models.Tasks
 import ai.toolio.app.ui.LoginForm
 import ai.toolio.app.ui.MainScreenController
+import ai.toolio.app.ui.onboarding.OnboardingStep
+import ai.toolio.app.ui.onboarding.OnboardingView
 import ai.toolio.app.ui.theme.AppDarkColorScheme
 import ai.toolio.app.utils.NativeFeatures
 import ai.toolio.app.utils.PhotoPicker
@@ -11,12 +13,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.Font
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import toolio.composeapp.generated.resources.*
 import kotlin.time.Clock
@@ -26,14 +30,12 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun App(nativeFeatures: NativeFeatures) {
 
-    LaunchedEffect(Unit) {
-        // при старте
+    /*LaunchedEffect(Unit) {
         AppSessions.setLastActiveTimestamp(Clock.System.now().toEpochMilliseconds())
     }
 
     DisposableEffect(Unit) {
         onDispose {
-            // при закрытии / сворачивании
             AppSessions.setLastActiveTimestamp(Clock.System.now().toEpochMilliseconds())
         }
     }
@@ -80,23 +82,34 @@ fun App(nativeFeatures: NativeFeatures) {
             fontWeight = FontWeight.Normal
         )
         // добавь другие стили при необходимости
-    )
+    )*/
 
     var onLoginSuccess by mutableStateOf(false)
+    var onOnboardingCompleted by mutableStateOf(false)
 
     MaterialTheme(
-        colorScheme = AppDarkColorScheme,
-        typography = AppTypography
+        colorScheme = AppDarkColorScheme
     ) {
-        if (onLoginSuccess) {
-            MainScreenController(
-                categories = Tasks.categories
-            )
-        } else {
-            LoginForm(
-                nativeFeatures = nativeFeatures,
-                onLoginSuccess = { onLoginSuccess = true }
-            )
+        when {
+            !onOnboardingCompleted && !onLoginSuccess -> {
+                LoginForm(
+                    nativeFeatures = nativeFeatures,
+                    onLoginSuccess = { profile, isUserExists ->
+                        onOnboardingCompleted = isUserExists
+                        onLoginSuccess = true
+                    }
+                )
+            }
+            !onOnboardingCompleted && onLoginSuccess -> {
+                OnboardingView(
+                    onConfirm = { onOnboardingCompleted = true }
+                )
+            }
+            onOnboardingCompleted && onLoginSuccess -> {
+                MainScreenController(
+                    categories = Tasks.categories
+                )
+            }
         }
     }
 }

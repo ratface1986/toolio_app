@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ListItemView(text: String, textColor: Color, alignment: Alignment, isLarge: Boolean, onClick: () -> Unit = {}) {
@@ -23,7 +24,7 @@ fun ListItemView(text: String, textColor: Color, alignment: Alignment, isLarge: 
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(22.dp))
-            .background(Color.Black.copy(alpha = 1f))
+            .background(Color(0xFFec5b65))
             .clickable(onClick = onClick)
             .drawBehind {
                 drawRoundRect(
@@ -47,4 +48,10 @@ fun ListItemView(text: String, textColor: Color, alignment: Alignment, isLarge: 
             BodyText(text = text, color = textColor)
         }
     }
+}
+
+@Preview
+@Composable
+fun ListItemViewPreview() {
+    ListItemView(text = "Test", textColor = Color.Black, alignment = Alignment.Center, isLarge = true)
 }

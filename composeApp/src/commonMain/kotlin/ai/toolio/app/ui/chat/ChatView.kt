@@ -1,8 +1,13 @@
 package ai.toolio.app.ui.chat
 
 import ai.toolio.app.di.AppEnvironment
+import ai.toolio.app.misc.MeasureType
 import ai.toolio.app.misc.Roles
-import ai.toolio.app.ui.shared.ScreenWrapper
+import ai.toolio.app.models.RepairTaskSession
+import ai.toolio.app.models.TaskStatus
+import ai.toolio.app.models.UserProfile
+import ai.toolio.app.models.UserSettings
+import ai.toolio.app.ui.shared.SessionEndDialog
 import ai.toolio.app.ui.sidemenu.SideMenu
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,11 +15,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -44,6 +47,7 @@ fun ChatView(
     }
     var isTypingLoading by remember { mutableStateOf(false) }
     val inputHeightPx = remember { mutableStateOf(0) }
+    var showOnStopDialog by remember { mutableStateOf(false) }
 
     fun sendMessage(text: String) {
         scope.launch {
@@ -74,8 +78,36 @@ fun ChatView(
         }
     }
 
+    fun updateTaskSession(status: TaskStatus) {
+        scope.launch {
+            try {
+                AppEnvironment.updateSession(
+                    task = AppEnvironment.userProfile.sessions.last().task.copy(
+                        status = status,
+                    ),
+                )
+                AppEnvironment.repo.saveNewSession(AppEnvironment.userProfile.sessions.last())
+            } catch (e: Exception) {
+                println("Error saving new repair task session: ${e.message}")
+            }
+        }
+    }
 
-    ScreenWrapper(useGradientBackground = true) {
+    if (showOnStopDialog) {
+        SessionEndDialog(
+            onAbort = {
+                updateTaskSession(TaskStatus.ABORTED)
+                onBack()
+            },
+            onDone = {
+                updateTaskSession(TaskStatus.COMPLETED)
+                onBack()
+             },
+            onDismiss = { showOnStopDialog = false }
+        )
+    } else {
+
+
         ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
@@ -97,27 +129,25 @@ fun ChatView(
             }
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                // Сообщения
                 ChatMessagesView(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = with(LocalDensity.current) { inputHeightPx.value.toDp() }),
                     messagesInput = messages,
-                    isLoading = isTypingLoading,
+                    isWaitForAI = isTypingLoading,
                     onMenuClick = {
                         scope.launch {
                             if (drawerState.isClosed) drawerState.open() else drawerState.close()
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = with(LocalDensity.current) { inputHeightPx.value.toDp() })
+                    onStopClick = { showOnStopDialog = true }
                 )
 
-                // Ввод внизу
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .imePadding()
-                        .background(Color(0xFF1A1A1A)) // задаём нужный фон прямо тут
+                        .background(Color(0xFFf79d53)) // задаём нужный фон прямо тут
                 ) {
                     ChatInputView(
                         onSendMessage = { text ->
@@ -133,7 +163,6 @@ fun ChatView(
                         isInputEnabled = !isTypingLoading,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
                             .onGloballyPositioned {
                                 inputHeightPx.value = it.size.height
                             }
@@ -148,5 +177,23 @@ fun ChatView(
 @Preview
 @Composable
 fun FullChatPreview() {
+    AppEnvironment.setUserProfile(
+        UserProfile(
+            userId = "123456789",
+            inventory = mapOf(),
+            settings = UserSettings(
+                "123456789",
+                "test",
+                "en",
+                MeasureType.INCH
+            ),
+            sessions = mutableListOf(
+                RepairTaskSession(
+                    sessionId = "123",
+                    title = "test"
+                )
+            )
+        )
+    )
     ChatView({}, { })
 }

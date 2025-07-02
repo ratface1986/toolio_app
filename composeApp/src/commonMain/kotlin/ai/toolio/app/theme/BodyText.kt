@@ -9,6 +9,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.Font
 import toolio.composeapp.generated.resources.Res
+import toolio.composeapp.generated.resources.Satoshi_Bold
 import toolio.composeapp.generated.resources.Satoshi_Medium
 import toolio.composeapp.generated.resources.Satoshi_Regular
 
@@ -18,8 +19,8 @@ fun BodyText(text: String, color: Color = Color.White) {
         text = text,
         fontFamily = FontFamily(
             Font(
-                resource = Res.font.Satoshi_Regular,
-                weight = FontWeight.Normal,
+                resource = Res.font.Satoshi_Bold,
+                weight = FontWeight.Bold,
                 style = FontStyle.Normal
             )
         ),
@@ -29,13 +30,29 @@ fun BodyText(text: String, color: Color = Color.White) {
 }
 
 @Composable
+fun BodyTextMedium(text: String, color: Color = Color.White) {
+    Text(
+        text = text,
+        fontFamily = FontFamily(
+            Font(
+                resource = Res.font.Satoshi_Bold,
+                weight = FontWeight.Bold,
+                style = FontStyle.Normal
+            )
+        ),
+        color = color,
+        fontSize = 15.sp
+    )
+}
+
+@Composable
 fun BodyTextLarge(text: String, color: Color = Color.White) {
     Text(
         text = text,
         fontFamily = FontFamily(
             Font(
-                resource = Res.font.Satoshi_Medium,
-                weight = FontWeight.Medium,
+                resource = Res.font.Satoshi_Bold,
+                weight = FontWeight.Bold,
                 style = FontStyle.Normal
             )
         ),

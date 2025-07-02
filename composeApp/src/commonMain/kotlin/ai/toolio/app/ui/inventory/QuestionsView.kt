@@ -54,7 +54,7 @@ fun QuestionsView(
                         Spacer(Modifier.width(16.dp))
                         HeadlineMediumText(currentQuestion.question)
                     }
-
+                    Spacer(Modifier.height(16.dp))
                     Column(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxWidth()

@@ -1,7 +1,11 @@
 package ai.toolio.app.ui.inventory
 
 import ai.toolio.app.di.AppEnvironment
+import ai.toolio.app.misc.MeasureType
+import ai.toolio.app.models.RepairTaskSession
 import ai.toolio.app.models.Tool
+import ai.toolio.app.models.UserProfile
+import ai.toolio.app.models.UserSettings
 import ai.toolio.app.theme.BackButton
 import ai.toolio.app.theme.HeadlineMediumText
 import ai.toolio.app.theme.TaskView
@@ -35,12 +39,12 @@ fun RequiredToolsView(
     onBack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val tools by remember { mutableStateOf(AppEnvironment.userProfile.sessions.first().task.tools) }
+    val tools by remember { mutableStateOf(AppEnvironment.userProfile.sessions.last().task.tools) }
 
     fun saveNewRepairTaskSession() {
         scope.launch {
             try {
-                val response = AppEnvironment.repo.saveNewSession(AppEnvironment.userProfile.sessions.first())
+                val response = AppEnvironment.repo.saveNewSession(AppEnvironment.userProfile.sessions.last())
                 if (response) {
                     AppEnvironment.updateSession(isSaved = true)
                 }
@@ -55,62 +59,69 @@ fun RequiredToolsView(
     }
 
     ScreenWrapper {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 24.dp, bottom = 86.dp), // space for confirm btn
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 40.dp, start = 16.dp, end = 16.dp, bottom = 24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                BackButton(onClick = onBack)
-                Spacer(Modifier.width(16.dp))
-                HeadlineMediumText("Required Tools")
-            }
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f, fill = false),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(tools) { tool ->
-                    val toolData = AppEnvironment.userProfile.getTool(tool)
-                    TaskView(
-                        header = tool.displayName,
-                        subHeader = toolData?.name ?: "",
-                        subHeaderColor = Color.Blue,
-                        icon = getToolIconRes(tool),
-                        showButton = true,
-                        showChecked = toolData?.confirmed ?: false,
-                        buttonLabel = if (toolData?.confirmed == true) "Edit" else "Add",
-                        onClick = {
-                            onAddToolClicked(tool)
-                        }
-                    )
-                }
-            }
-        }
-
-        // Confirm button at bottom
         Box(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(bottom = 32.dp)
+                .fillMaxSize()
+                .padding(horizontal = 24.dp)
         ) {
-            Button(
-                onClick = { saveNewRepairTaskSession() },
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(18.dp)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Confirm", fontSize = 19.sp)
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 40.dp, start = 16.dp, end = 16.dp, bottom = 24.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    BackButton(onClick = onBack)
+                    Spacer(Modifier.width(16.dp))
+                    HeadlineMediumText("Required Tools")
+                }
+
+                Spacer(Modifier.height(16.dp))
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f, fill = false),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(tools) { tool ->
+                        val toolData = AppEnvironment.userProfile.getTool(tool)
+                        TaskView(
+                            header = tool.displayName,
+                            subHeader = toolData?.name ?: "",
+                            subHeaderColor = Color.Black,
+                            icon = getToolIconRes(tool),
+                            showButton = true,
+                            showChecked = toolData?.confirmed ?: false,
+                            buttonLabel = if (toolData?.confirmed == true) "Edit" else "Add",
+                            onClick = {
+                                onAddToolClicked(tool)
+                            }
+                        )
+                    }
+                }
+            }
+
+            // Confirm button at bottom
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp)
+            ) {
+                Button(
+                    onClick = { saveNewRepairTaskSession() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp)
+                        .padding(horizontal = 16.dp),
+                    shape = RoundedCornerShape(18.dp)
+                ) {
+                    Text("Confirm", fontSize = 19.sp)
+                }
             }
         }
     }
@@ -137,6 +148,25 @@ private fun getToolIconRes(tool: Tool): org.jetbrains.compose.resources.Drawable
 @Preview
 @Composable
 fun PreviewRequiredToolsView() {
+    AppEnvironment.setUserProfile(
+        UserProfile(
+            userId = "123456789",
+            inventory = mapOf(),
+            settings = UserSettings(
+                "123456789",
+                "test",
+                "en",
+                MeasureType.INCH
+            ),
+            sessions = mutableListOf(
+                RepairTaskSession(
+                    sessionId = "123",
+                    title = "test"
+                )
+            )
+        )
+    )
+
     RequiredToolsView(
         onAddToolClicked = {},
         onConfirm = {},

@@ -1,6 +1,10 @@
 package ai.toolio.app.ui.chat
 
+import ai.toolio.app.theme.BodyText
+import ai.toolio.app.theme.BodyTextLarge
+import ai.toolio.app.theme.BodyTextMedium
 import ai.toolio.app.ui.shared.CrossPlatformImage
+import ai.toolio.app.ui.shared.ScreenWrapper
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -9,16 +13,18 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -48,7 +54,8 @@ sealed class ChatMessage(open val isUser: Boolean) {
 fun ChatMessagesView(
     messagesInput: List<ChatMessage>,
     onMenuClick: () -> Unit,
-    isLoading: Boolean,
+    onStopClick: () -> Unit,
+    isWaitForAI: Boolean,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
@@ -59,38 +66,11 @@ fun ChatMessagesView(
         }
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .imePadding()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF2F403E),
-                        Color(0xFF1A1C1D)
-                    )
-                )
-            )
-    ) {
+    ScreenWrapper {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            TopAppBar(
-                title = { Text("") },
-                navigationIcon = {
-                    IconButton(onClick = onMenuClick) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu",
-                            tint = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    titleContentColor = Color.White
-                )
-            )
+            ChatTopBar(onMenuClick = onMenuClick, onStopClick = onStopClick)
 
             LazyColumn(
                 modifier = Modifier
@@ -108,7 +88,7 @@ fun ChatMessagesView(
                     ChatMessageItem(message = message)
                 }
 
-                if (isLoading) {
+                if (isWaitForAI) {
                     item {
                         Column(
                             modifier = Modifier.fillMaxWidth(),
@@ -116,7 +96,6 @@ fun ChatMessagesView(
                         ) {
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.secondaryContainer,
                                 modifier = Modifier.padding(vertical = 4.dp)
                             ) {
                                 TypingLoading()
@@ -155,26 +134,29 @@ private fun ChatMessageItem(
         when (message) {
             is ChatMessage.Text -> {
                 if (isUser) {
-                    Text(
-                        text = message.content,
-                        color = Color.White,
-                        fontFamily = customFont,
-                        textAlign = TextAlign.Right,
-                        modifier = Modifier.fillMaxWidth(0.70f)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.90f),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        BodyTextMedium(
+                            text = message.content,
+                            color = Color.Black
+                        )
+                    }
                 } else {
                     Surface(
                         shape = RoundedCornerShape(18.dp),
-                        color = Color(0xFFFFFFFF),
-                        modifier = Modifier
-                            .padding(4.dp) // чтобы не прилипал к краям
+                        color = Color(0xFF37DC94)
                     ) {
-                        Text(
-                            text = message.content,
-                            color = Color.Black,
-                            modifier = Modifier.padding(12.dp),
-                            softWrap = true
-                        )
+                        Box(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            BodyTextMedium(
+                                text = message.content,
+                                color = Color.Black
+                            )
+                        }
                     }
                 }
             }
@@ -257,6 +239,56 @@ private fun TypingLoading(
     }
 }
 
+@Composable
+fun ChatTopBar(
+    onMenuClick: () -> Unit,
+    onStopClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+            .height(56.dp)
+    ) {
+        IconButton(
+            onClick = onMenuClick,
+            modifier = Modifier.align(Alignment.CenterStart)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .background(Color.White.copy(alpha = 0.2f), shape = CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = "Menu",
+                    tint = Color(0xFF268AFF)
+                )
+            }
+        }
+
+        IconButton(
+            onClick = onStopClick,
+            modifier = Modifier.align(Alignment.CenterEnd)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .background(Color.White.copy(alpha = 0.2f), shape = CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Stop,
+                    contentDescription = "Stop",
+                    tint = Color.Red
+                )
+            }
+        }
+    }
+}
+
+
 @Preview
 @Composable
 fun ChatViewPreviewNew() {
@@ -267,7 +299,8 @@ fun ChatViewPreviewNew() {
             ChatMessage.Text("I'm doing fine, thanks!", true),
         ),
         onMenuClick = {},
+        onStopClick = {},
         modifier = Modifier.fillMaxSize(),
-        isLoading = false
+        isWaitForAI = false
     )
 }

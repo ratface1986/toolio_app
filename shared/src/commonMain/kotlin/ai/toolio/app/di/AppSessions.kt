@@ -1,10 +1,8 @@
 package ai.toolio.app.di
 
 expect object AppSessions {
-    fun createNewSessionId(): String
-    fun getLastSessionId(): String
-    fun setLastSessionId(id: String)
-
-    fun setLastActiveTimestamp(timestamp: Long)
-    fun getLastActiveTimestamp(): Long
+    fun saveUserId(id: String)
+    fun getUserId(): String
+    fun saveUserNickname(nickname: String)
+    fun getUserNickname(): String
 }

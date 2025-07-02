@@ -21,14 +21,14 @@ fun BackButton(onClick: () -> Unit) {
         modifier = Modifier
             .size(48.dp)
             .clip(CircleShape)
-            .background(Color.White)
+            .background(Color(0xFF443A94))
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = "Back",
-            tint = Color.Black,
+            tint = Color.White,
             modifier = Modifier.size(24.dp)
         )
     }

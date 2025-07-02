@@ -32,7 +32,7 @@ fun ChatInputView(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0xFF757575), RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)) // если надо фон всё же
+            .background(Color(0xFFFA5C65), RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)) // если надо фон всё же
     ) {
         MessageInput(
             onSendMessage = onSendMessage,

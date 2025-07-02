@@ -10,12 +10,13 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 
 suspend fun saveTaskSession(userId: String, session: RepairTaskSession) = withContext(Dispatchers.IO) {
     transaction {
-        TaskSessions.insert {
-            it[id] = session.sessionId.toUUID()
+        val data: TaskSessions.(UpdateBuilder<*>) -> Unit = {
             it[TaskSessions.userId] = userId.toUUID()
             it[title] = session.title
             it[category] = session.category.id
@@ -24,6 +25,17 @@ suspend fun saveTaskSession(userId: String, session: RepairTaskSession) = withCo
             it[taskStatus] = session.task.status.name
             it[answers] = Json.encodeToString(session.answers)
             it[startPrompt] = session.initialPrompt
+        }
+
+        val exists = TaskSessions.selectAll().where { TaskSessions.id eq session.sessionId.toUUID() }.any()
+
+        if (exists) {
+            TaskSessions.update({ TaskSessions.id eq session.sessionId.toUUID() }, body = data)
+        } else {
+            TaskSessions.insert {
+                it[id] = session.sessionId.toUUID()
+                data(it)
+            }
         }
     }
 }

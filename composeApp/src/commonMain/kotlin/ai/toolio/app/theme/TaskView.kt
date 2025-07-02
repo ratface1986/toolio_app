@@ -1,6 +1,7 @@
 package ai.toolio.app.theme
 
 import ai.toolio.app.data.toColor
+import ai.toolio.app.data.toDisplayText
 import ai.toolio.app.data.toDrawableResource
 import ai.toolio.app.models.CategoryType
 import ai.toolio.app.models.TaskStatus
@@ -42,18 +43,18 @@ fun TaskView(
             .fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
             .size(66.dp)
-            .background(Color(0xFF616161)) // фон карточки
+            .background(Color(0xFF268AFF))
             .drawBehind {
                 drawRoundRect(
                     brush = Brush.verticalGradient(
                         listOf(
-                            Color(0x2BEAEAEA), // верхняя часть бордюра
+                            Color(0x2BFA5C65),
                             Color.Transparent
                         )
                     ),
                     size = size,
                     cornerRadius = CornerRadius(28.dp.toPx()),
-                    style = Stroke(width = 1.dp.toPx())
+                    style = Stroke(width = 2.dp.toPx())
                 )
             }
             .padding(start = 8.dp, top = 8.dp, bottom = 8.dp, end = 16.dp),
@@ -63,7 +64,7 @@ fun TaskView(
             modifier = Modifier
                 .size(60.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFF242424))
+                .background(Color(0xFFFA5C65))
                 .border(
                     width = 1.17.dp,
                     color = Color(0xFF171A0F),
@@ -90,7 +91,7 @@ fun TaskView(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    TitleMediumText(text = header, color = Color.White)
+                    TitleMediumText(text = header, color = Color(0xFFdce2e2))
 
                     if (showChecked) {
                         Spacer(modifier = Modifier.width(8.dp))

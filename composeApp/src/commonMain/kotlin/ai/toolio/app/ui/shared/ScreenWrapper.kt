@@ -9,7 +9,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -18,20 +17,14 @@ import androidx.compose.ui.unit.sp
 fun ScreenWrapper(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
-    useGradientBackground: Boolean = false,
+    useCustomBackground: Boolean = false,
+    customBackgroundColor: Color = Color(0xFFf79d53),
     content: @Composable BoxScope.(PaddingValues) -> Unit
 ) {
-    val backgroundModifier = if (useGradientBackground) {
-        Modifier.background(
-            Brush.verticalGradient(
-                colors = listOf(
-                    Color(0xFF2F403E),
-                    Color(0xFF1A1C1D)
-                )
-            )
-        )
+    val backgroundModifier = if (useCustomBackground) {
+        Modifier.background(customBackgroundColor)
     } else {
-        Modifier.background(Color(0xFF282F32))
+        Modifier.background(Color(0xFFf79d53))
     }
 
     Box(

@@ -2,7 +2,6 @@ package ai.toolio.app.di
 
 import android.content.Context
 import android.content.SharedPreferences
-import java.util.UUID
 import androidx.core.content.edit
 
 actual object AppSessions {
@@ -12,25 +11,19 @@ actual object AppSessions {
         prefs = context.getSharedPreferences("toolio_prefs", Context.MODE_PRIVATE)
     }
 
-    actual fun createNewSessionId(): String {
-        val id = UUID.randomUUID().toString()
-        setLastSessionId(id)
-        return id
+    actual fun saveUserId(id: String) {
+        prefs.edit { putString("saved_user_id", id) }
     }
 
-    actual fun getLastSessionId(): String {
-        return prefs.getString("last_session_id", "").orEmpty()
+    actual fun getUserId(): String {
+        return prefs.getString("saved_user_id", "").orEmpty()
     }
 
-    actual fun setLastSessionId(id: String) {
-        prefs.edit { putString("last_session_id", id) }
+    actual fun saveUserNickname(nickname: String) {
+        prefs.edit { putString("saved_nickname", nickname) }
     }
 
-    actual fun setLastActiveTimestamp(timestamp: Long) {
-        prefs.edit { putLong("last_active_timestamp", timestamp) }
-    }
-
-    actual fun getLastActiveTimestamp(): Long {
-        return prefs.getLong("last_active_timestamp", 0)
+    actual fun getUserNickname(): String {
+        return prefs.getString("saved_nickname", "").orEmpty()
     }
 }

@@ -250,13 +250,6 @@ enum class TaskStatus {
     IN_PROGRESS,
     COMPLETED,
     ABORTED;
-
-    fun toDisplayText(): String = when (this) {
-        IDLE -> "Idle..."
-        IN_PROGRESS -> "In Progress..."
-        COMPLETED -> "Completed"
-        ABORTED -> "Aborted"
-    }
 }
 
 

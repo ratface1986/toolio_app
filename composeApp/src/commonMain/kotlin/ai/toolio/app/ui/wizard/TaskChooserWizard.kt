@@ -23,6 +23,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -39,7 +40,8 @@ fun TaskChooserWizardScreen(
     onCategoryChosen: (category: TaskCategory, task: Task) -> Unit,
     onBack: () -> Unit = {}
 ) {
-    var selectedCategory by remember { mutableStateOf<TaskCategory?>(Tasks.categories.first()) }
+    var selectedCategory by remember { mutableStateOf<TaskCategory?>(null) }
+    //var selectedCategory by remember { mutableStateOf<TaskCategory?>(Tasks.categories.first()) }
     ScreenWrapper {
         Box(
             modifier = Modifier
@@ -130,8 +132,12 @@ private fun CategoryButton(
     Box(
         modifier = Modifier
             .size(width = 159.dp, height = 180.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .background(Color(0xFF616161))
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(24.dp), // совпадает с фоном/бордером
+                clip = true
+            )
+            .background(Color(0xFFec5b65), shape = RoundedCornerShape(24.dp))
             .clickable(onClick = onClick)
             .border(
                 width = 1.dp,
@@ -143,7 +149,8 @@ private fun CategoryButton(
                 shape = RoundedCornerShape(24.dp)
             ),
         contentAlignment = Alignment.Center
-    ) {
+    )
+    {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -151,12 +158,12 @@ private fun CategoryButton(
             Icon(
                 painter = painterResource(categoryDrawableResource),
                 contentDescription = null,
-                tint = Color.White,
+                tint = Color(0xFFdce2e2),
                 modifier = Modifier.size(48.dp)
             )
             TitleMediumText(
                 text = title,
-                color = Color.White,
+                color = Color(0xFFdce2e2),
                 alignment = TextAlign.Center
             )
         }
@@ -183,7 +190,7 @@ private fun SubcategoryListView(
             Spacer(Modifier.width(16.dp))
             HeadlineMediumText(category.prompt)
         }
-
+        Spacer(Modifier.height(16.dp))
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {

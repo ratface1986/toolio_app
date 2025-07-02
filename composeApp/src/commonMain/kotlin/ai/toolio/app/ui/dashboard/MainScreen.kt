@@ -1,9 +1,11 @@
 package ai.toolio.app.ui.dashboard
 
 import ai.toolio.app.data.toColor
+import ai.toolio.app.data.toDisplayText
 import ai.toolio.app.data.toDrawableResource
 import ai.toolio.app.models.CategoryType
 import ai.toolio.app.models.Task
+import ai.toolio.app.models.TaskStatus
 import ai.toolio.app.theme.HeadlineLargeText
 import ai.toolio.app.theme.ListItemView
 import ai.toolio.app.theme.TaskView
@@ -33,14 +35,14 @@ fun MainMenuScreen(
     onContinueTask: (() -> Unit)? = null,
     onStartNewProject: () -> Unit
 ) {
-    ScreenWrapper(useGradientBackground = true) {
+    ScreenWrapper {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp)
         ) {
             Spacer(modifier = Modifier.height(32.dp))
-            HeadlineLargeText("Welcome to Toolio PIDAR")
+            HeadlineLargeText("Welcome to Toolio")
 
             Spacer(modifier = Modifier.height(32.dp))
             TitleText("Last Active Session")
@@ -48,7 +50,7 @@ fun MainMenuScreen(
             if (lastActiveTask == null) {
                 Text(
                     text = "You are about to fix something",
-                    color = Color(0xC2C2C2).copy(1f),
+                    color = Color(0xFF4B1E22),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(vertical = 20.dp, horizontal = 6.dp)
                 )
@@ -58,7 +60,7 @@ fun MainMenuScreen(
                     subHeader = lastActiveTask.status.toDisplayText(),
                     subHeaderColor = lastActiveTask.status.toColor(),
                     icon = CategoryType.FIX.toDrawableResource(),
-                    showButton = true,
+                    showButton = lastActiveTask.status == TaskStatus.IN_PROGRESS,
                     onClick = { onContinueTask?.invoke() }
                 )
             }
@@ -69,7 +71,7 @@ fun MainMenuScreen(
             if (completedTaskNames.isEmpty()) {
                 Text(
                     text = "You haven't completed tasks yet.",
-                    color = Color.Gray,
+                    color = Color(0xFF4B1E22),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(vertical = 18.dp, horizontal = 6.dp)
                 )

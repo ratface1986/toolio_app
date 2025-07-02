@@ -2,6 +2,10 @@ package ai.toolio.app.data
 
 import ai.toolio.app.models.CategoryType
 import ai.toolio.app.models.TaskStatus
+import ai.toolio.app.models.TaskStatus.ABORTED
+import ai.toolio.app.models.TaskStatus.COMPLETED
+import ai.toolio.app.models.TaskStatus.IDLE
+import ai.toolio.app.models.TaskStatus.IN_PROGRESS
 import androidx.compose.ui.graphics.Color
 import toolio.composeapp.generated.resources.*
 
@@ -16,8 +20,15 @@ internal fun CategoryType.toDrawableResource() =
 
 internal fun TaskStatus.toColor() =
     when (this) {
-        TaskStatus.IDLE -> Color.White
-        TaskStatus.IN_PROGRESS -> Color(0xFF8DEB92)
-        TaskStatus.ABORTED -> Color(0xFFFF3B30)
-        TaskStatus.COMPLETED -> Color(0xFF2A9DF4)
+        IDLE -> Color.Black
+        IN_PROGRESS -> Color(0xFF8DEB92)
+        ABORTED -> Color(0xFF000000)
+        COMPLETED -> Color(0xFF2A9DF4)
     }
+
+internal fun TaskStatus.toDisplayText(): String = when (this) {
+    IDLE -> "Idle..."
+    IN_PROGRESS -> "In Progress..."
+    COMPLETED -> "Completed"
+    ABORTED -> "Aborted"
+}

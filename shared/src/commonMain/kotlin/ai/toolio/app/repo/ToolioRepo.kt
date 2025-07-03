@@ -157,7 +157,7 @@ class ToolioRepo(private val baseUrl: String) {
         private var instance: ToolioRepo? = null
 
         //private const val BASE_URL = "https://toolio-api.vercel.app/api"
-        private const val BASE_URL = "https://toolioapp-production.up.railway.app"
+        private const val BASE_URL = "https://toolioapp.com"
 
         fun getInstance(): ToolioRepo {
             return instance ?: createInstance()

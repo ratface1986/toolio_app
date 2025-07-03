@@ -215,7 +215,7 @@ fun Application.module() {
                 part.dispose()
             }
 
-            if (userId == null || sessionId.isNullOrBlank()) {
+            if (userId == null) {
                 logger.warn("Missing user_id")
                 call.respond(HttpStatusCode.BadRequest, "Missing user_id")
                 return@post
@@ -254,7 +254,7 @@ fun Application.module() {
                     request = ChatGptRequest(
                         userId = userId,
                         prompt = fullPrompt,
-                        sessionId = sessionId,
+                        sessionId = sessionId.orEmpty(),
                         imageBytes = imageBytes
                     )
                 )
@@ -327,7 +327,16 @@ fun Application.module() {
             call.respond(HttpStatusCode.Created)
         }
 
+        post("/update-settings") {
+            val request = call.receive<UserProfile>()
+            val success = updateUserSettings(request.userId, request.settings)
 
+            if (success) {
+                call.respond(HttpStatusCode.OK)
+            } else {
+                call.respond(HttpStatusCode.InternalServerError, "Failed to update settings")
+            }
+        }
 
         staticFiles("/uploads", File(ToolioConfig.storagePath))
     }

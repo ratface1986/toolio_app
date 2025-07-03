@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import android.content.pm.PackageManager
 import androidx.activity.result.ActivityResultCaller
+import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity(), ActivityResultCaller {
 
@@ -32,6 +33,7 @@ class MainActivity : ComponentActivity(), ActivityResultCaller {
 
         // Register the picker in onCreate *before* any async logic!
         photoPicker = AndroidPhotoPicker(this)
+        FirebaseApp.initializeApp(this)
 
         AppSessions.init(applicationContext)
 

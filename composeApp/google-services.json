@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "592143760637",
+    "project_id": "toolio-3735c",
+    "storage_bucket": "toolio-3735c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:592143760637:android:2f9d495ceeced44b585294",
+        "android_client_info": {
+          "package_name": "ai.toolio.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANXJJGjRtzc9Tt3vDfPU7RV6tANykjBOg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

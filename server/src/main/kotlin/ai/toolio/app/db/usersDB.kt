@@ -144,3 +144,19 @@ suspend fun insertUser(nickname: String, email: String = "rust.m@gmail.com"): Us
         )
     }
 }
+
+suspend fun updateUserSettings(userId: String, settings: UserSettings): Boolean = withContext(Dispatchers.IO) {
+    try {
+        transaction {
+            Users.update({ Users.id eq userId.toUUID() }) {
+                it[nickname] = settings.nickname
+                it[email] = settings.email
+                it[language] = settings.language
+                it[measure] = settings.measure
+            }
+        }
+        true
+    } catch (e: Exception) {
+        false
+    }
+}

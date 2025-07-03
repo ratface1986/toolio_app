@@ -51,6 +51,8 @@ fun AddToolView(
         )
     }
 
+    println("MYDATA AddToolView: userId: ${AppEnvironment.userProfile.userId}")
+
     fun processPhoto(photoBytes: ByteArray) {
         val prompt = tool.displayName
         val userId = AppEnvironment.userProfile.userId

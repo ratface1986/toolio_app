@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class UserProfile(
     val userId: String,
     val inventory: Map<String, ToolData>,
-    val settings: UserSettings,
+    var settings: UserSettings,
     val sessions: MutableList<RepairTaskSession> = mutableListOf()
 ) {
     fun getTool(tool: Tool): ToolData? = inventory[tool.name]

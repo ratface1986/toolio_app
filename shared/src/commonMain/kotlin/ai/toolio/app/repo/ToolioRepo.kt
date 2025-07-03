@@ -111,19 +111,34 @@ class ToolioRepo(private val baseUrl: String) {
     }
 
     suspend fun saveNewSession(session: RepairTaskSession): Boolean {
-        val request = SaveSessionRequest(
-            userId = AppEnvironment.userProfile.userId,
-            session = session
-        )
+        return try {
+            val request = SaveSessionRequest(
+                userId = AppEnvironment.userProfile.userId,
+                session = session
+            )
 
-        val response = client.post("$baseUrl/save-session") {
-            contentType(ContentType.Application.Json)
-            setBody(request)
+            val response = client.post("$baseUrl/save-session") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+
+            response.status.isSuccess()
+        } catch (e: Exception) {
+            false
         }
-
-        return false//response.status.isSuccess()
     }
 
+    suspend fun saveUserSettings(profile: UserProfile): Boolean {
+        return try {
+            val response = client.post("$baseUrl/update-settings") {
+                contentType(ContentType.Application.Json)
+                setBody(profile)
+            }
+            response.status.isSuccess()
+        } catch (e: Exception) {
+            false
+        }
+    }
 
     suspend fun fetchImageByUrl(imageUrl: String): ByteArray {
         return client.get(imageUrl).body()

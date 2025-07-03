@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.benasher44.uuid.uuid4
+import kotlinx.coroutines.launch
 import kotlin.uuid.ExperimentalUuidApi
 
 sealed class AppScreen {
@@ -37,8 +38,19 @@ fun MainScreenController(
     categories: List<TaskCategory>,
     startScreen: AppScreen = AppScreen.MainMenu
 ) {
+    val scope = rememberCoroutineScope()
     var screen by remember { mutableStateOf(startScreen) }
     var requiredTool: Tool by remember { mutableStateOf(Tool.DRILL) }
+
+    fun updateUserProfile() {
+        try {
+            scope.launch {
+                val result = AppEnvironment.repo.saveUserSettings(AppEnvironment.userProfile)
+            }
+        } catch (e: Exception) {
+            println("Error saving user profile: ${e.message}")
+        }
+    }
 
     Box(
         Modifier.fillMaxSize()
@@ -132,16 +144,29 @@ fun MainScreenController(
             AppScreen.Settings -> {
                 SettingsView(
                     nickname = AppEnvironment.userProfile.settings.nickname,
-                    onNicknameChange = {},
+                    onNicknameChange = { nickname ->
+                        AppEnvironment.updateUserSettings(
+                            nickname = nickname
+                        )
+                        updateUserProfile()
+                    },
                     language = AppEnvironment.userProfile.settings.language,
                     languages = emptyList(),
-                    onLanguageChange = {},
+                    onLanguageChange = { language ->
+                        AppEnvironment.updateUserSettings(
+                            language = language
+                        )
+                        updateUserProfile()
+                    },
                     useInches = AppEnvironment.userProfile.settings.measure == MeasureType.INCH,
-                    onUnitsChange = {
-
+                    onUnitsChange = { isUseInches ->
+                        AppEnvironment.updateUserSettings(
+                            measure = if (isUseInches) MeasureType.INCH else MeasureType.CM
+                        )
+                        updateUserProfile()
                     },
                     onDeleteAllData = {
-
+                        //
                     },
                     onBack = {
                         screen = AppScreen.Chat

@@ -1,9 +1,13 @@
 package ai.toolio.app.di
 
+import ai.toolio.app.misc.MeasureType
+import ai.toolio.app.models.RepairTaskSession
 import ai.toolio.app.models.Task
 import ai.toolio.app.models.TaskCategory
 import ai.toolio.app.models.TaskStatus
+import ai.toolio.app.models.ToolData
 import ai.toolio.app.models.UserProfile
+import ai.toolio.app.models.UserSettings
 import ai.toolio.app.repo.ToolioRepo
 import ai.toolio.app.utils.NativeFeatures
 
@@ -48,6 +52,20 @@ object AppEnvironment {
                 answers = answers,
                 isSaved = isSaved
             )
+    }
+
+    fun updateUserSettings(
+        nickname: String = userProfile.settings.nickname,
+        email: String = userProfile.settings.email,
+        language: String = userProfile.settings.language,
+        measure: MeasureType = userProfile.settings.measure
+    ) {
+        userProfile.settings = userProfile.settings.copy(
+            nickname = nickname,
+            email = email,
+            language = language,
+            measure = measure
+        )
     }
 
     fun reset() {

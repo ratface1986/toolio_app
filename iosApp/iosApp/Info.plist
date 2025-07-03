@@ -1,29 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-    <dict>
-        <key>CADisableMinimumFrameDurationOnPhone</key>
-        <true/>
-        <key>NSCameraUsageDescription</key>
-        <string>We need camera to add photos</string>
-        <key>NSLocalNetworkUsageDescription</key>
-        <string>We need access to the local network to connect to the game server.</string>
-        <key>NSBonjourServices</key>
-        <array>
-            <string>_http._tcp</string>
-        </array>
-        <key>NSAppTransportSecurity</key>
-        <dict>
-            <key>NSAllowsArbitraryLoads</key>
-            <true/>
-        </dict>
-
-        <key>NSLocalNetworkUsageDescription</key>
-        <string>App needs access to local network to connect to backend server</string>
-
-        <key>NSBonjourServices</key>
-        <array>
-            <string>_http._tcp</string>
-        </array>
-    </dict>
+<dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>We need camera to add photos</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>App needs access to local network to connect to backend server</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_http._tcp</string>
+	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>app-analytics-services.com</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<false/>
+				<key>NSExceptionMinimumTLSVersion</key>
+				<string>TLSv1.0</string>
+			</dict>
+			<key>google.com</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<false/>
+				<key>NSExceptionMinimumTLSVersion</key>
+				<string>TLSv1.0</string>
+			</dict>
+		</dict>
+	</dict>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<true/>
+</dict>
 </plist>

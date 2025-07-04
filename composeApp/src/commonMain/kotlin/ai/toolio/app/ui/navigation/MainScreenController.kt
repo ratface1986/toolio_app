@@ -57,6 +57,7 @@ fun MainScreenController(
     ) {
         when (screen) {
             AppScreen.MainMenu -> {
+                println("MYDATA LAST TASK: ${AppEnvironment.userProfile.sessions.lastOrNull()?.task?.name} ${AppEnvironment.userProfile.sessions.lastOrNull()?.task?.status}")
                 MainMenuScreen(
                     lastActiveTask = AppEnvironment.userProfile.sessions.lastOrNull()?.task,
                     completedTaskNames = listOf("Hang shelf", "Install TV"), // or emptyList()
@@ -142,33 +143,40 @@ fun MainScreenController(
                 )
             }
             AppScreen.Settings -> {
+                var updatedInches by remember { mutableStateOf(AppEnvironment.userProfile.settings.measure == MeasureType.INCH) }
+                var updateLanguage by remember { mutableStateOf(AppEnvironment.userProfile.settings.language) }
+                var updateNickname by remember { mutableStateOf(AppEnvironment.userProfile.settings.nickname) }
+
                 SettingsView(
-                    nickname = AppEnvironment.userProfile.settings.nickname,
+                    nickname = updateNickname,
                     onNicknameChange = { nickname ->
-                        AppEnvironment.updateUserSettings(
-                            nickname = nickname
-                        )
-                        updateUserProfile()
+                        updateNickname = nickname
                     },
-                    language = AppEnvironment.userProfile.settings.language,
-                    languages = emptyList(),
+                    language = updateLanguage,
+                    languages = mapOf(
+                        "en" to "English",
+                        "ru" to "Русский",
+                        "de" to "Deutsch",
+                        "sp" to "Español",
+                        "it" to "Italiano"
+                    ),
                     onLanguageChange = { language ->
-                        AppEnvironment.updateUserSettings(
-                            language = language
-                        )
-                        updateUserProfile()
+                        updateLanguage = language
                     },
-                    useInches = AppEnvironment.userProfile.settings.measure == MeasureType.INCH,
+                    useInches = updatedInches,
                     onUnitsChange = { isUseInches ->
-                        AppEnvironment.updateUserSettings(
-                            measure = if (isUseInches) MeasureType.INCH else MeasureType.CM
-                        )
-                        updateUserProfile()
+                        updatedInches = isUseInches
                     },
                     onDeleteAllData = {
                         //
                     },
                     onBack = {
+                        AppEnvironment.updateUserSettings(
+                            nickname = updateNickname,
+                            language = updateLanguage,
+                            measure = if (updatedInches) MeasureType.INCH else MeasureType.CM,
+                        )
+                        updateUserProfile()
                         screen = AppScreen.Chat
                     }
                 )

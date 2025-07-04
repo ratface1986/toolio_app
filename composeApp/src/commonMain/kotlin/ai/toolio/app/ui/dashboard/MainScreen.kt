@@ -61,6 +61,7 @@ fun MainMenuScreen(
                     subHeaderColor = lastActiveTask.status.toColor(),
                     icon = CategoryType.FIX.toDrawableResource(),
                     showButton = lastActiveTask.status == TaskStatus.IN_PROGRESS,
+                    showChecked = lastActiveTask.status == TaskStatus.COMPLETED,
                     onClick = { onContinueTask?.invoke() }
                 )
             }

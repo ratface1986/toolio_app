@@ -22,8 +22,8 @@ internal fun TaskStatus.toColor() =
     when (this) {
         IDLE -> Color.Black
         IN_PROGRESS -> Color(0xFF8DEB92)
-        ABORTED -> Color(0xFF000000)
-        COMPLETED -> Color(0xFF2A9DF4)
+        ABORTED -> Color(0xFFE6005F)
+        COMPLETED -> Color(0xFF443A94)
     }
 
 internal fun TaskStatus.toDisplayText(): String = when (this) {

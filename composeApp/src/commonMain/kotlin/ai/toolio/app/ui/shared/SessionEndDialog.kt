@@ -108,7 +108,7 @@ fun SessionEndDialog(
                                 horizontalArrangement = Arrangement.End
                             ) {
                                 TextButton(
-                                    onClick = { onDismiss() },
+                                    onClick = { onDone() },
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(50))
                                         .background(Color(0xFF37DC94))
@@ -116,23 +116,8 @@ fun SessionEndDialog(
                                 ) {
                                     Text("Done!", color = Color.White)
                                 }
-
-                                /*Spacer(Modifier.width(8.dp))
-
-                                Button(
-                                    onClick = {
-                                        onDone()
-                                        onDismiss()
-                                    },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF268AFF)),
-                                    shape = RoundedCornerShape(50),
-                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                                ) {
-                                    Text("Done", color = Color.White)
-                                }*/
                             }
                         }
-
                     }
                 }
             }

@@ -37,6 +37,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(project.dependencies.platform(libs.firebase.bom))
             implementation(libs.firebase.analytics)
+            implementation(libs.billing)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -68,8 +69,8 @@ android {
         applicationId = "ai.toolio.app"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.0.2"
     }
     packaging {
         resources {

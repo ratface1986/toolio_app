@@ -44,11 +44,11 @@ object AppEnvironment {
         isSaved: Boolean = false
     ) {
         userProfile.sessions[0] =
-            userProfile.sessions.first().copy(
-                sessionId = sessionId ?: userProfile.sessions.first().sessionId,
-                title = title ?: userProfile.sessions.first().title,
-                category = category ?: userProfile.sessions.first().category,
-                task = task ?: userProfile.sessions.first().task,
+            userProfile.sessions.last().copy(
+                sessionId = sessionId ?: userProfile.sessions.last().sessionId,
+                title = title ?: userProfile.sessions.last().title,
+                category = category ?: userProfile.sessions.last().category,
+                task = task ?: userProfile.sessions.last().task,
                 answers = answers,
                 isSaved = isSaved
             )

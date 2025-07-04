@@ -13,6 +13,7 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
+import java.util.UUID
 
 suspend fun saveTaskSession(userId: String, session: RepairTaskSession) = withContext(Dispatchers.IO) {
     transaction {
@@ -27,13 +28,25 @@ suspend fun saveTaskSession(userId: String, session: RepairTaskSession) = withCo
             it[startPrompt] = session.initialPrompt
         }
 
-        val exists = TaskSessions.selectAll().where { TaskSessions.id eq session.sessionId.toUUID() }.any()
+        val sessionUUID = if (session.sessionId.isBlank()) {
+            UUID.randomUUID()
+        } else {
+            try {
+                UUID.fromString(session.sessionId)
+            } catch (e: IllegalArgumentException) {
+                error("Invalid sessionId format: ${session.sessionId}")
+            }
+        }
+
+        val exists = TaskSessions.selectAll()
+            .where { TaskSessions.id eq sessionUUID }
+            .any()
 
         if (exists) {
-            TaskSessions.update({ TaskSessions.id eq session.sessionId.toUUID() }, body = data)
+            TaskSessions.update({ TaskSessions.id eq sessionUUID }, body = data)
         } else {
             TaskSessions.insert {
-                it[id] = session.sessionId.toUUID()
+                it[id] = sessionUUID
                 data(it)
             }
         }

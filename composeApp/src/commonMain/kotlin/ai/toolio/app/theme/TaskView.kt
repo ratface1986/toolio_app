@@ -114,7 +114,7 @@ fun TaskView(
 
 
                 if (subHeader.isNotEmpty())
-                    BodyText(text = subHeader, color = subHeaderColor)
+                    BodyTextLarge(text = subHeader, color = subHeaderColor)
             }
 
             if (showButton) {
@@ -142,8 +142,8 @@ fun TaskView(
 fun TaskViewPreview() {
     TaskView(
         header = "Fix shelve",
-        subHeader = TaskStatus.IN_PROGRESS.toDisplayText(),
-        subHeaderColor = TaskStatus.IN_PROGRESS.toColor(),
+        subHeader = TaskStatus.ABORTED.toDisplayText(),
+        subHeaderColor = TaskStatus.ABORTED.toColor(),
         icon = CategoryType.FIX.toDrawableResource(),
         showButton = true,
         buttonLabel = "Edit",

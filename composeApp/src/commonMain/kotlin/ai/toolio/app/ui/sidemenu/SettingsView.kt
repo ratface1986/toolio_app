@@ -26,7 +26,7 @@ fun SettingsView(
     nickname: String,
     onNicknameChange: (String) -> Unit,
     language: String,
-    languages: List<String>,
+    languages: Map<String, String>,
     onLanguageChange: (String) -> Unit,
     useInches: Boolean,
     onUnitsChange: (Boolean) -> Unit,
@@ -54,8 +54,9 @@ fun SettingsView(
             Spacer(modifier = Modifier.height(8.dp))
             MyTextField(
                 nicknameState = nicknameState,
-                onNicknameChange = {
-                    onNicknameChange(it)
+                onNicknameChange = { newNick ->
+                    nicknameState = newNick
+                    onNicknameChange(newNick)
                 }
             )
 
@@ -72,7 +73,7 @@ fun SettingsView(
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    BodyText(text = language)
+                    BodyText(text = languages.getValue(language))
                 }
                 DropdownMenu(
                     expanded = expandLangDropdown,
@@ -82,10 +83,10 @@ fun SettingsView(
                     languages.forEach { lang ->
                         DropdownMenuItem(
                             text = {
-                                BodyText(text = lang)
+                                BodyText(text = lang.value)
                             },
                             onClick = {
-                                onLanguageChange(lang)
+                                onLanguageChange(lang.key)
                                 expandLangDropdown = false
                             }
                         )
@@ -104,12 +105,12 @@ fun SettingsView(
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 UnitChip(
-                    text = "mm",
+                    text = "INCHES",
                     selected = useInches,
                     onClick = { onUnitsChange(true) }
                 )
                 UnitChip(
-                    text = "inches",
+                    text = "CM",
                     selected = !useInches,
                     onClick = { onUnitsChange(false) }
                 )
@@ -161,7 +162,7 @@ private fun UnitChip(
     )
 
     Surface(
-        color = if (selected) Color.Black else Color.White,
+        color = if (selected) Color.White else Color.Black,
         shape = RoundedCornerShape(30.dp),
         modifier = Modifier
             .height(36.dp)
@@ -175,8 +176,8 @@ private fun UnitChip(
         ) {
             Text(
                 text = text,
-                color = if (selected) Color.White else Color.Black,
-                fontWeight = FontWeight.Medium,
+                color = if (selected) Color.Black else Color.White,
+                fontWeight = FontWeight.Bold,
                 fontFamily = customFont
             )
         }
@@ -189,8 +190,14 @@ fun PreviewSettingsView() {
     SettingsView(
         nickname = "Toolio",
         onNicknameChange = {},
-        language = "English",
-        languages = listOf("English", "Deutsch"),
+        language = "en",
+        languages = mapOf(
+            "English" to "en",
+            "Русский" to "ru",
+            "German" to "de",
+            "Spanish" to "sp",
+            "Istalian" to "it"
+        ),
         onLanguageChange = {},
         useInches = true,
         onUnitsChange = {},

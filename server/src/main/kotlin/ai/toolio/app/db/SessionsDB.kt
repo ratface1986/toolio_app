@@ -65,7 +65,14 @@ suspend fun loadTaskSessions(userId: String): List<RepairTaskSession> = withCont
                 val task = category.tasks.find { it.name == taskName } ?: return@mapNotNull null
                 val sessionId = row[TaskSessions.id].toString()
 
-                val answers: Map<String, String> = Json.decodeFromString(row[TaskSessions.answers])
+                println("Sessions Task name: $task in category: $category")
+
+                val answers: Map<String, String> = try {
+                    Json.decodeFromString<Map<String, String>>(row[TaskSessions.answers])
+                } catch (e: Exception) {
+                    println("⚠️ Failed to parse answers for session ${row[TaskSessions.id]}: ${e.message}")
+                    emptyMap()
+                }
 
                 val messages = loadChatMessagesForUser(sessionId.toUUID())
 

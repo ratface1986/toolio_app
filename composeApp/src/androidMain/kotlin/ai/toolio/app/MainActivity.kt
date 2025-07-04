@@ -1,6 +1,7 @@
 package ai.toolio.app
 
 import ai.toolio.app.di.AppSessions
+import ai.toolio.app.spec.AndroidAuthService
 import ai.toolio.app.spec.AndroidPhotoPicker
 import ai.toolio.app.utils.NativeFeatures
 import android.Manifest
@@ -26,6 +27,7 @@ class MainActivity : ComponentActivity(), ActivityResultCaller {
     private lateinit var launchPermissions: () -> Unit
     // Always create AndroidPhotoPicker at construction time
     private lateinit var photoPicker: AndroidPhotoPicker
+    private lateinit var authService: AndroidAuthService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -36,6 +38,7 @@ class MainActivity : ComponentActivity(), ActivityResultCaller {
         FirebaseApp.initializeApp(this)
 
         AppSessions.init(applicationContext)
+        authService = AndroidAuthService(this)
 
         val permissions = buildPermissionsList()
         val grantedState = mutableStateOf(
@@ -67,7 +70,8 @@ class MainActivity : ComponentActivity(), ActivityResultCaller {
             if (granted) {
                 App(
                     NativeFeatures(
-                        photoPicker = photoPicker
+                        photoPicker = photoPicker,
+                        authService = authService
                     )
                 )
             } else {

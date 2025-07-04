@@ -19,4 +19,19 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
         return true
     }
+
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        var handled: Bool
+
+        // Обработка URL для GoogleSignIn
+        handled = GIDSignIn.sharedInstance.handle(url) // Если у тебя старый GIDSignIn.sharedInstance().handleURL(url)
+
+        if handled {
+            return true
+        }
+
+        // Your other URL handling goes here.
+        return false
+    }
+
 }

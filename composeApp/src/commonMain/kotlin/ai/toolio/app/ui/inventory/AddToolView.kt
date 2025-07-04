@@ -4,6 +4,8 @@ import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.models.Tool
 import ai.toolio.app.models.ToolData
 import ai.toolio.app.models.ToolRecognitionResult
+import ai.toolio.app.theme.BackButton
+import ai.toolio.app.theme.HeadlineMediumText
 import ai.toolio.app.ui.shared.ScreenWrapper
 import ai.toolio.app.ui.shared.ToolPhotoView
 import androidx.compose.foundation.background
@@ -126,7 +128,17 @@ fun AddToolView(
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Tool Image Area
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 40.dp, start = 16.dp, end = 16.dp, bottom = 24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                BackButton(onClick = onBackClick)
+                Spacer(Modifier.width(16.dp))
+                HeadlineMediumText("Verify Your Tool")
+            }
+            Spacer(modifier = Modifier.height(24.dp))
             Box(
                 modifier = Modifier
                     .size(180.dp)

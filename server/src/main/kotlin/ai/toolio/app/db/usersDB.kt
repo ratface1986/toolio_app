@@ -100,8 +100,88 @@ suspend fun findUserByNickname(nickname: String): UserProfile? = withContext(Dis
     }
 }
 
+suspend fun findUserByUserId(userId: String): UserProfile? = withContext(Dispatchers.IO) {
+    transaction {
+        val userRow = Users
+            .selectAll().where { Users.id eq userId.toUUID() }
+            .limit(1)
+            .firstOrNull() ?: return@transaction null
+
+        val email = userRow[Users.email].orEmpty()
+        val language = userRow[Users.language].orEmpty()
+        val measure = userRow[Users.measure]
+
+        val inventory = Tools
+            .selectAll().where { Tools.userId eq userId.toUUID() }
+            .associate { row ->
+                val type = row[Tools.type]
+                val name = row[Tools.name]
+                val description = row[Tools.description]
+                val imageUrl = row[Tools.imageUrl]
+                val confirmed = row[Tools.confirmed]
+
+                type to ToolData(name, description, imageUrl, confirmed)
+            }
+
+        UserProfile(
+            userId = userId,
+            inventory = inventory,
+            settings = UserSettings(
+                nickname = "",
+                email = email,
+                language = language,
+                measure = measure
+            )
+        )
+    }
+}
+
 
 suspend fun insertUser(nickname: String, email: String = "rust.m@gmail.com"): UserProfile? = withContext(Dispatchers.IO) {
+    val userId = UUID.randomUUID()
+    val now = LocalDateTime.now()
+
+    transaction {
+        // 1. Вставка пользователя
+        Users.insert {
+            it[id] = userId
+            it[Users.nickname] = nickname
+            it[createdAt] = now
+            it[Users.email] = email
+            it[language] = "en"
+            it[measure] = MeasureType.INCH
+        }
+
+        // 2. Вставка всех инструментов как "заготовка"
+        Tool.entries.forEach { tool ->
+            Tools.insert {
+                it[id] = UUID.randomUUID()
+                it[Tools.userId] = userId
+                it[Tools.type] = tool.name
+                it[Tools.name] = ""
+                it[Tools.description] = ""
+                it[Tools.imageUrl] = ""
+                it[Tools.confirmed] = false
+                it[Tools.createdAt] = now
+            }
+        }
+
+        UserProfile(
+            userId = userId.toString(),
+            inventory = Tool.entries.associate {
+                it.name to ToolData(it.displayName, "", "", false)
+            },
+            settings = UserSettings(
+                nickname = nickname,
+                email = email,
+                language = "en",
+                measure = MeasureType.INCH
+            )
+        )
+    }
+}
+
+suspend fun insertUserWithUserId(userId: String, nickname: String, email: String): UserProfile? = withContext(Dispatchers.IO) {
     val userId = UUID.randomUUID()
     val now = LocalDateTime.now()
 

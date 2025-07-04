@@ -12,7 +12,20 @@
           "package_name": "ai.toolio.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "592143760637-66jgbv2j75s3hn87tffk02hg11f07237.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ai.toolio.app",
+            "certificate_hash": "6c09c0ffff16cd0e54c2a6408fc5a2056240e82d"
+          }
+        },
+        {
+          "client_id": "592143760637-b9mveirnlbml8vfb7mg4124fa5rb9ci2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyANXJJGjRtzc9Tt3vDfPU7RV6tANykjBOg"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "592143760637-b9mveirnlbml8vfb7mg4124fa5rb9ci2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "592143760637-rufhh596bsfat5vtih6psbhr463pk7ts.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "ai.toolio.app"
+              }
+            }
+          ]
         }
       }
     }

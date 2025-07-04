@@ -4,6 +4,17 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>592143760637-rufhh596bsfat5vtih6psbhr463pk7ts.apps.googleusercontent.com</string>
+            </array>
+        </dict>
+    </array>
 	<key>NSCameraUsageDescription</key>
 	<string>We need camera to add photos</string>
 	<key>NSLocalNetworkUsageDescription</key>

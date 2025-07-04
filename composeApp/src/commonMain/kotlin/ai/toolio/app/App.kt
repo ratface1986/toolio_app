@@ -1,5 +1,7 @@
 package ai.toolio.app
 
+import ai.toolio.app.di.AuthResult
+import ai.toolio.app.di.AuthService
 import ai.toolio.app.models.Tasks
 import ai.toolio.app.ui.LoginForm
 import ai.toolio.app.ui.MainScreenController
@@ -50,6 +52,10 @@ fun AppPreview() {
     App(
         nativeFeatures = NativeFeatures(photoPicker = object : PhotoPicker {
             override fun pickPhoto(onResult: (ByteArray?) -> Unit) {
+                TODO("Not yet implemented")
+            }
+        }, authService = object : AuthService {
+            override suspend fun signInWithGoogle(): AuthResult {
                 TODO("Not yet implemented")
             }
         })

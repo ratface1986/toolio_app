@@ -11,6 +11,7 @@ import ai.toolio.app.ui.dashboard.MainMenuScreen
 import ai.toolio.app.ui.inventory.AddToolView
 import ai.toolio.app.ui.inventory.QuestionsView
 import ai.toolio.app.ui.inventory.RequiredToolsView
+import ai.toolio.app.ui.inventory.SearchTool
 import ai.toolio.app.ui.sidemenu.SettingsView
 import ai.toolio.app.ui.wizard.TaskChooserWizardScreen
 import androidx.compose.foundation.layout.Box
@@ -30,6 +31,7 @@ sealed class AppScreen {
     object AddTool : AppScreen()
     object Chat : AppScreen()
     object Settings : AppScreen()
+    object SearchTool : AppScreen()
 }
 
 @OptIn(ExperimentalUuidApi::class)
@@ -58,6 +60,12 @@ fun MainScreenController(
         when (screen) {
             AppScreen.MainMenu -> {
                 println("MYDATA LAST TASK: ${AppEnvironment.userProfile.sessions.lastOrNull()?.task?.name} ${AppEnvironment.userProfile.sessions.lastOrNull()?.task?.status}")
+                AppEnvironment.userProfile.sessions.lastOrNull()?.isSaved?.let { isSaved ->
+                    if (!isSaved) {
+                        AppEnvironment.userProfile.sessions.removeLast()
+                    }
+                }
+
                 MainMenuScreen(
                     lastActiveTask = AppEnvironment.userProfile.sessions.lastOrNull()?.task,
                     completedTaskNames = listOf("Hang shelf", "Install TV"), // or emptyList()
@@ -121,7 +129,7 @@ fun MainScreenController(
                         screen = AppScreen.RequiredTools
                     },
                     onNoToolClick = {
-                        screen = AppScreen.RequiredTools
+                        screen = AppScreen.SearchTool
                     },
                     onBackClick = {
                         screen = AppScreen.RequiredTools
@@ -178,6 +186,14 @@ fun MainScreenController(
                         )
                         updateUserProfile()
                         screen = AppScreen.Chat
+                    }
+                )
+            }
+            AppScreen.SearchTool -> {
+                SearchTool(
+                    tool = requiredTool,
+                    onBack = {
+                        screen = AppScreen.AddTool
                     }
                 )
             }

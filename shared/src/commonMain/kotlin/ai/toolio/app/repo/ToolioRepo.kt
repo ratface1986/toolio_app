@@ -37,6 +37,18 @@ class ToolioRepo(private val baseUrl: String) {
         return response.body()
     }
 
+    suspend fun loginWithGoogle(
+        userId: String,
+        nickname: String,
+        email: String,
+    ): UserProfile {
+        val response = client.post("$baseUrl/loginWithGoogle") {
+            contentType(ContentType.Application.Json)
+            setBody(mapOf("userId" to userId))
+        }
+        return response.body()
+    }
+
     suspend fun verifyTool(
         userId: String,
         prompt: String,

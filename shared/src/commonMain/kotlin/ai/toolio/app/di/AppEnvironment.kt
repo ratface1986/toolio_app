@@ -43,7 +43,7 @@ object AppEnvironment {
         answers: Map<String, String> = emptyMap(),
         isSaved: Boolean = false
     ) {
-        userProfile.sessions[0] =
+        userProfile.sessions[userProfile.sessions.lastIndex] =
             userProfile.sessions.last().copy(
                 sessionId = sessionId ?: userProfile.sessions.last().sessionId,
                 title = title ?: userProfile.sessions.last().title,

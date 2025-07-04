@@ -1,6 +1,8 @@
 package ai.toolio.app
 
 import ai.toolio.app.ToolioConfig.jdbcUrl
+import ai.toolio.app.api.handleDefaultLogin
+import ai.toolio.app.api.handleGoogleLogin
 import ai.toolio.app.api.handleOpenAIImagePrompt
 import ai.toolio.app.db.*
 import ai.toolio.app.misc.Roles
@@ -24,9 +26,6 @@ import io.ktor.util.*
 import io.ktor.utils.io.*
 import kotlinx.io.readByteArray
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.boolean
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import org.jetbrains.exposed.sql.Database
@@ -100,37 +99,11 @@ fun Application.module() {
         }
 
         post("/login") {
-            val request = call.receive<Map<String, String>>()
-            val nickname = request["nickname"]
+            handleDefaultLogin()
+        }
 
-            if (nickname.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "Missing nickname")
-                return@post
-            }
-
-            val user = findUserByNickname(nickname)
-                ?: insertUser(nickname)
-                ?: run {
-                    call.respond(HttpStatusCode.InternalServerError, "Failed to create user")
-                    return@post
-                }
-
-            val profile = user.copy(
-                userId = user.userId,
-                inventory = getUserInventory(user.userId)
-                    .mapValues { (_, value) ->
-                        val obj = value.jsonObject
-                        ToolData(
-                            name = obj["name"]?.jsonPrimitive?.content.orEmpty(),
-                            description = obj["description"]?.jsonPrimitive?.content.orEmpty(),
-                            imageUrl = obj["imageUrl"]?.jsonPrimitive?.content.orEmpty(),
-                            confirmed = obj["confirmed"]?.jsonPrimitive?.boolean ?: false
-                        )
-                    },
-                sessions = loadTaskSessions(user.userId).toMutableList()
-            )
-
-            call.respond(profile)
+        post("/loginWithGoogle") {
+            handleGoogleLogin()
         }
 
         post("/openai") {

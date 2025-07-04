@@ -38,6 +38,8 @@ kotlin {
             implementation(project.dependencies.platform(libs.firebase.bom))
             implementation(libs.firebase.analytics)
             implementation(libs.billing)
+            implementation(libs.firebase.auth.ktx)
+            implementation(libs.play.services.auth)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

@@ -2,13 +2,14 @@ package ai.toolio.app.ui
 
 import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.di.AppSessions
+import ai.toolio.app.di.AuthResult
+import ai.toolio.app.di.AuthService
 import ai.toolio.app.models.UserProfile
 import ai.toolio.app.repo.ToolioRepo
 import ai.toolio.app.theme.HeadlineLargeText
 import ai.toolio.app.ui.shared.ScreenWrapper
 import ai.toolio.app.utils.NativeFeatures
 import ai.toolio.app.utils.PhotoPicker
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -31,6 +32,7 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
     var isLoading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var name by remember { mutableStateOf("") }
+    var isLoginFailed by remember { mutableStateOf(false) }
 
     fun onLoginClick(isUserExists: Boolean = false) {
         isLoading = true
@@ -52,6 +54,43 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
                 error = e.message ?: "Something went wrong"
             } finally {
                 isLoading = false
+            }
+        }
+    }
+
+    fun onGoogleSignInClick(isUserExists: Boolean = false) {
+        scope.launch {
+            val result = nativeFeatures.authService.signInWithGoogle()
+            when (result) {
+                is AuthResult.Success -> {
+                    println("User signed in: ${result.userId}, ${result.email}")
+                    val nickname = result.displayName ?: "No nickname provided by Google."
+                    val email = result.email ?: "No email provided by Google."
+                    val profile = toolioRepo.loginWithGoogle(result.userId, nickname, email)
+
+                    AppSessions.saveUserId(result.userId)
+                    AppSessions.saveUserNickname(nickname)
+
+                    AppEnvironment.init(
+                        userProfile = profile.copy(
+                            settings = profile.settings.copy(
+                                nickname = nickname,
+                                email = email,
+                            )
+                        ),
+                        nativeFeatures = nativeFeatures,
+                        repo = toolioRepo
+                    )
+                    onLoginSuccess(profile, isUserExists)
+                }
+                is AuthResult.Error -> {
+                    println("Sign-in error: ${result.message}")
+                    isLoginFailed = true
+                    error = result.message
+                }
+                AuthResult.Cancelled -> {
+                    println("Sign-in cancelled.")
+                }
             }
         }
     }
@@ -102,15 +141,15 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
                 )
             }
 
-
-
-
             Spacer(Modifier.height(24.dp))
 
             val buttonEnabled = !isLoading && name.trim().length >= 2
 
             Button(
-                onClick = { onLoginClick() },
+                onClick = {
+                    //onLoginClick()
+                    onGoogleSignInClick()
+                },
                 enabled = buttonEnabled,
                 modifier = Modifier
                     .height(48.dp)
@@ -158,5 +197,9 @@ fun LoginFormPreview() {
         override fun pickPhoto(onSuccess: (ByteArray?) -> Unit) {
             onSuccess(null)
         }
-    }), {_, _ ->})
+    }, authService = object : AuthService {
+        override suspend fun signInWithGoogle(): AuthResult {
+            TODO("Not yet implemented")
+        }
+    }), { _, _ ->})
 }

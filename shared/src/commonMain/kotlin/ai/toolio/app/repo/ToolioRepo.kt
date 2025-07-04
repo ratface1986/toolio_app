@@ -44,7 +44,11 @@ class ToolioRepo(private val baseUrl: String) {
     ): UserProfile {
         val response = client.post("$baseUrl/loginWithGoogle") {
             contentType(ContentType.Application.Json)
-            setBody(mapOf("userId" to userId))
+            setBody(mapOf(
+                "userId" to userId,
+                "email" to email,
+                "nickname" to nickname,
+            ))
         }
         return response.body()
     }

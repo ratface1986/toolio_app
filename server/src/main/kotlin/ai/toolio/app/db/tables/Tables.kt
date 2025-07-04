@@ -28,6 +28,7 @@ object Users : Table("users") {
     val measure = enumerationByName("measure", 10, MeasureType::class)
     val language = varchar("language", 10).nullable()
     val email = varchar("email", 120).nullable()
+    val googleUserId = varchar("google_user_id", 255).nullable()
 
     override val primaryKey = PrimaryKey(id)
 }

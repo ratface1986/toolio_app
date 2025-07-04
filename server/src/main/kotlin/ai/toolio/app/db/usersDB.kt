@@ -100,19 +100,20 @@ suspend fun findUserByNickname(nickname: String): UserProfile? = withContext(Dis
     }
 }
 
-suspend fun findUserByUserId(userId: String): UserProfile? = withContext(Dispatchers.IO) {
+suspend fun findUserByUserId(googleUserId: String): UserProfile? = withContext(Dispatchers.IO) {
     transaction {
         val userRow = Users
-            .selectAll().where { Users.id eq userId.toUUID() }
+            .selectAll().where { Users.googleUserId eq googleUserId }
             .limit(1)
             .firstOrNull() ?: return@transaction null
 
+        val userId = userRow[Users.id]
         val email = userRow[Users.email].orEmpty()
         val language = userRow[Users.language].orEmpty()
         val measure = userRow[Users.measure]
 
         val inventory = Tools
-            .selectAll().where { Tools.userId eq userId.toUUID() }
+            .selectAll().where { Tools.userId eq userId }
             .associate { row ->
                 val type = row[Tools.type]
                 val name = row[Tools.name]
@@ -124,7 +125,7 @@ suspend fun findUserByUserId(userId: String): UserProfile? = withContext(Dispatc
             }
 
         UserProfile(
-            userId = userId,
+            userId = userId.toString(),
             inventory = inventory,
             settings = UserSettings(
                 nickname = "",
@@ -181,7 +182,7 @@ suspend fun insertUser(nickname: String, email: String = "rust.m@gmail.com"): Us
     }
 }
 
-suspend fun insertUserWithUserId(userId: String, nickname: String, email: String): UserProfile? = withContext(Dispatchers.IO) {
+suspend fun insertUserWithUserId(newGoogleUserId: String, nickname: String, email: String): UserProfile? = withContext(Dispatchers.IO) {
     val userId = UUID.randomUUID()
     val now = LocalDateTime.now()
 
@@ -194,6 +195,7 @@ suspend fun insertUserWithUserId(userId: String, nickname: String, email: String
             it[Users.email] = email
             it[language] = "en"
             it[measure] = MeasureType.INCH
+            it[googleUserId] = newGoogleUserId
         }
 
         // 2. Вставка всех инструментов как "заготовка"

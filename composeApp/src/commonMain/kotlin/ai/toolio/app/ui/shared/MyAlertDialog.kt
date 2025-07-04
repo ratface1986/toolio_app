@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun AlertDialog(
+fun MyAlertDialog(
     title: String,
     contentText: String,
     onConfirm: () -> Unit,

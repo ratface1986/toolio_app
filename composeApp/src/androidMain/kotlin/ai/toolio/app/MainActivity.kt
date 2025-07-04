@@ -5,6 +5,7 @@ import ai.toolio.app.spec.AndroidAuthService
 import ai.toolio.app.spec.AndroidPhotoPicker
 import ai.toolio.app.utils.NativeFeatures
 import android.Manifest
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,13 +20,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import android.content.pm.PackageManager
 import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
 import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity(), ActivityResultCaller {
 
     private lateinit var permissionsCheck: () -> Boolean
     private lateinit var launchPermissions: () -> Unit
-    // Always create AndroidPhotoPicker at construction time
+
     private lateinit var photoPicker: AndroidPhotoPicker
     private lateinit var authService: AndroidAuthService
 
@@ -33,7 +35,6 @@ class MainActivity : ComponentActivity(), ActivityResultCaller {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        // Register the picker in onCreate *before* any async logic!
         photoPicker = AndroidPhotoPicker(this)
         FirebaseApp.initializeApp(this)
 
@@ -94,6 +95,15 @@ class MainActivity : ComponentActivity(), ActivityResultCaller {
         }
         perms.add(imagePermission)
         return perms
+    }
+
+    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == AndroidAuthService.RC_SIGN_IN) {
+            authService.handleGoogleSignInResult(data)
+        }
     }
 }
 

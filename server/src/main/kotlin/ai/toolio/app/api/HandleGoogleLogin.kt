@@ -17,17 +17,17 @@ import kotlinx.serialization.json.jsonPrimitive
 
 suspend fun RoutingContext.handleGoogleLogin() {
     val request = call.receive<Map<String, String>>()
-    val userId = request["userId"]
+    val googleUserId = request["userId"]
     val email = request["email"]
     val nickname = request["nickname"]
 
-    if (userId.isNullOrBlank()) {
+    if (googleUserId.isNullOrBlank()) {
         call.respond(HttpStatusCode.BadRequest, "Missing nickname")
         return
     }
 
-    val user = findUserByUserId(userId)
-        ?: insertUserWithUserId(userId, nickname.orEmpty(), email.orEmpty())
+    val user = findUserByUserId(googleUserId)
+        ?: insertUserWithUserId(googleUserId, nickname.orEmpty(), email.orEmpty())
         ?: run {
             call.respond(HttpStatusCode.InternalServerError, "Failed to create user")
             return

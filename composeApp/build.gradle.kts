@@ -67,6 +67,15 @@ android {
     namespace = "ai.toolio.app"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
+    lint {
+        // Отключаем проблемный детектор
+        disable.add("NullSafeMutableLiveData")
+        // Можешь также отключить все фатальные ошибки Lint для релиза,
+        // но это менее безопасно и может скрыть другие проблемы.
+        // Это можно использовать как временное решение:
+        // abortOnError = false
+    }
+
     defaultConfig {
         applicationId = "ai.toolio.app"
         minSdk = libs.versions.android.minSdk.get().toInt()

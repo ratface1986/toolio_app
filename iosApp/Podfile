@@ -1,0 +1,8 @@
+platform :ios, '17.6.1'
+
+target 'ComposeApp' do
+  use_frameworks!
+
+  pod 'FirebaseAuth', '~> 11.15.0'
+  pod 'GoogleSignIn', '~> 8.0.0'
+end

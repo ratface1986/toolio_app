@@ -1,13 +1,10 @@
 package ai.toolio.app.di
 
 import ai.toolio.app.misc.MeasureType
-import ai.toolio.app.models.RepairTaskSession
 import ai.toolio.app.models.Task
 import ai.toolio.app.models.TaskCategory
 import ai.toolio.app.models.TaskStatus
-import ai.toolio.app.models.ToolData
 import ai.toolio.app.models.UserProfile
-import ai.toolio.app.models.UserSettings
 import ai.toolio.app.repo.ToolioRepo
 import ai.toolio.app.utils.NativeFeatures
 

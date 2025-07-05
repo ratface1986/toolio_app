@@ -10,8 +10,6 @@ import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.Font
 import toolio.composeapp.generated.resources.Res
 import toolio.composeapp.generated.resources.Satoshi_Bold
-import toolio.composeapp.generated.resources.Satoshi_Medium
-import toolio.composeapp.generated.resources.Satoshi_Regular
 
 @Composable
 fun BodyText(text: String, color: Color = Color.White) {

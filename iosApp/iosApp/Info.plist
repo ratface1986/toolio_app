@@ -53,5 +53,21 @@
 	</dict>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<true/>
+    <key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>com.googleusercontent.apps.592143760637-rufhh596bsfat5vtih6psbhr463pk7ts</string>
+        </array>
+      </dict>
+    </array>
+
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>google</string>
+      <string>com.googleusercontent.apps.592143760637-rufhh596bsfat5vtih6psbhr463pk7ts</string>
+    </array>
+
 </dict>
 </plist>

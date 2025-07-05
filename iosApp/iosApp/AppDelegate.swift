@@ -6,32 +6,23 @@ import Foundation
 import UIKit
 import FirebaseCore
 import FirebaseAnalytics
+import GoogleSignIn
 
-class AppDelegate: NSObject, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate {
+
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        // Firebase
-        print("MYDATA DELEGATE Launched")
         FirebaseApp.configure()
         Analytics.logEvent("app_launched", parameters: ["environment": "development"])
-
         return true
     }
 
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        var handled: Bool
+    func application(_ app: UIApplication,
+                     open url: URL,
+                     options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
 
-        // Обработка URL для GoogleSignIn
-        handled = GIDSignIn.sharedInstance.handle(url) // Если у тебя старый GIDSignIn.sharedInstance().handleURL(url)
-
-        if handled {
-            return true
-        }
-
-        // Your other URL handling goes here.
-        return false
+        return GIDSignIn.sharedInstance.handle(url)
     }
-
 }

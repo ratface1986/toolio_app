@@ -11,6 +11,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.tasks.await
 import kotlin.coroutines.resume
 
 class AndroidAuthService(private val context: Context) : AuthService {
@@ -18,7 +19,6 @@ class AndroidAuthService(private val context: Context) : AuthService {
     private val auth = FirebaseAuth.getInstance()
     private lateinit var googleSignInClient: GoogleSignInClient
 
-    // Callback для получения результата из Activity
     private var signInContinuation: ((AuthResult) -> Unit)? = null
 
     init {
@@ -26,7 +26,7 @@ class AndroidAuthService(private val context: Context) : AuthService {
         val webClientId = "592143760637-b9mveirnlbml8vfb7mg4124fa5rb9ci2.apps.googleusercontent.com"
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(webClientId) // ОЧЕНЬ ВАЖНО: твой Web Client ID
+            .requestIdToken(webClientId)
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(context, gso)
@@ -34,17 +34,16 @@ class AndroidAuthService(private val context: Context) : AuthService {
 
     override suspend fun signInWithGoogle(): AuthResult = suspendCancellableCoroutine { continuation ->
         signInContinuation = { result ->
-            signInContinuation = null // Сбросить после использования
+            signInContinuation = null
             continuation.resume(result)
         }
 
         val signInIntent = googleSignInClient.signInIntent
-        // Запускаем Activity для входа (НЕОБХОДИМА MainActivity для обработки результата)
+
         (context as? Activity)?.startActivityForResult(signInIntent, RC_SIGN_IN)
             ?: continuation.resume(AuthResult.Error("Context is not an Activity, cannot start sign-in flow."))
     }
 
-    // Этот метод вызывается из MainActivity
     fun handleGoogleSignInResult(data: Intent?): AuthResult {
         val task = GoogleSignIn.getSignedInAccountFromIntent(data)
         return try {
@@ -75,11 +74,22 @@ class AndroidAuthService(private val context: Context) : AuthService {
         } catch (e: com.google.android.gms.common.api.ApiException) {
             val errorMessage = "Google sign in failed: ${e.statusCode} ${e.message}"
             signInContinuation?.invoke(AuthResult.Error(errorMessage))
-            AuthResult.Error(errorMessage) // Возвращаем ошибку сразу
+            AuthResult.Error(errorMessage)
         } catch (e: Exception) {
             val errorMessage = "Unexpected error during Google sign in: ${e.message}"
             signInContinuation?.invoke(AuthResult.Error(errorMessage))
-            AuthResult.Error(errorMessage) // Возвращаем ошибку сразу
+            AuthResult.Error(errorMessage)
+        }
+    }
+
+    override suspend fun signOut(): Boolean {
+        return try {
+            auth.signOut()
+            googleSignInClient.signOut().await()
+            true
+        } catch (e: Exception) {
+            println("Android sign out error: ${e.message}")
+            false
         }
     }
 

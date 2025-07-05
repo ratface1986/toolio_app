@@ -6,19 +6,8 @@ import ai.toolio.app.theme.BackButton
 import ai.toolio.app.theme.HeadlineMediumText
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -34,11 +23,7 @@ import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import toolio.composeapp.generated.resources.Res
-import toolio.composeapp.generated.resources.amazon_logo
-import toolio.composeapp.generated.resources.ebay_logo
-import toolio.composeapp.generated.resources.maps_logo
-import toolio.composeapp.generated.resources.no_tools
+import toolio.composeapp.generated.resources.*
 
 enum class StoreType {
     AMAZON, EBAY, GOOGLE_MAPS

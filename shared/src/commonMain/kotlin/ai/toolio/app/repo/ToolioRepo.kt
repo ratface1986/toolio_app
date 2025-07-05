@@ -1,7 +1,6 @@
 package ai.toolio.app.repo
 
 import ai.toolio.app.di.AppEnvironment
-import ai.toolio.app.di.AppSessions
 import ai.toolio.app.models.*
 import io.ktor.client.*
 import io.ktor.client.call.*

@@ -1,8 +1,8 @@
 package ai.toolio.app.di
 
 interface AuthService {
-    suspend fun signInWithGoogle(): AuthResult // Определи AuthResult как Data class для успеха/ошибки
-    // suspend fun signOut(): Boolean // Если нужен выход
+    suspend fun signInWithGoogle(): AuthResult
+    suspend fun signOut(): Boolean
 }
 
 sealed class AuthResult {

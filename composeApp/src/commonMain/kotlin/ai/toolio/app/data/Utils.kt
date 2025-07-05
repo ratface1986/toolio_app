@@ -2,10 +2,7 @@ package ai.toolio.app.data
 
 import ai.toolio.app.models.CategoryType
 import ai.toolio.app.models.TaskStatus
-import ai.toolio.app.models.TaskStatus.ABORTED
-import ai.toolio.app.models.TaskStatus.COMPLETED
-import ai.toolio.app.models.TaskStatus.IDLE
-import ai.toolio.app.models.TaskStatus.IN_PROGRESS
+import ai.toolio.app.models.TaskStatus.*
 import androidx.compose.ui.graphics.Color
 import toolio.composeapp.generated.resources.*
 

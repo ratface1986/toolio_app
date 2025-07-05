@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.googleServices)
+    alias(libs.plugins.kotlinCocoapods)
 }
 
 kotlin {
@@ -25,6 +26,23 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+        }
+    }
+
+    cocoapods {
+        version = "2.2.0"
+        summary = "Common UI for Toolio"
+        homepage = "https://github.com/ratface1986/toolio_app"
+        ios.deploymentTarget = "17.6.1"
+
+        pod("FirebaseAuth") {
+            version = "11.15.0"
+            extraOpts += listOf("-compiler-option", "-fmodules")
+        }
+
+        pod("GoogleSignIn") {
+            version = "8.0.0"
+            extraOpts += listOf("-compiler-option", "-fmodules")
         }
     }
 

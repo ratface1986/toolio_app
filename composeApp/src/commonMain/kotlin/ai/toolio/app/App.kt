@@ -10,7 +10,10 @@ import ai.toolio.app.utils.NativeFeatures
 import ai.toolio.app.utils.PhotoPicker
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.time.ExperimentalTime
 
@@ -56,6 +59,10 @@ fun AppPreview() {
             }
         }, authService = object : AuthService {
             override suspend fun signInWithGoogle(): AuthResult {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun signOut(): Boolean {
                 TODO("Not yet implemented")
             }
         })

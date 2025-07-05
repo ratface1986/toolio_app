@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +34,7 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
     var name by remember { mutableStateOf("") }
     var isLoginFailed by remember { mutableStateOf(false) }
     var isLoginFailedMessage by remember { mutableStateOf("AAAAA") }
+    //var fb: FirebaseAuth
 
     fun onLoginClick(isUserExists: Boolean = false) {
         isLoading = true
@@ -61,16 +61,16 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
     }
 
     fun onGoogleSignInClick(isUserExists: Boolean = false) {
+        isLoading = true
         scope.launch {
             val result = nativeFeatures.authService.signInWithGoogle()
             when (result) {
                 is AuthResult.Success -> {
-                    println("User signed in: ${result.userId}, ${result.email}")
                     val nickname = result.displayName ?: "No nickname provided by Google."
                     val email = result.email ?: "No email provided by Google."
                     val profile = toolioRepo.loginWithGoogle(result.userId, nickname, email)
 
-                    AppSessions.saveUserId(result.userId)
+                    AppSessions.saveUserId(profile.userId)
                     AppSessions.saveUserNickname(nickname)
 
                     AppEnvironment.init(
@@ -83,6 +83,7 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
                         nativeFeatures = nativeFeatures,
                         repo = toolioRepo
                     )
+                    isLoading = false
                     onLoginSuccess(profile, isUserExists)
                 }
 
@@ -217,11 +218,15 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
 @Composable
 fun LoginFormPreview() {
     LoginForm(NativeFeatures(object : PhotoPicker {
-        override fun pickPhoto(onSuccess: (ByteArray?) -> Unit) {
-            onSuccess(null)
+        override fun pickPhoto(onResult: (ByteArray?) -> Unit) {
+            onResult(null)
         }
     }, authService = object : AuthService {
         override suspend fun signInWithGoogle(): AuthResult {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun signOut(): Boolean {
             TODO("Not yet implemented")
         }
     }), { _, _ -> })

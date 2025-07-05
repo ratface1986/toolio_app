@@ -44,6 +44,22 @@ kotlin {
             version = "8.0.0"
             extraOpts += listOf("-compiler-option", "-fmodules")
         }
+
+        pod("RevenueCat") {
+            version = "5.31"
+            extraOpts += listOf("-compiler-option", "-fmodules")
+        }
+
+    }
+
+    targets.configureEach {
+        compilations.configureEach {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    freeCompilerArgs.add("-Xexpect-actual-classes")
+                }
+            }
+        }
     }
 
     sourceSets {
@@ -58,6 +74,7 @@ kotlin {
             implementation(libs.billing)
             implementation(libs.firebase.auth.ktx)
             implementation(libs.play.services.auth)
+            implementation(libs.purchases)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

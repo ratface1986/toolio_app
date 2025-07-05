@@ -11,6 +11,7 @@ Pod::Spec.new do |spec|
     spec.ios.deployment_target    = '17.6.1'
     spec.dependency 'FirebaseAuth', '11.15.0'
     spec.dependency 'GoogleSignIn', '8.0.0'
+    spec.dependency 'RevenueCat', '5.31'
                 
     if !Dir.exist?('build/cocoapods/framework/composeApp.framework') || Dir.empty?('build/cocoapods/framework/composeApp.framework')
         raise "

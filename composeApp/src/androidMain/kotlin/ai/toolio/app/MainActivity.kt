@@ -1,6 +1,7 @@
 package ai.toolio.app
 
 import ai.toolio.app.di.AppSessions
+import ai.toolio.app.di.SubscriptionManager
 import ai.toolio.app.spec.AndroidAuthService
 import ai.toolio.app.spec.AndroidPhotoPicker
 import ai.toolio.app.utils.NativeFeatures
@@ -45,6 +46,9 @@ class MainActivity : ComponentActivity(), ActivityResultCaller {
 
         AppSessions.init(applicationContext)
         authService = AndroidAuthService(this)
+
+        SubscriptionManager.setContext(this)
+        SubscriptionManager.initialize("goog_AsrSEuuHLwfZkVGqQbAvckfKtGA")
 
         val permissions = buildPermissionsList()
         val grantedState = mutableStateOf(

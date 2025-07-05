@@ -3,6 +3,7 @@ package ai.toolio.app.ui.dashboard
 import ai.toolio.app.data.toColor
 import ai.toolio.app.data.toDisplayText
 import ai.toolio.app.data.toDrawableResource
+import ai.toolio.app.di.SubscriptionManager
 import ai.toolio.app.models.CategoryType
 import ai.toolio.app.models.Task
 import ai.toolio.app.models.TaskStatus
@@ -11,6 +12,7 @@ import ai.toolio.app.theme.ListItemView
 import ai.toolio.app.theme.TaskView
 import ai.toolio.app.theme.TitleText
 import ai.toolio.app.ui.shared.ScreenWrapper
+import ai.toolio.app.ui.subscription.SubscriptionBottomSheet
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -20,12 +22,18 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -35,6 +43,27 @@ fun MainMenuScreen(
     onContinueTask: (() -> Unit)? = null,
     onStartNewProject: () -> Unit
 ) {
+    var showSheet by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    fun subscribe() {
+        scope.launch {
+            try {
+                println("MYDATA Before calling getCustomerInfo")
+
+                val info = SubscriptionManager.getCustomerInfo()
+                println("MYDATA info: ${info.activeProductIds}")
+                val result = SubscriptionManager.purchase("\$rc_monthly")
+                println("MYDATA result: $result")
+            } catch (e: Exception) {
+                println("MYDATA Subscription error: ${e.message}")
+                e.printStackTrace()
+            } finally {
+                //showSheet = false
+            }
+        }
+    }
+
     ScreenWrapper {
         Column(
             modifier = Modifier
@@ -90,6 +119,16 @@ fun MainMenuScreen(
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(32.dp))
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Button(onClick = { showSheet = true }) {
+                    Text("Get Toolio PRO")
+                }
+            }
+
             Spacer(modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.height(80.dp)) // for bottom action button spacing
         }
@@ -120,6 +159,22 @@ fun MainMenuScreen(
             ) {
                 Text(text = "Start new project", fontSize = 19.sp)
             }
+        }
+
+        if (showSheet) {
+            SubscriptionBottomSheet(
+                title = "Toolio PRO",
+                benefits = listOf(
+                    "Unlimited Tasks",
+                    "Voice assistance",
+                    "Smart Guidance"
+                ),
+                onSubscribeClick = {
+                    showSheet = false
+                    subscribe()
+                },
+                onDismiss = { showSheet = false }
+            )
         }
     }
 }

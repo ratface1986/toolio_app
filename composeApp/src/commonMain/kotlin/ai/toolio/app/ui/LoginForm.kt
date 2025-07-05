@@ -168,8 +168,8 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
 
                 Button(
                     onClick = {
-                        //onLoginClick()
-                        onGoogleSignInClick()
+                        onLoginClick()
+                        //onGoogleSignInClick()
                     },
                     enabled = buttonEnabled,
                     modifier = Modifier

@@ -57,6 +57,7 @@ kotlin {
             compileTaskProvider.configure {
                 compilerOptions {
                     freeCompilerArgs.add("-Xexpect-actual-classes")
+                    freeCompilerArgs.add("-Xbinary=bundleId=ai.toolio.app")
                 }
             }
         }

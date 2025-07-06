@@ -5,6 +5,7 @@ import ai.toolio.app.data.toDisplayText
 import ai.toolio.app.data.toDrawableResource
 import ai.toolio.app.models.CategoryType
 import ai.toolio.app.models.TaskStatus
+import ai.toolio.app.models.Tool
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -22,6 +23,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -42,7 +44,7 @@ fun TaskView(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
-            .size(66.dp)
+            .heightIn(min = 66.dp)
             .background(Color(0xFF268AFF))
             .drawBehind {
                 drawRoundRect(
@@ -69,14 +71,14 @@ fun TaskView(
                     width = 1.17.dp,
                     color = Color(0xFF171A0F),
                     shape = RoundedCornerShape(24.dp)
-                ),
+                ).padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter = painterResource(icon),
                 contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.heightIn(min = 24.dp),
+                tint = Color.Unspecified
             )
         }
 
@@ -90,8 +92,17 @@ fun TaskView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    TitleMediumText(text = header, color = Color(0xFFdce2e2))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        TitleMediumText(
+                            text = header,
+                            color = Color(0xFFdce2e2),
+                            alignment = TextAlign.Start
+                        )
+                    }
 
                     if (showChecked) {
                         Spacer(modifier = Modifier.width(8.dp))
@@ -109,6 +120,7 @@ fun TaskView(
                                 modifier = Modifier.size(24.dp)
                             )
                         }
+                        Spacer(modifier = Modifier.width(8.dp))
                     }
                 }
 
@@ -141,12 +153,13 @@ fun TaskView(
 @Composable
 fun TaskViewPreview() {
     TaskView(
-        header = "Fix shelve",
+        header = "Seasonal Lights or Garland",
         subHeader = TaskStatus.ABORTED.toDisplayText(),
         subHeaderColor = TaskStatus.ABORTED.toColor(),
-        icon = CategoryType.FIX.toDrawableResource(),
+        icon = Tool.DRILL.toDrawableResource(),
         showButton = true,
         buttonLabel = "Edit",
+        showChecked = true,
         onClick = {}
     )
 }

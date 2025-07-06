@@ -1,5 +1,6 @@
 package ai.toolio.app.ui.inventory
 
+import ai.toolio.app.data.toDrawableResource
 import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.misc.MeasureType
 import ai.toolio.app.models.RepairTaskSession
@@ -24,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import toolio.composeapp.generated.resources.*
 
 @Composable
 fun RequiredToolsView(
@@ -85,7 +85,7 @@ fun RequiredToolsView(
                             header = tool.displayName,
                             subHeader = toolData?.name ?: "",
                             subHeaderColor = Color.Black,
-                            icon = getToolIconRes(tool),
+                            icon = tool.toDrawableResource(),
                             showButton = true,
                             showChecked = toolData?.confirmed ?: false,
                             buttonLabel = if (toolData?.confirmed == true) "Edit" else "Add",
@@ -116,24 +116,6 @@ fun RequiredToolsView(
                 }
             }
         }
-    }
-}
-
-private fun getToolIconRes(tool: Tool): org.jetbrains.compose.resources.DrawableResource {
-    return when (tool) {
-        Tool.DRILL -> Res.drawable.drill
-        Tool.SCREWDRIVER -> Res.drawable.screwdriver
-        Tool.HAMMER -> Res.drawable.hammer
-        Tool.UTILITY_KNIFE -> Res.drawable.utility_knife
-        Tool.TAPE_MEASURE -> Res.drawable.tape_measuring
-        Tool.WIRE_STRIPPER -> Res.drawable.wire_stripper
-        Tool.ELECTRICAL_TAPE -> Res.drawable.electricial_tape
-        Tool.LEVEL -> Res.drawable.level_tool
-        Tool.PLIERS -> Res.drawable.pliers
-        Tool.SCREWS -> Res.drawable.screws
-        Tool.STUD_FINDER -> Res.drawable.stud_finder
-        Tool.WALL_PLUGS -> Res.drawable.wall_plug
-        Tool.WRENCH -> Res.drawable.wrench
     }
 }
 

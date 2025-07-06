@@ -43,7 +43,9 @@ fun ChatInputView(
         Spacer(modifier = Modifier.height(6.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -51,7 +53,7 @@ fun ChatInputView(
                 Icon(
                     imageVector = Icons.Default.CameraAlt,
                     contentDescription = "Attach photo",
-                    tint = Color.Black
+                    tint = Color.White
                 )
             }
 
@@ -59,7 +61,7 @@ fun ChatInputView(
                 Icon(
                     imageVector = Icons.Default.Mic,
                     contentDescription = "Voice input",
-                    tint = Color.Black
+                    tint = Color.White
                 )
             }
         }
@@ -70,7 +72,8 @@ fun ChatInputView(
 fun MessageInput(
     onSendMessage: (String) -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    isLoading: Boolean = false
 ) {
     var text by remember { mutableStateOf("") }
 
@@ -90,12 +93,22 @@ fun MessageInput(
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = Color.Transparent,
             focusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
-            cursorColor = Color.White
+            disabledIndicatorColor = Color.Transparent,
+            cursorColor = Color.White,
+            disabledTextColor = Color.White,
+            disabledPlaceholderColor = Color.White
         ),
         trailingIcon = {
-            if (text.isNotBlank()) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = Color.White
+                )
+            } else if (text.isNotBlank()) {
                 IconButton(
                     onClick = {
                         onSendMessage(text)

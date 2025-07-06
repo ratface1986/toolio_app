@@ -5,6 +5,7 @@ import ai.toolio.app.data.toDisplayText
 import ai.toolio.app.data.toDrawableResource
 import ai.toolio.app.di.SubscriptionManager
 import ai.toolio.app.models.CategoryType
+import ai.toolio.app.models.RepairTaskSession
 import ai.toolio.app.models.Task
 import ai.toolio.app.models.TaskStatus
 import ai.toolio.app.theme.HeadlineLargeText
@@ -21,12 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -38,7 +34,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun MainMenuScreen(
-    lastActiveTask: Task?,
+    lastActiveSession: RepairTaskSession?,
     completedTaskNames: List<String>,
     onContinueTask: (() -> Unit)? = null,
     onStartNewProject: () -> Unit
@@ -49,8 +45,6 @@ fun MainMenuScreen(
     fun subscribe() {
         scope.launch {
             try {
-                println("MYDATA Before calling getCustomerInfo")
-
                 val info = SubscriptionManager.getCustomerInfo()
                 println("MYDATA info: ${info.activeProductIds}")
                 val result = SubscriptionManager.purchase("\$rc_monthly")
@@ -76,7 +70,7 @@ fun MainMenuScreen(
             Spacer(modifier = Modifier.height(32.dp))
             TitleText("Last Active Session")
 
-            if (lastActiveTask == null) {
+            if (lastActiveSession == null) {
                 Text(
                     text = "You are about to fix something",
                     color = Color(0xFF4B1E22),
@@ -85,12 +79,12 @@ fun MainMenuScreen(
                 )
             } else {
                 TaskView(
-                    header = lastActiveTask.name,
-                    subHeader = lastActiveTask.status.toDisplayText(),
-                    subHeaderColor = lastActiveTask.status.toColor(),
-                    icon = CategoryType.FIX.toDrawableResource(),
-                    showButton = lastActiveTask.status == TaskStatus.IN_PROGRESS,
-                    showChecked = lastActiveTask.status == TaskStatus.COMPLETED,
+                    header = lastActiveSession.task.name,
+                    subHeader = lastActiveSession.task.status.toDisplayText(),
+                    subHeaderColor = lastActiveSession.task.status.toColor(),
+                    icon = lastActiveSession.category.type.toDrawableResource(),
+                    showButton = lastActiveSession.task.status == TaskStatus.IN_PROGRESS,
+                    showChecked = lastActiveSession.task.status == TaskStatus.COMPLETED,
                     onClick = { onContinueTask?.invoke() }
                 )
             }
@@ -183,7 +177,9 @@ fun MainMenuScreen(
 @Composable
 fun PreviewMainMenuScreen() {
     MainMenuScreen(
-        lastActiveTask = Task("", "Fix shelve", emptyList(), emptyList()), // Task? object
+        lastActiveSession = RepairTaskSession("", "Fix shelve", task = Task(
+            "", "Fix shelve", emptyList(), emptyList()
+        )), // Task? object
         completedTaskNames = listOf("Hang shelf", "Install TV"), // or emptyList()
         onContinueTask = { /* handle continue */ },
         onStartNewProject = { /* begin new project */ }

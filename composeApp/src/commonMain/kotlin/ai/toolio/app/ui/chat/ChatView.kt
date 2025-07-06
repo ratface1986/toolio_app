@@ -119,9 +119,6 @@ fun ChatView(
                     drawerContainerColor = Color(0xFF000000)
                 ) {
                     SideMenu(
-                        onAccountsClick = {
-                            scope.launch { drawerState.close() }
-                        },
                         onSettingsClick = {
                             scope.launch { onShowSettings() }
                         },

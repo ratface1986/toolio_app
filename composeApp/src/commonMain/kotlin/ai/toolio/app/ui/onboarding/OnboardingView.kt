@@ -126,6 +126,8 @@ private fun OnboardingStepContent(
                     color = Color.White
                 )
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

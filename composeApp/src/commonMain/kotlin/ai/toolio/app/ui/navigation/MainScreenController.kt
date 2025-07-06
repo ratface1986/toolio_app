@@ -66,7 +66,7 @@ fun MainScreenController(
                 }
 
                 MainMenuScreen(
-                    lastActiveTask = AppEnvironment.userProfile.sessions.lastOrNull()?.task,
+                    lastActiveSession = AppEnvironment.userProfile.sessions.lastOrNull(),
                     completedTaskNames = listOf("Hang shelf", "Install TV"), // or emptyList()
                     onContinueTask = { screen = AppScreen.Chat },
                     onStartNewProject = {

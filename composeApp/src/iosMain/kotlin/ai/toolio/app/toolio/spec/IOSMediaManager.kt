@@ -1,17 +1,30 @@
 package ai.toolio.app.toolio.spec
 
-import ai.toolio.app.utils.PhotoPicker
+import ai.toolio.app.utils.MediaInputManager
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.addressOf
-import kotlinx.cinterop.convert
-import kotlinx.cinterop.usePinned
+import platform.AVFAudio.AVAudioQualityHigh
+import platform.AVFAudio.AVAudioRecorder
+import platform.AVFAudio.AVAudioRecorderDelegateProtocol
+import platform.AVFAudio.AVAudioSession
+import platform.AVFAudio.AVAudioSessionCategoryPlayAndRecord
+import platform.AVFAudio.AVEncoderAudioQualityKey
+import platform.AVFAudio.AVFormatIDKey
+import platform.AVFAudio.AVNumberOfChannelsKey
+import platform.AVFAudio.AVSampleRateKey
+import platform.AVFAudio.setActive
+import platform.CoreAudioTypes.kAudioFormatMPEG4AAC
 import platform.Foundation.NSData
+import platform.Foundation.NSTemporaryDirectory
+import platform.Foundation.NSURL
+import platform.Foundation.dataWithContentsOfURL
 import platform.UIKit.*
 import platform.darwin.NSObject
-import platform.posix.memcpy
+import kotlin.Any
 
-class IOSPhotoPicker : PhotoPicker {
+class IOSMediaManager : MediaInputManager {
     private var currentDelegate: NSObject? = null
+    private var recorder: AVAudioRecorder? = null
+    private var tempUrl: NSURL? = null
 
     override fun pickPhoto(onResult: (ByteArray?) -> Unit) {
         val picker = UIImagePickerController()
@@ -53,22 +66,39 @@ class IOSPhotoPicker : PhotoPicker {
         val rootController = UIApplication.sharedApplication.keyWindow?.rootViewController
         rootController?.presentViewController(picker, animated = true, completion = null)
     }
-}
 
+    @OptIn(ExperimentalForeignApi::class)
+    override fun startRecording() {
+        val session = AVAudioSession.sharedInstance()
+        session.setCategory(AVAudioSessionCategoryPlayAndRecord, null)
+        session.setActive(true, null)
 
-@OptIn(ExperimentalForeignApi::class)
-fun NSData.toByteArray(): ByteArray {
-    val size = this.length.toInt()
-    if (size == 0) return ByteArray(0)
+        val settings = mapOf<Any?, Any>(
+            AVFormatIDKey to kAudioFormatMPEG4AAC,
+            AVSampleRateKey to 12000.0,
+            AVNumberOfChannelsKey to 1,
+            AVEncoderAudioQualityKey to AVAudioQualityHigh
+        )
 
-    val byteArray = ByteArray(size)
-    val buffer = this.bytes
+        val url = getTempAudioFileUrl()
+        tempUrl = url
 
-    buffer?.let {
-        byteArray.usePinned { pinned ->
-            memcpy(pinned.addressOf(0), buffer, size.convert())
-        }
+        recorder = AVAudioRecorder(url, settings, null)
+        recorder?.prepareToRecord()
+        recorder?.record()
     }
 
-    return byteArray
+    override fun stopRecording(onResult: (ByteArray?) -> Unit) {
+        recorder?.stop()
+        recorder = null
+
+        val data = tempUrl?.let { NSData.dataWithContentsOfURL(it) }
+        onResult(data?.toByteArray())
+    }
+
+    private fun getTempAudioFileUrl(): NSURL {
+        val tempDir = NSTemporaryDirectory()
+        val path = "$tempDir/recording.m4a"
+        return NSURL.fileURLWithPath(path)
+    }
 }

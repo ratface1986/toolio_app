@@ -10,6 +10,7 @@ import ai.toolio.app.models.*
 import ai.toolio.app.services.deleteImageFromLocalStorage
 import ai.toolio.app.services.saveImageToLocalStorage
 import callOpenAI
+import callWhisperTranscription
 import io.ktor.client.*
 import io.ktor.http.*
 import io.ktor.http.content.*
@@ -138,6 +139,58 @@ fun Application.module() {
             handleOpenAIImagePrompt()
         }
 
+        post("/speechToText") {
+            val multipart = call.receiveMultipart()
+
+            var audioBytes: ByteArray? = null
+            var userId = "unknownUser"
+            var sessionId = "unknownSession"
+
+            multipart.forEachPart { part ->
+                when (part) {
+                    is PartData.FormItem -> {
+                        when (part.name) {
+                            "userId" -> userId = part.value
+                            "sessionId" -> sessionId = part.value
+                        }
+                    }
+
+                    is PartData.FileItem -> {
+                        if (part.name == "file") {
+                            audioBytes = part.streamProvider().readBytes()
+                        }
+                    }
+
+                    else -> Unit
+                }
+                part.dispose()
+            }
+
+            if (audioBytes == null) {
+                call.respond(HttpStatusCode.BadRequest, "Missing required audio data")
+                return@post
+            }
+
+            val response = callWhisperTranscription(
+                httpClient = call.httpClient,
+                request = ChatGptRequest(
+                    prompt = "",
+                    userId = userId,
+                    sessionId = sessionId,
+                    contentByteArray = audioBytes
+                )
+            )
+
+            insertChatMessage(
+                userId = userId,
+                sessionId = sessionId,
+                role = Roles.USER.name.lowercase(),
+                content = response.content
+            )
+
+            call.respond(HttpStatusCode.OK, response)
+        }
+
         post("/upload") {
             val multipart = call.receiveMultipart()
             var uploadedUrl: String? = null
@@ -228,7 +281,7 @@ fun Application.module() {
                         userId = userId,
                         prompt = fullPrompt,
                         sessionId = sessionId.orEmpty(),
-                        imageBytes = imageBytes
+                        contentByteArray = imageBytes
                     )
                 )
             } catch (e: Exception) {

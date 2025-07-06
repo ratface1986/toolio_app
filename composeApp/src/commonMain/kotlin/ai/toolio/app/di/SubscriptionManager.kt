@@ -20,6 +20,6 @@ data class PurchaseResult(
 )
 
 data class ToolioCustomerInfo(
-    val isActive: Boolean,
+    val isActive: Boolean?,
     val activeProductIds: List<String>
 )

@@ -1,6 +1,7 @@
 package ai.toolio.app.repo
 
 import ai.toolio.app.di.AppEnvironment
+import ai.toolio.app.di.AppSessions
 import ai.toolio.app.models.*
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -104,6 +105,24 @@ class ToolioRepo(private val baseUrl: String) {
 
         val response = client.submitFormWithBinaryData(
             url = "$baseUrl/openaiImagePrompt",
+            formData = parts
+        )
+
+        return response.body()
+    }
+
+    suspend fun transcribeSpeech(audioBytes: ByteArray): ToolioChatMessage {
+        val parts = formData {
+            append("file", audioBytes, Headers.build {
+                append(HttpHeaders.ContentType, "audio/wav")
+                append(HttpHeaders.ContentDisposition, "filename=\"audio.wav\"")
+            })
+            append("userId", AppEnvironment.userProfile.userId)
+            append("sessionId", AppEnvironment.getSessionId())
+        }
+
+        val response = client.submitFormWithBinaryData(
+            url = "$baseUrl/speechToText",
             formData = parts
         )
 

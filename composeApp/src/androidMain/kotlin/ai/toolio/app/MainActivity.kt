@@ -3,7 +3,7 @@ package ai.toolio.app
 import ai.toolio.app.di.AppSessions
 import ai.toolio.app.di.SubscriptionManager
 import ai.toolio.app.spec.AndroidAuthService
-import ai.toolio.app.spec.AndroidPhotoPicker
+import ai.toolio.app.spec.AndroidMediaManager
 import ai.toolio.app.utils.NativeFeatures
 import android.Manifest
 import android.content.Intent
@@ -34,14 +34,14 @@ class MainActivity : ComponentActivity(), ActivityResultCaller {
     private lateinit var permissionsCheck: () -> Boolean
     private lateinit var launchPermissions: () -> Unit
 
-    private lateinit var photoPicker: AndroidPhotoPicker
+    private lateinit var mediaManager: AndroidMediaManager
     private lateinit var authService: AndroidAuthService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        photoPicker = AndroidPhotoPicker(this)
+        mediaManager = AndroidMediaManager(this)
         FirebaseApp.initializeApp(this)
 
         AppSessions.init(applicationContext)
@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity(), ActivityResultCaller {
             if (granted) {
                 App(
                     NativeFeatures(
-                        photoPicker = photoPicker,
+                        mediaManager = mediaManager,
                         authService = authService
                     )
                 )

@@ -4,13 +4,14 @@ import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.di.AppSessions
 import ai.toolio.app.di.AuthResult
 import ai.toolio.app.di.AuthService
+import ai.toolio.app.di.SubscriptionManager
 import ai.toolio.app.models.UserProfile
 import ai.toolio.app.repo.ToolioRepo
 import ai.toolio.app.theme.HeadlineLargeText
 import ai.toolio.app.ui.shared.MyAlertDialog
 import ai.toolio.app.ui.shared.ScreenWrapper
+import ai.toolio.app.utils.MediaInputManager
 import ai.toolio.app.utils.NativeFeatures
-import ai.toolio.app.utils.PhotoPicker
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -43,7 +44,10 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
             try {
                 //val userNickname = AppSessions.getUserNickname().takeIf { it.isNotBlank() } ?: name.trim()
                 val userNickname = name.trim()
-                val profile = toolioRepo.login(userNickname)
+                val info = SubscriptionManager.getCustomerInfo()
+                val profile = toolioRepo.login(userNickname).copy(
+                    isProUser = info.isActive == true
+                )
                 AppSessions.saveUserId(profile.userId)
                 AppSessions.saveUserNickname(profile.settings.nickname)
                 AppEnvironment.init(
@@ -216,9 +220,17 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
 @Preview
 @Composable
 fun LoginFormPreview() {
-    LoginForm(NativeFeatures(object : PhotoPicker {
+    LoginForm(NativeFeatures(object : MediaInputManager {
         override fun pickPhoto(onResult: (ByteArray?) -> Unit) {
             onResult(null)
+        }
+
+        override fun startRecording() {
+            TODO("Not yet implemented")
+        }
+
+        override fun stopRecording(onResult: (ByteArray?) -> Unit) {
+            TODO("Not yet implemented")
         }
     }, authService = object : AuthService {
         override suspend fun signInWithGoogle(): AuthResult {

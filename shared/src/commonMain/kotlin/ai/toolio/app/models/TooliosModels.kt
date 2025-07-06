@@ -15,6 +15,11 @@ data class OpenAIRequest(
 )
 
 @Serializable
+data class WhisperTranscriptionResponse(
+    val text: String
+)
+
+@Serializable
 data class Choice(
     val index: Int,
     val message: ChatMessageIn,
@@ -81,7 +86,7 @@ data class ChatGptRequest(
     val prompt: String,
     val userId: String,
     val sessionId: String,
-    val imageBytes: ByteArray? = null
+    val contentByteArray: ByteArray? = null
 )
 
 @Serializable

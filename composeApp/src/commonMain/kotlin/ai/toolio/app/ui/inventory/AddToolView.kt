@@ -156,7 +156,7 @@ fun AddToolView(
                 // Camera
                 Button(
                     onClick = {
-                        AppEnvironment.nativeFeatures.photoPicker.pickPhoto { photoBytes ->
+                        AppEnvironment.nativeFeatures.mediaManager.pickPhoto { photoBytes ->
                             if (photoBytes != null) {
                                 toolImageData = photoBytes
                                 processPhoto(photoBytes)
@@ -172,7 +172,7 @@ fun AddToolView(
                 // Library (simulate as same as camera for this demo)
                 Button(
                     onClick = {
-                        AppEnvironment.nativeFeatures.photoPicker.pickPhoto { photoBytes ->
+                        AppEnvironment.nativeFeatures.mediaManager.pickPhoto { photoBytes ->
                             if (photoBytes != null) {
                                 toolImageData = photoBytes
                                 processPhoto(photoBytes)

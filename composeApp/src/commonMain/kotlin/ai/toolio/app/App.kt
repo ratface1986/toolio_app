@@ -6,8 +6,8 @@ import ai.toolio.app.models.Tasks
 import ai.toolio.app.ui.LoginForm
 import ai.toolio.app.ui.MainScreenController
 import ai.toolio.app.ui.onboarding.OnboardingView
+import ai.toolio.app.utils.MediaInputManager
 import ai.toolio.app.utils.NativeFeatures
-import ai.toolio.app.utils.PhotoPicker
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -53,8 +53,16 @@ fun App(nativeFeatures: NativeFeatures) {
 @Composable
 fun AppPreview() {
     App(
-        nativeFeatures = NativeFeatures(photoPicker = object : PhotoPicker {
+        nativeFeatures = NativeFeatures(mediaManager = object : MediaInputManager {
             override fun pickPhoto(onResult: (ByteArray?) -> Unit) {
+                TODO("Not yet implemented")
+            }
+
+            override fun startRecording() {
+                TODO("Not yet implemented")
+            }
+
+            override fun stopRecording(onResult: (ByteArray?) -> Unit) {
                 TODO("Not yet implemented")
             }
         }, authService = object : AuthService {

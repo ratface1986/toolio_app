@@ -63,7 +63,7 @@ suspend fun RoutingContext.handleOpenAIImagePrompt() {
             userId = userId,
             prompt = "check photo and let me know what do you think",
             sessionId = sessionId,
-            imageBytes = imageBytes
+            contentByteArray = imageBytes
         )
     )
 

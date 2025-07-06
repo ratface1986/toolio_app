@@ -59,7 +59,6 @@ fun MainScreenController(
     ) {
         when (screen) {
             AppScreen.MainMenu -> {
-                println("MYDATA LAST TASK: ${AppEnvironment.userProfile.sessions.lastOrNull()?.task?.name} ${AppEnvironment.userProfile.sessions.lastOrNull()?.task?.status}")
                 AppEnvironment.userProfile.sessions.lastOrNull()?.isSaved?.let { isSaved ->
                     if (!isSaved) {
                         AppEnvironment.userProfile.sessions.removeLast()

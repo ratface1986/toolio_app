@@ -88,7 +88,6 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
                 }
 
                 is AuthResult.Error -> {
-                    println("Sign-in error: ${result.message}")
                     isLoginFailed = true
                     error = result.message
                 }

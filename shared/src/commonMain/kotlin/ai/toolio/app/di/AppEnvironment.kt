@@ -34,21 +34,21 @@ object AppEnvironment {
 
     fun updateSession(
         sessionId: String? = null,
-        title: String? = null ,
+        title: String? = null,
         category: TaskCategory? = null,
         task: Task? = null,
-        answers: Map<String, String> = emptyMap(),
-        isSaved: Boolean = false
+        answers: Map<String, String>? = null,
+        isSaved: Boolean? = null
     ) {
-        userProfile.sessions[userProfile.sessions.lastIndex] =
-            userProfile.sessions.last().copy(
-                sessionId = sessionId ?: userProfile.sessions.last().sessionId,
-                title = title ?: userProfile.sessions.last().title,
-                category = category ?: userProfile.sessions.last().category,
-                task = task ?: userProfile.sessions.last().task,
-                answers = answers,
-                isSaved = isSaved
-            )
+        val last = userProfile.sessions.last()
+        userProfile.sessions[userProfile.sessions.lastIndex] = last.copy(
+            sessionId = sessionId ?: last.sessionId,
+            title = title ?: last.title,
+            category = category ?: last.category,
+            task = task ?: last.task,
+            answers = answers ?: last.answers,
+            isSaved = isSaved ?: last.isSaved
+        )
     }
 
     fun updateUserSettings(

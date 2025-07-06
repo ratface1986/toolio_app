@@ -26,6 +26,7 @@ suspend fun saveTaskSession(userId: String, session: RepairTaskSession) = withCo
             it[taskStatus] = session.task.status.name
             it[answers] = Json.encodeToString(session.answers)
             it[startPrompt] = session.initialPrompt
+            it[isSaved] = session.isSaved
         }
 
         val sessionUUID = if (session.sessionId.isBlank()) {
@@ -84,7 +85,8 @@ suspend fun loadTaskSessions(userId: String): List<RepairTaskSession> = withCont
                     answers = answers,
                     createdAt = row[TaskSessions.createdAt].toString(),
                     initialPrompt = row[TaskSessions.startPrompt] ?: "",
-                    messages = messages
+                    messages = messages,
+                    isSaved = row[TaskSessions.isSaved],
                 )
             }
     }

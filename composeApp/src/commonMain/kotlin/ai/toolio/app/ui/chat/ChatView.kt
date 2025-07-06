@@ -34,7 +34,6 @@ fun ChatView(
     onShowSettings: () -> Unit,
     onBack: () -> Unit
 ) {
-
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -59,7 +58,6 @@ fun ChatView(
         scope.launch {
             isTypingLoading = true
             try {
-                println("Sending message to GPT: $text")
                 val response = AppEnvironment.repo.chatGpt(text)
                 messages.add(ChatMessage.Text(content = response.content, isUser = false))
             } finally {
@@ -89,12 +87,14 @@ fun ChatView(
             try {
                 AppEnvironment.updateSession(
                     task = AppEnvironment.userProfile.sessions.last().task.copy(
-                        status = status,
-                    ),
+                        status = status
+                    )
                 )
                 AppEnvironment.repo.saveNewSession(AppEnvironment.userProfile.sessions.last())
             } catch (e: Exception) {
                 println("Error saving new repair task session: ${e.message}")
+            } finally {
+                onBack()
             }
         }
     }
@@ -103,11 +103,9 @@ fun ChatView(
         SessionEndDialog(
             onAbort = {
                 updateTaskSession(TaskStatus.ABORTED)
-                onBack()
             },
             onDone = {
                 updateTaskSession(TaskStatus.COMPLETED)
-                onBack()
              },
             onDismiss = { showOnStopDialog = false }
         )

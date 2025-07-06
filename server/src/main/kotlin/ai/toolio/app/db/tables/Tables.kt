@@ -44,6 +44,7 @@ object TaskSessions : Table("task_sessions") {
     val answers = text("answers")
     val startPrompt = text("start_prompt").nullable()
     val createdAt = datetime("created_at").clientDefault { LocalDateTime.now() }
+    val isSaved = bool("is_saved")
 
     override val primaryKey = PrimaryKey(id)
 }

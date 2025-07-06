@@ -4,14 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.util.Log
-import com.revenuecat.purchases.CustomerInfo
-import com.revenuecat.purchases.LogLevel
-import com.revenuecat.purchases.Offerings
-import com.revenuecat.purchases.PurchaseParams
-import com.revenuecat.purchases.Purchases
-import com.revenuecat.purchases.PurchasesConfiguration
-import com.revenuecat.purchases.getCustomerInfoWith
-import com.revenuecat.purchases.getOfferingsWith
+import com.revenuecat.purchases.*
 import com.revenuecat.purchases.interfaces.PurchaseCallback
 import com.revenuecat.purchases.models.StoreTransaction
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -55,52 +48,37 @@ actual object SubscriptionManager {
     actual suspend fun purchase(packageId: String): PurchaseResult =
         suspendCancellableCoroutine { cont ->
             try {
-                println("MYDATA PURCHASE: started")
-
                 val activity = context as? Activity
                 if (activity == null) {
-                    println("MYDATA PURCHASE ERROR: Context is not Activity")
                     cont.resume(PurchaseResult(false, "Context is not Activity"))
                     return@suspendCancellableCoroutine
                 }
 
-                println("MYDATA PURCHASE: context is Activity, calling getOfferings")
-
                 Purchases.sharedInstance.getOfferingsWith(
                     onError = {
-                        println("MYDATA PURCHASE ERROR: getOfferings failed: ${it.message}")
                         cont.resume(PurchaseResult(false, it.message))
                     },
                     onSuccess = { offerings ->
-                        println("MYDATA PURCHASE: offerings received")
-
                         val availablePackages = offerings.current?.availablePackages
                         if (availablePackages == null || availablePackages.isEmpty()) {
-                            println("MYDATA PURCHASE ERROR: No available packages")
                             cont.resume(PurchaseResult(false, "No available packages"))
                             return@getOfferingsWith
                         }
 
                         val pkg = availablePackages.firstOrNull { it.identifier == packageId }
                         val all = availablePackages.joinToString(", ") { it.identifier }
-                        println("MYDATA PURCHASE: found package $availablePackages")
+
                         if (pkg == null) {
-                            println("MYDATA PURCHASE ERROR: Package '$packageId' not found")
                             cont.resume(PurchaseResult(false, "Package not found $all"))
                             return@getOfferingsWith
                         }
 
-                        println("MYDATA PURCHASE: found package, building params")
-
                         val purchaseParams = try {
                             PurchaseParams.Builder(activity, pkg).build()
                         } catch (e: Exception) {
-                            println("MYDATA PURCHASE ERROR: Failed to build purchase params: ${e.message}")
                             cont.resume(PurchaseResult(false, "Failed to build purchase params"))
                             return@getOfferingsWith
                         }
-
-                        println("MYDATA PURCHASE: calling purchase")
 
                         Purchases.sharedInstance.purchase(
                             purchaseParams,
@@ -109,7 +87,6 @@ actual object SubscriptionManager {
                                     storeTransaction: StoreTransaction,
                                     customerInfo: CustomerInfo
                                 ) {
-                                    println("MYDATA PURCHASE: completed")
                                     cont.resume(PurchaseResult(true))
                                 }
 
@@ -122,7 +99,6 @@ actual object SubscriptionManager {
                                     } else {
                                         error.message
                                     }
-                                    println("MYDATA PURCHASE ERROR: $message")
                                     cont.resume(PurchaseResult(false, message))
                                 }
                             }
@@ -130,7 +106,6 @@ actual object SubscriptionManager {
                     }
                 )
             } catch (e: Throwable) {
-                println("MYDATA PURCHASE FATAL ERROR: ${e.message}")
                 e.printStackTrace()
                 cont.resume(PurchaseResult(false, e.message ?: "Unknown fatal error"))
             }

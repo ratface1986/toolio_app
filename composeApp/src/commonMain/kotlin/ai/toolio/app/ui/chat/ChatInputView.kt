@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
@@ -28,9 +29,9 @@ fun ChatInputView(
     onSendMessage: (String) -> Unit,
     onPhotoClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isInputEnabled: Boolean = true
+    isInputEnabled: Boolean = true,
+    shouldShowPremiumButtons: Boolean = false
 ) {
-    // Убираем Surface, чтобы не накладывал фон + паддинги
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -47,7 +48,10 @@ fun ChatInputView(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
+                .padding(bottom = 16.dp)
+                .alpha(
+                    if (shouldShowPremiumButtons) 1f else 0f
+                ),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {

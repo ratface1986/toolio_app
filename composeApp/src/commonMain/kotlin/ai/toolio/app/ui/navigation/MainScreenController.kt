@@ -2,12 +2,14 @@ package ai.toolio.app.ui
 
 import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.misc.MeasureType
+import ai.toolio.app.misc.SessionType
 import ai.toolio.app.models.RepairTaskSession
 import ai.toolio.app.models.TaskCategory
 import ai.toolio.app.models.TaskStatus
 import ai.toolio.app.models.Tool
 import ai.toolio.app.ui.chat.ChatView
 import ai.toolio.app.ui.dashboard.MainMenuScreen
+import ai.toolio.app.ui.dashboard.SubscriptionScreen
 import ai.toolio.app.ui.inventory.AddToolView
 import ai.toolio.app.ui.inventory.QuestionsView
 import ai.toolio.app.ui.inventory.RequiredToolsView
@@ -32,6 +34,7 @@ sealed class AppScreen {
     object Chat : AppScreen()
     object Settings : AppScreen()
     object SearchTool : AppScreen()
+    object PurchaseSessions : AppScreen()
 }
 
 @OptIn(ExperimentalUuidApi::class)
@@ -69,9 +72,21 @@ fun MainScreenController(
                     lastActiveSession = AppEnvironment.userProfile.sessions.lastOrNull(),
                     completedTaskNames = listOf("Hang shelf", "Install TV"), // or emptyList()
                     onContinueTask = { screen = AppScreen.Chat },
-                    onStartNewProject = {
-                        AppEnvironment.userProfile.sessions.add(RepairTaskSession())
-                        screen = AppScreen.Wizard
+                    onStartTextSession = {
+                        if (AppEnvironment.userProfile.textSessions == 0 ) {
+                            screen = AppScreen.PurchaseSessions
+                        } else {
+                            AppEnvironment.userProfile.sessions.add(RepairTaskSession(sessionType = SessionType.TEXT))
+                            screen = AppScreen.Wizard
+                        }
+                    },
+                    onStartPremiumSession = {
+                        if (AppEnvironment.userProfile.premiumSessions == 0 ) {
+                            screen = AppScreen.PurchaseSessions
+                        } else {
+                            AppEnvironment.userProfile.sessions.add(RepairTaskSession(sessionType = SessionType.PREMIUM))
+                            screen = AppScreen.Wizard
+                        }
                     }
                 )
             }
@@ -193,6 +208,13 @@ fun MainScreenController(
                     tool = requiredTool,
                     onBack = {
                         screen = AppScreen.AddTool
+                    }
+                )
+            }
+            AppScreen.PurchaseSessions -> {
+                SubscriptionScreen(
+                    onBackClick = {
+                        screen = AppScreen.MainMenu
                     }
                 )
             }

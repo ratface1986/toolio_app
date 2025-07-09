@@ -20,12 +20,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.Font
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import toolio.composeapp.generated.resources.Res
 import toolio.composeapp.generated.resources.Satoshi_Bold
 
 @Composable
-fun TitleText(text: String) {
+fun TitleText(text: String, textColor: Color = Color.Black) {
     Text(
         text = text,
         fontFamily = FontFamily(
@@ -36,7 +35,7 @@ fun TitleText(text: String) {
             )
         ),
         fontSize = 24.sp,
-        color = Color.Black,
+        color = textColor,
         modifier = Modifier.padding(bottom = 12.dp)
     )
 }

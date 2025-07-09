@@ -25,6 +25,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.*
 import io.ktor.utils.io.*
+import io.ktor.utils.io.jvm.javaio.toInputStream
 import kotlinx.io.readByteArray
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
@@ -157,7 +158,8 @@ fun Application.module() {
 
                     is PartData.FileItem -> {
                         if (part.name == "file") {
-                            audioBytes = part.streamProvider().readBytes()
+                            val inputStream = part.provider().toInputStream()
+                            audioBytes = inputStream.readBytes()
                         }
                     }
 

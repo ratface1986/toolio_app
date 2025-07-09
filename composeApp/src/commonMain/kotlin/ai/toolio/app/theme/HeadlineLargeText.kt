@@ -23,10 +23,10 @@ fun HeadlineLargeText(text: String) {
 }
 
 @Composable
-fun HeadlineMediumText(text: String) {
+fun HeadlineMediumText(text: String, textColor: Color = Color.Black) {
     Text(
         text = text,
-        color = Color.Black,
+        color = textColor,
         fontFamily = FontFamily(Font(resource = Res.font.Satoshi_Bold, weight = FontWeight.Bold)),
         fontSize = 24.sp,
         fontWeight = FontWeight.Bold

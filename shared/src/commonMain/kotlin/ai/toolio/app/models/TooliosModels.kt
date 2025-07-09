@@ -1,6 +1,7 @@
 package ai.toolio.app.models
 
 import ai.toolio.app.misc.Roles
+import ai.toolio.app.misc.SessionType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -124,6 +125,7 @@ data class RepairTaskSession(
     val createdAt: String = "",
     val initialPrompt: String = "",
     val messages: List<ToolioChatMessage> = emptyList(),
+    val sessionType: SessionType = SessionType.TEXT,
     @Transient val isSaved: Boolean = false
 )
 

@@ -151,6 +151,8 @@ suspend fun insertUser(nickname: String, email: String = "rust.m@gmail.com"): Us
             it[Users.email] = email
             it[language] = "en"
             it[measure] = MeasureType.INCH
+            it[textSessions] = 0
+            it[premiumSessions] = 1
         }
 
         // 2. Вставка всех инструментов как "заготовка"
@@ -177,7 +179,9 @@ suspend fun insertUser(nickname: String, email: String = "rust.m@gmail.com"): Us
                 email = email,
                 language = "en",
                 measure = MeasureType.INCH
-            )
+            ),
+            textSessions = 0,
+            premiumSessions = 1
         )
     }
 }
@@ -222,7 +226,9 @@ suspend fun insertUserWithUserId(newGoogleUserId: String, nickname: String, emai
                 email = email,
                 language = "en",
                 measure = MeasureType.INCH
-            )
+            ),
+            textSessions = 0,
+            premiumSessions = 1
         )
     }
 }

@@ -3,11 +3,14 @@ package ai.toolio.app.ui.dashboard
 import ai.toolio.app.data.toColor
 import ai.toolio.app.data.toDisplayText
 import ai.toolio.app.data.toDrawableResource
+import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.di.SubscriptionManager
-import ai.toolio.app.models.CategoryType
+import ai.toolio.app.misc.MeasureType
 import ai.toolio.app.models.RepairTaskSession
 import ai.toolio.app.models.Task
 import ai.toolio.app.models.TaskStatus
+import ai.toolio.app.models.UserProfile
+import ai.toolio.app.models.UserSettings
 import ai.toolio.app.theme.HeadlineLargeText
 import ai.toolio.app.theme.ListItemView
 import ai.toolio.app.theme.TaskView
@@ -20,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -37,26 +41,10 @@ fun MainMenuScreen(
     lastActiveSession: RepairTaskSession?,
     completedTaskNames: List<String>,
     onContinueTask: (() -> Unit)? = null,
-    onStartNewProject: () -> Unit
+    onStartTextSession: () -> Unit,
+    onStartPremiumSession: () -> Unit
 ) {
-    var showSheet by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-
-    fun subscribe() {
-        scope.launch {
-            try {
-                val info = SubscriptionManager.getCustomerInfo()
-                println("MYDATA info: ${info.activeProductIds}")
-                val result = SubscriptionManager.purchase("\$rc_monthly")
-                println("MYDATA result: $result")
-            } catch (e: Exception) {
-                println("MYDATA Subscription error: ${e.message}")
-                e.printStackTrace()
-            } finally {
-                //showSheet = false
-            }
-        }
-    }
 
     ScreenWrapper {
         Column(
@@ -113,15 +101,6 @@ fun MainMenuScreen(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(32.dp))
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Button(onClick = { showSheet = true }) {
-                    Text("Get Toolio PRO")
-                }
-            }
 
             Spacer(modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.height(80.dp)) // for bottom action button spacing
@@ -131,44 +110,71 @@ fun MainMenuScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(24.dp, 24.dp, 24.dp, 40.dp)
+                .padding(start = 24.dp, end = 24.dp, bottom = 40.dp)
                 .shadow(
                     elevation = 10.dp,
-                    shape = CircleShape,
-                    ambientColor = Color.White.copy(alpha = 0.6f),
-                    spotColor = Color.White.copy(alpha = 0.6f)
+                    shape = RoundedCornerShape(24.dp),
+                    ambientColor = Color.Black.copy(alpha = 0.05f),
+                    spotColor = Color.Black.copy(alpha = 0.08f)
                 )
-                .background(Color.White, shape = CircleShape)
+                .background(Color(0xFFE6580F), shape = RoundedCornerShape(24.dp))
+                .padding(horizontal = 20.dp, vertical = 24.dp)
         ) {
-            Button(
-                onClick = onStartNewProject,
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFFFFFF),
-                    contentColor = Color.Black
-                )
+                    .padding(vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                Text(text = "Start new project", fontSize = 19.sp)
-            }
-        }
+                Column {
+                    TitleText(text = "Text left: ${AppEnvironment.userProfile.textSessions}", Color.White)
+                    Button(
+                        onClick = onStartTextSession,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF8e44ad),
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text(
+                            text = if (AppEnvironment.userProfile.textSessions == 0) "Buy more sessions" else "Start TEXT project",
+                            fontSize = 19.sp
+                        )
+                    }
+                }
 
-        if (showSheet) {
-            SubscriptionBottomSheet(
-                title = "Toolio PRO",
-                benefits = listOf(
-                    "Unlimited Tasks",
-                    "Voice assistance",
-                    "Smart Guidance"
-                ),
-                onSubscribeClick = {
-                    showSheet = false
-                    subscribe()
-                },
-                onDismiss = { showSheet = false }
-            )
+                Divider(
+                    color = Color(0x22000000),
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+
+                Column {
+                    TitleText(
+                        text = "Premium left: ${AppEnvironment.userProfile.premiumSessions}",
+                        textColor = Color.White
+                    )
+                    Button(
+                        onClick = onStartPremiumSession,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF27ae60),
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text(
+                            text = if (AppEnvironment.userProfile.premiumSessions == 0) "Buy more sessions" else "Start PREMIUM project",
+                            fontSize = 19.sp
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -176,12 +182,26 @@ fun MainMenuScreen(
 @Preview
 @Composable
 fun PreviewMainMenuScreen() {
+    AppEnvironment.setUserProfile(
+        UserProfile(
+            userId = "123456789",
+            inventory = mapOf(),
+            settings = UserSettings(
+                "123456789",
+                "test",
+                "en",
+                MeasureType.INCH
+            )
+        )
+    )
+
     MainMenuScreen(
         lastActiveSession = RepairTaskSession("", "Fix shelve", task = Task(
             "", "Fix shelve", emptyList(), emptyList()
         )), // Task? object
         completedTaskNames = listOf("Hang shelf", "Install TV"), // or emptyList()
-        onContinueTask = { /* handle continue */ },
-        onStartNewProject = { /* begin new project */ }
+        onContinueTask = {  },
+        onStartTextSession = {    },
+        onStartPremiumSession = {    }
     )
 }

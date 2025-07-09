@@ -3,6 +3,7 @@ package ai.toolio.app.ui.chat
 import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.misc.MeasureType
 import ai.toolio.app.misc.Roles
+import ai.toolio.app.misc.SessionType
 import ai.toolio.app.models.RepairTaskSession
 import ai.toolio.app.models.TaskStatus
 import ai.toolio.app.models.UserProfile
@@ -10,10 +11,14 @@ import ai.toolio.app.models.UserSettings
 import ai.toolio.app.ui.shared.SessionEndDialog
 import ai.toolio.app.ui.sidemenu.SideMenu
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -21,14 +26,19 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalEncodingApi::class)
+@OptIn(ExperimentalEncodingApi::class, ExperimentalTime::class)
 @Composable
 fun ChatView(
     onShowSettings: () -> Unit,
@@ -53,6 +63,9 @@ fun ChatView(
     var isTypingLoading by remember { mutableStateOf(false) }
     val inputHeightPx = remember { mutableStateOf(0) }
     var showOnStopDialog by remember { mutableStateOf(false) }
+    var showSpeakOverlay by remember { mutableStateOf(false) }
+    var startTime by remember { mutableStateOf(0L) }
+    val isPremiumSession by remember { mutableStateOf(AppEnvironment.userProfile.sessions.lastOrNull()?.sessionType == SessionType.PREMIUM) }
 
     fun sendMessage(text: String) {
         scope.launch {
@@ -99,6 +112,17 @@ fun ChatView(
         }
     }
 
+    fun transcriptVoice(audioBytes: ByteArray) {
+        scope.launch {
+            try {
+                val chatResponse = AppEnvironment.repo.transcribeSpeech(audioBytes = audioBytes)
+                messages.add(ChatMessage.Text(chatResponse.content, isUser = true))
+            } finally {
+                isTypingLoading = false
+            }
+        }
+    }
+
     if (showOnStopDialog) {
         SessionEndDialog(
             onAbort = {
@@ -106,12 +130,10 @@ fun ChatView(
             },
             onDone = {
                 updateTaskSession(TaskStatus.COMPLETED)
-             },
+            },
             onDismiss = { showOnStopDialog = false }
         )
     } else {
-
-
         ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
@@ -155,19 +177,65 @@ fun ChatView(
                             messages.add(ChatMessage.Text(text, isUser = true))
                             sendMessage(text)
                         },
-                        onVoiceClick = {},
                         onPhotoClick = {
-                            AppEnvironment.nativeFeatures.photoPicker.pickPhoto { photoBytes ->
+                            AppEnvironment.nativeFeatures.mediaManager.pickPhoto { photoBytes ->
                                 photoBytes?.let { uploadUserPhoto(photoBytes) }
                             }
                         },
                         isInputEnabled = !isTypingLoading,
+                        shouldShowPremiumButtons = isPremiumSession,
                         modifier = Modifier
                             .fillMaxWidth()
                             .onGloballyPositioned {
                                 inputHeightPx.value = it.size.height
                             }
                     )
+                }
+            }
+        }
+
+        if (showSpeakOverlay) {
+            VoiceRecordingOverlay()
+        }
+
+        if (isPremiumSession) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .align(Alignment.BottomEnd)
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onPress = {
+                                    startTime = Clock.System.now().toEpochMilliseconds()
+                                    showSpeakOverlay = true
+                                    //AppEnvironment.nativeFeatures.mediaManager.startRecording()
+                                    tryAwaitRelease()
+
+                                    val durationMs = Clock.System.now().toEpochMilliseconds() - startTime
+                                    if (durationMs >= 1000) {
+                                        /*AppEnvironment.nativeFeatures.mediaManager.stopRecording { audioBytes ->
+                                            audioBytes?.let { transcriptVoice(it) }
+                                        }*/
+                                    }
+
+                                    showSpeakOverlay = false
+                                }
+                            )
+                        }
+                ) {
+                    if (showSpeakOverlay) {
+                        Box(
+                            modifier = Modifier
+                                .offset(x = 20.dp, y = 20.dp) // за края
+                                .size(100.dp)
+                                .background(Color(0xFFFF9800), shape = CircleShape)
+                                .align(Alignment.BottomEnd)
+                        )
+                    }
                 }
             }
         }

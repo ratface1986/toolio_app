@@ -10,6 +10,8 @@ data class UserProfile(
     val inventory: Map<String, ToolData>,
     var settings: UserSettings,
     val sessions: MutableList<RepairTaskSession> = mutableListOf(),
+    val textSessions: Int = 0,
+    val premiumSessions: Int = 0,
     @Transient val isProUser: Boolean = false,
 ) {
     fun getTool(tool: Tool): ToolData? = inventory[tool.name]

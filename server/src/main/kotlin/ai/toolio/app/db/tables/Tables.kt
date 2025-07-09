@@ -1,6 +1,7 @@
 package ai.toolio.app.db.tables
 
 import ai.toolio.app.misc.MeasureType
+import ai.toolio.app.misc.SessionType
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
@@ -29,6 +30,8 @@ object Users : Table("users") {
     val language = varchar("language", 10).nullable()
     val email = varchar("email", 120).nullable()
     val googleUserId = varchar("google_user_id", 255).nullable()
+    val textSessions = integer("text_sessions")
+    val premiumSessions = integer("text_sessions")
 
     override val primaryKey = PrimaryKey(id)
 }
@@ -45,6 +48,7 @@ object TaskSessions : Table("task_sessions") {
     val startPrompt = text("start_prompt").nullable()
     val createdAt = datetime("created_at").clientDefault { LocalDateTime.now() }
     val isSaved = bool("is_saved")
+    val sessionType = enumerationByName("session_type", 10, SessionType::class)
 
     override val primaryKey = PrimaryKey(id)
 }

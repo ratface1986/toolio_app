@@ -31,7 +31,7 @@ object Users : Table("users") {
     val email = varchar("email", 120).nullable()
     val googleUserId = varchar("google_user_id", 255).nullable()
     val textSessions = integer("text_sessions")
-    val premiumSessions = integer("text_sessions")
+    val premiumSessions = integer("premium_sessions")
 
     override val primaryKey = PrimaryKey(id)
 }

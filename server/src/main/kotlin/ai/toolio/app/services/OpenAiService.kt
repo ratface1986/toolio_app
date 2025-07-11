@@ -18,12 +18,16 @@ suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ToolioC
     val apiKey = System.getenv("OPENAI_API_KEY") ?: error("Missing OPENAI_API_KEY")
 
     val messages = mutableListOf<ChatMessageOut>()
-    messages += loadChatMessagesForUser(request.sessionId.toUUID()).map { msg ->
+    val history = loadChatMessagesForUser(request.sessionId.toUUID())
+    log.info("MYDATA 💬 Loaded ${history.size} messages for GPT (sessionId=${request.sessionId})")
+
+    messages += history.map { msg ->
         ChatMessageOut(
             role = msg.role.role,
             content = listOf(ContentPart.Text(msg.content))
         )
     }
+
 
     if (request.contentByteArray != null) {
         val base64 = request.contentByteArray!!.encodeBase64()
@@ -42,6 +46,8 @@ suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ToolioC
             content = listOf(ContentPart.Text(request.prompt))
         )
     }
+    
+    log.info("MYDATA GPT-messages:\n${messages.joinToString("\n")}")
 
     val openAIRequest = OpenAIRequest(
         model = "gpt-4o",

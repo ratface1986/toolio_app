@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.benasher44.uuid.uuid4
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -40,6 +41,7 @@ fun RequiredToolsView(
         scope.launch {
             try {
                 AppEnvironment.updateSession(
+                    sessionId = uuid4().toString(),
                     isSaved = true,
                     initialPrompt = buildSystemPrompt()
                 )

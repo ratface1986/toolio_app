@@ -57,26 +57,27 @@ suspend fun saveTaskSession(userId: String, session: RepairTaskSession) = withCo
 }
 
 suspend fun loadTaskSessions(userId: String): List<RepairTaskSession> = withContext(Dispatchers.IO) {
-    transaction {
+    val rows = transaction {
         TaskSessions
             .selectAll().where { TaskSessions.userId eq userId.toUUID() }
-            .mapNotNull { mapRowToRepairTaskSession(it) }
+            .toList()
     }
+
+    rows.mapNotNull { mapRowToRepairTaskSession(it) }
 }
 
-
 suspend fun loadSpecificSessions(sessionId: String): RepairTaskSession? = withContext(Dispatchers.IO) {
-    transaction {
+    val row = transaction {
         TaskSessions
             .selectAll().where { TaskSessions.id eq sessionId.toUUID() }
             .limit(1)
             .firstOrNull()
-            ?.let { mapRowToRepairTaskSession(it) }
     }
+
+    row?.let { mapRowToRepairTaskSession(it) }
 }
 
-
-fun mapRowToRepairTaskSession(row: ResultRow): RepairTaskSession? {
+suspend fun mapRowToRepairTaskSession(row: ResultRow): RepairTaskSession? {
     val categoryId = row[TaskSessions.category]
     val taskName = row[TaskSessions.task]
 

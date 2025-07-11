@@ -35,21 +35,24 @@ suspend fun insertChatMessage(
     }
 }
 
-fun loadChatMessagesForUser(sessionId: UUID): List<ToolioChatMessage> {
-    return ChatMessages
-        .selectAll().where { ChatMessages.sessionId eq sessionId }
-        .orderBy(ChatMessages.createdAt to SortOrder.ASC)
-        .mapNotNull { row ->
-            val role = row[ChatMessages.role]
+suspend fun loadChatMessagesForUser(sessionId: UUID): List<ToolioChatMessage> = withContext(Dispatchers.IO) {
+    transaction {
+        ChatMessages
+            .selectAll().where { ChatMessages.sessionId eq sessionId }
+            .orderBy(ChatMessages.createdAt to SortOrder.ASC)
+            .mapNotNull { row ->
+                val role = row[ChatMessages.role]
 
-            ToolioChatMessage(
-                sessionId = sessionId.toString(),
-                role = role,
-                content = row[ChatMessages.content],
-                imageUrl = row[ChatMessages.imageUrl],
-                timestamp = row[ChatMessages.createdAt].toString()
-            )
-        }
+                ToolioChatMessage(
+                    sessionId = sessionId.toString(),
+                    role = role,
+                    content = row[ChatMessages.content],
+                    imageUrl = row[ChatMessages.imageUrl],
+                    timestamp = row[ChatMessages.createdAt].toString()
+                )
+            }
+    }
 }
+
 
 

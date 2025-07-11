@@ -144,6 +144,21 @@ class ToolioRepo(private val baseUrl: String) {
         return response.body()
     }
 
+    suspend fun sendInitialSystemPrompt(systemPrompt: String): ToolioChatMessage {
+        val request = ChatGptRequest(
+            userId = AppEnvironment.userProfile.userId,
+            prompt = systemPrompt,
+            sessionId = AppEnvironment.getSessionId()
+        )
+
+        val response = client.post("$baseUrl/openai-system") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
+
+        return response.body()
+    }
+
     suspend fun saveNewSession(session: RepairTaskSession): Boolean {
         return try {
             val request = SaveSessionRequest(

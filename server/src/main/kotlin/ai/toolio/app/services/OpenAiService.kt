@@ -1,3 +1,5 @@
+import ai.toolio.app.db.loadChatMessagesForUser
+import ai.toolio.app.ext.toUUID
 import ai.toolio.app.misc.Roles
 import ai.toolio.app.models.*
 import io.ktor.client.*
@@ -15,25 +17,29 @@ suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ToolioC
     val log = LoggerFactory.getLogger("OpenAIDebug")
     val apiKey = System.getenv("OPENAI_API_KEY") ?: error("Missing OPENAI_API_KEY")
 
-    val messages = if (request.contentByteArray != null) {
+    val messages = mutableListOf<ChatMessageOut>()
+    messages += loadChatMessagesForUser(request.sessionId.toUUID()).map { msg ->
+        ChatMessageOut(
+            role = msg.role.role,
+            content = listOf(ContentPart.Text(msg.content))
+        )
+    }
+
+    if (request.contentByteArray != null) {
         val base64 = request.contentByteArray!!.encodeBase64()
         val imageDataUrl = "data:image/jpeg;base64,$base64"
 
-        listOf(
-            ChatMessageOut(
-                role = "user",
-                content = listOf(
-                    ContentPart.Text(request.prompt),
-                    ContentPart.ImageUrl(ImagePayload(url = imageDataUrl))
-                )
+        messages += ChatMessageOut(
+            role = "user",
+            content = listOf(
+                ContentPart.Text(request.prompt),
+                ContentPart.ImageUrl(ImagePayload(url = imageDataUrl))
             )
         )
     } else {
-        listOf(
-            ChatMessageOut(
-                role = "user",
-                content = listOf(ContentPart.Text(request.prompt))
-            )
+        messages += ChatMessageOut(
+            role = "user",
+            content = listOf(ContentPart.Text(request.prompt))
         )
     }
 
@@ -56,18 +62,18 @@ suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ToolioC
         val parsed = Json { ignoreUnknownKeys = true }
             .decodeFromString<OpenAIChatResponse>(response.bodyAsText())
 
-        val reply = parsed.choices.firstOrNull()?.message?.content ?: "OpenAI ничего не вернул"
+        val reply = parsed.choices.firstOrNull()?.message?.content ?: "OpenAI hasn't responded."
 
         ToolioChatMessage(
-            sessionId = "",
+            sessionId = request.sessionId,
             content = reply,
             role = Roles.ASSISTANT,
             tokensUsed = parsed.usage?.totalTokens
         )
     } catch (e: Exception) {
-        log.error("💥 Ошибка парсинга OpenAI-ответа: ${e.message}")
+        log.error("💥 Parse error OpenAI-ответа: ${e.message}")
         ToolioChatMessage(
-            sessionId = "",
+            sessionId = request.sessionId,
             content = "Ошибка: ${e.message.orEmpty()}",
             role = Roles.SYSTEM
         )

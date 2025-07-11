@@ -32,13 +32,16 @@ object AppEnvironment {
     fun getSessionId() =
         userProfile.sessions.find { it.task.status == TaskStatus.IN_PROGRESS }?.sessionId.orEmpty()
 
+    fun getLastSession() = userProfile.sessions.lastOrNull()
+
     fun updateSession(
         sessionId: String? = null,
         title: String? = null,
         category: TaskCategory? = null,
         task: Task? = null,
         answers: Map<String, String>? = null,
-        isSaved: Boolean? = null
+        isSaved: Boolean? = null,
+        initialPrompt: String? = null,
     ) {
         val last = userProfile.sessions.last()
         userProfile.sessions[userProfile.sessions.lastIndex] = last.copy(
@@ -47,7 +50,8 @@ object AppEnvironment {
             category = category ?: last.category,
             task = task ?: last.task,
             answers = answers ?: last.answers,
-            isSaved = isSaved ?: last.isSaved
+            isSaved = isSaved ?: last.isSaved,
+            initialPrompt = initialPrompt ?: last.initialPrompt,
         )
     }
 

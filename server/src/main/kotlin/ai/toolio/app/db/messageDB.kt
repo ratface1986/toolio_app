@@ -10,7 +10,6 @@ import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.time.ZoneId
 import java.util.*
 
 suspend fun insertChatMessage(
@@ -42,7 +41,11 @@ fun loadChatMessagesForUser(sessionId: UUID): List<ToolioChatMessage> {
         .orderBy(ChatMessages.createdAt to SortOrder.ASC)
         .mapNotNull { row ->
             val roleStr = row[ChatMessages.role]
-            val role = Roles.entries.find { it.role.equals(roleStr, ignoreCase = true) } ?: Roles.SYSTEM
+            val role = try {
+                Roles.valueOf(roleStr)
+            } catch (e: Exception) {
+                Roles.ASSISTANT
+            }
 
             ToolioChatMessage(
                 sessionId = sessionId.toString(),

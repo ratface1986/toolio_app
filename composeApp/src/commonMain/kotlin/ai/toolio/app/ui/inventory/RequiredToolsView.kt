@@ -3,6 +3,7 @@ package ai.toolio.app.ui.inventory
 import ai.toolio.app.data.toDrawableResource
 import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.misc.MeasureType
+import ai.toolio.app.misc.buildSystemPrompt
 import ai.toolio.app.models.RepairTaskSession
 import ai.toolio.app.models.Tool
 import ai.toolio.app.models.UserProfile
@@ -38,7 +39,10 @@ fun RequiredToolsView(
     fun saveNewRepairTaskSession() {
         scope.launch {
             try {
-                AppEnvironment.updateSession(isSaved = true)
+                AppEnvironment.updateSession(
+                    isSaved = true,
+                    initialPrompt = buildSystemPrompt()
+                )
                 val response = AppEnvironment.repo.saveNewSession(AppEnvironment.userProfile.sessions.last())
             } catch (e: Error) {
                 println("Error saving new repair task session: ${e.message}")

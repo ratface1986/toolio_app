@@ -49,17 +49,40 @@ fun ChatView(
 
     val messages = remember {
         mutableStateListOf<ChatMessage>().apply {
-            AppEnvironment.userProfile.sessions.lastOrNull()?.messages?.forEach { lastMessage ->
-                val isUser = lastMessage.role == Roles.USER
-                val message = if (lastMessage.imageUrl?.isEmpty() == true) {
-                    ChatMessage.Text(lastMessage.content, isUser = isUser)
-                } else {
-                    ChatMessage.Image(lastMessage.imageUrl ?: "", isUser = isUser)
+            AppEnvironment.userProfile.sessions.lastOrNull()?.messages
+                ?.filter { it.role != Roles.SYSTEM }
+                ?.forEach { lastMessage ->
+                    val isUser = lastMessage.role == Roles.USER
+                    val message = if (lastMessage.imageUrl?.isEmpty() == true) {
+                        ChatMessage.Text(lastMessage.content, isUser = isUser)
+                    } else {
+                        ChatMessage.Image(lastMessage.imageUrl ?: "", isUser = isUser)
+                    }
+                    add(message)
                 }
-                add(message)
+        }
+    }
+
+
+    LaunchedEffect(AppEnvironment.getSessionId()) {
+        val session = AppEnvironment.userProfile.sessions.lastOrNull()
+
+        if (AppEnvironment.getSessionId().isNotEmpty() && session?.messages?.isEmpty() == true) {
+            val response = try {
+                AppEnvironment.repo.sendInitialSystemPrompt(
+                    systemPrompt = session.initialPrompt
+                )
+            } catch (e: Exception) {
+                println("🔥 Failed to call /openai-system: ${e.message}")
+                null
+            }
+
+            if (response != null) {
+                messages.add(ChatMessage.Text(response.content, isUser = false))
             }
         }
     }
+
     var isTypingLoading by remember { mutableStateOf(false) }
     val inputHeightPx = remember { mutableStateOf(0) }
     var showOnStopDialog by remember { mutableStateOf(false) }

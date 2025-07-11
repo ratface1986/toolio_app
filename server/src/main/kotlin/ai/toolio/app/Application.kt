@@ -140,6 +140,44 @@ fun Application.module() {
             handleOpenAIImagePrompt()
         }
 
+        post("/openai-system") {
+            val request = call.receive<ChatGptRequest>()
+            val session = loadSpecificSessions(request.sessionId)
+
+            if (session == null) {
+                call.respond(HttpStatusCode.NotFound, "Session not found")
+                return@post
+            }
+
+            // 1. SYSTEM message
+            insertChatMessage(
+                userId = request.userId,
+                sessionId = request.sessionId,
+                role = Roles.SYSTEM.name.lowercase(),
+                content = session.initialPrompt
+            )
+
+            // 2. GPT response
+            val response = callOpenAI(
+                httpClient = call.httpClient,
+                request = ChatGptRequest(
+                    userId = request.userId,
+                    prompt = "",
+                    sessionId = request.sessionId
+                )
+            )
+
+            insertChatMessage(
+                userId = request.userId,
+                sessionId = request.sessionId,
+                role = Roles.ASSISTANT.name.lowercase(),
+                content = response.content
+            )
+
+            call.respond(HttpStatusCode.OK, response)
+        }
+
+
         post("/speechToText") {
             val multipart = call.receiveMultipart()
 

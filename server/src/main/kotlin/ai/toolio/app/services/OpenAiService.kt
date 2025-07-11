@@ -41,9 +41,9 @@ suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ToolioC
             val imageDataUrl = "data:image/jpeg;base64,$base64"
             parts += ContentPart.ImageUrl(ImagePayload(url = imageDataUrl))
         }
-        
+
         messages += ChatMessageOut(
-            role = "user",
+            role = Roles.USER.role.lowercase(),
             content = parts
         )
     }

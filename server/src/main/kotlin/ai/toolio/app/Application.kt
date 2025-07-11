@@ -114,7 +114,7 @@ fun Application.module() {
             insertChatMessage(
                 userId = request.userId,
                 sessionId = request.sessionId,
-                role = "user",
+                role = Roles.USER,
                 content = request.prompt
             )
 
@@ -126,7 +126,7 @@ fun Application.module() {
             insertChatMessage(
                 userId = request.userId,
                 sessionId = request.sessionId,
-                role = Roles.ASSISTANT.name.lowercase(),
+                role = Roles.ASSISTANT,
                 content = response.content
             )
 
@@ -153,7 +153,7 @@ fun Application.module() {
             insertChatMessage(
                 userId = request.userId,
                 sessionId = request.sessionId,
-                role = Roles.SYSTEM.name.lowercase(),
+                role = Roles.SYSTEM,
                 content = session.initialPrompt
             )
 
@@ -170,7 +170,7 @@ fun Application.module() {
             insertChatMessage(
                 userId = request.userId,
                 sessionId = request.sessionId,
-                role = Roles.ASSISTANT.name.lowercase(),
+                role = Roles.ASSISTANT,
                 content = response.content
             )
 
@@ -224,7 +224,7 @@ fun Application.module() {
             insertChatMessage(
                 userId = userId,
                 sessionId = sessionId,
-                role = Roles.USER.name.lowercase(),
+                role = Roles.USER,
                 content = response.content
             )
 

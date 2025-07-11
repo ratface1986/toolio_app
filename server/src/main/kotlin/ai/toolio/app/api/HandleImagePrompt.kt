@@ -52,7 +52,7 @@ suspend fun RoutingContext.handleOpenAIImagePrompt() {
     insertChatMessage(
         userId = userId,
         sessionId = sessionId,
-        role = Roles.USER.name.lowercase(),
+        role = Roles.USER,
         content = promptText.orEmpty(),
         imageUrl = imageUrl
     )
@@ -70,7 +70,7 @@ suspend fun RoutingContext.handleOpenAIImagePrompt() {
     insertChatMessage(
         userId = userId,
         sessionId = sessionId,
-        role = Roles.ASSISTANT.name.lowercase(),
+        role = Roles.ASSISTANT,
         content = response.content
     )
 

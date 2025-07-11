@@ -15,7 +15,7 @@ import java.util.*
 suspend fun insertChatMessage(
     userId: String,
     sessionId: String,
-    role: String,
+    role: Roles,
     content: String,
     imageUrl: String = ""
 ): Boolean = withContext(Dispatchers.IO) {
@@ -40,12 +40,7 @@ fun loadChatMessagesForUser(sessionId: UUID): List<ToolioChatMessage> {
         .selectAll().where { ChatMessages.sessionId eq sessionId }
         .orderBy(ChatMessages.createdAt to SortOrder.ASC)
         .mapNotNull { row ->
-            val roleStr = row[ChatMessages.role]
-            val role = try {
-                Roles.valueOf(roleStr)
-            } catch (e: Exception) {
-                Roles.ASSISTANT
-            }
+            val role = row[ChatMessages.role]
 
             ToolioChatMessage(
                 sessionId = sessionId.toString(),

@@ -1,6 +1,7 @@
 package ai.toolio.app.db.tables
 
 import ai.toolio.app.misc.MeasureType
+import ai.toolio.app.misc.Roles
 import ai.toolio.app.misc.SessionType
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.datetime
@@ -58,7 +59,7 @@ object ChatMessages : Table("chat_messages") {
     val id = integer("id").autoIncrement()
     val userId = uuid("user_id").references(Users.id)
     val sessionId = uuid("session_id").references(TaskSessions.id)
-    val role = varchar("role", 64)
+    val role = enumerationByName("role", 64, Roles::class)
     val content = text("content")
     val imageUrl = text("image_url").nullable()
     val createdAt = datetime("created_at").clientDefault { LocalDateTime.now() }

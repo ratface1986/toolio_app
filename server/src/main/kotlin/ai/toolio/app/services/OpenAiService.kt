@@ -18,35 +18,36 @@ suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ToolioC
     val apiKey = System.getenv("OPENAI_API_KEY") ?: error("Missing OPENAI_API_KEY")
 
     val messages = mutableListOf<ChatMessageOut>()
-    val history = loadChatMessagesForUser(request.sessionId.toUUID())
-    log.info("MYDATA 💬 Loaded ${history.size} messages for GPT (sessionId=${request.sessionId})")
 
-    messages += history.map { msg ->
+    // Загружаем историю сообщений
+    messages += loadChatMessagesForUser(request.sessionId.toUUID()).map { msg ->
         ChatMessageOut(
             role = msg.role.role,
             content = listOf(ContentPart.Text(msg.content))
         )
     }
 
+    // Добавляем user-сообщение, если есть текст или изображение
+    if (request.prompt.isNotBlank() || request.contentByteArray != null) {
+        val parts = mutableListOf<ContentPart>()
 
-    if (request.contentByteArray != null) {
-        val base64 = request.contentByteArray!!.encodeBase64()
-        val imageDataUrl = "data:image/jpeg;base64,$base64"
+        if (request.prompt.isNotBlank()) {
+            parts += ContentPart.Text(request.prompt)
+        }
 
+        val byteArray = request.contentByteArray
+        if (byteArray != null) {
+            val base64 = byteArray.encodeBase64()
+            val imageDataUrl = "data:image/jpeg;base64,$base64"
+            parts += ContentPart.ImageUrl(ImagePayload(url = imageDataUrl))
+        }
+        
         messages += ChatMessageOut(
             role = "user",
-            content = listOf(
-                ContentPart.Text(request.prompt),
-                ContentPart.ImageUrl(ImagePayload(url = imageDataUrl))
-            )
-        )
-    } else {
-        messages += ChatMessageOut(
-            role = "user",
-            content = listOf(ContentPart.Text(request.prompt))
+            content = parts
         )
     }
-    
+
     log.info("MYDATA GPT-messages:\n${messages.joinToString("\n")}")
 
     val openAIRequest = OpenAIRequest(
@@ -64,9 +65,21 @@ suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ToolioC
         setBody(TextContent(jsonPayload, ContentType.Application.Json))
     }
 
+    val rawBody = response.bodyAsText()
+
+    // Проверка статуса ответа
+    if (!response.status.isSuccess()) {
+        log.error("❌ OpenAI HTTP ${response.status.value}:\n$rawBody")
+        return ToolioChatMessage(
+            sessionId = request.sessionId,
+            content = "OpenAI error: ${response.status.value}",
+            role = Roles.SYSTEM
+        )
+    }
+
     return try {
         val parsed = Json { ignoreUnknownKeys = true }
-            .decodeFromString<OpenAIChatResponse>(response.bodyAsText())
+            .decodeFromString<OpenAIChatResponse>(rawBody)
 
         val reply = parsed.choices.firstOrNull()?.message?.content ?: "OpenAI hasn't responded."
 
@@ -77,7 +90,7 @@ suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ToolioC
             tokensUsed = parsed.usage?.totalTokens
         )
     } catch (e: Exception) {
-        log.error("💥 Parse error OpenAI-ответа: ${e.message}")
+        log.error("💥 Parse error OpenAI-ответа: ${e.message}\nRAW:\n$rawBody")
         ToolioChatMessage(
             sessionId = request.sessionId,
             content = "Ошибка: ${e.message.orEmpty()}",

@@ -1,5 +1,6 @@
 package ai.toolio.app.db
 
+import ai.toolio.app.db.tables.ChatMessages.sessionId
 import ai.toolio.app.db.tables.TaskSessions
 import ai.toolio.app.ext.toUUID
 import ai.toolio.app.models.RepairTaskSession
@@ -16,10 +17,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import java.util.UUID
 
-suspend fun saveTaskSession(userId: String, session: RepairTaskSession) = withContext(Dispatchers.IO) {
+suspend fun saveTaskSession(clientUserId: String, session: RepairTaskSession) = withContext(Dispatchers.IO) {
     transaction {
         val data: TaskSessions.(UpdateBuilder<*>) -> Unit = {
-            it[TaskSessions.userId] = userId.toUUID()
+            it[userId] = clientUserId.toUUID()
             it[title] = session.title
             it[category] = session.category.id
             it[categoryType] = session.category.type.name
@@ -31,25 +32,15 @@ suspend fun saveTaskSession(userId: String, session: RepairTaskSession) = withCo
             it[sessionType] = session.sessionType
         }
 
-        val sessionUUID = if (session.sessionId.isBlank()) {
-            UUID.randomUUID()
-        } else {
-            try {
-                UUID.fromString(session.sessionId)
-            } catch (e: IllegalArgumentException) {
-                error("Invalid sessionId format: ${session.sessionId}")
-            }
-        }
-
         val exists = TaskSessions.selectAll()
-            .where { TaskSessions.id eq sessionUUID }
+            .where { TaskSessions.id eq session.sessionId.toUUID() }
             .any()
 
         if (exists) {
-            TaskSessions.update({ TaskSessions.id eq sessionUUID }, body = data)
+            TaskSessions.update({ TaskSessions.id eq session.sessionId.toUUID() }, body = data)
         } else {
             TaskSessions.insert {
-                it[id] = sessionUUID
+                it[id] = session.sessionId.toUUID()
                 data(it)
             }
         }

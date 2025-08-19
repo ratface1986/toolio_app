@@ -97,7 +97,7 @@ fun SubscriptionScreen(onBackClick: () -> Unit) {
     val packs = listOf(
         ToolioPack(
             "Starter Pack",
-            "10 text + 1 premium session",
+            "3 premium sessions",
             "$2.99",
             "ai.tooio.app.starter_pack",
             Color(0xFF6aa5c0),
@@ -105,15 +105,15 @@ fun SubscriptionScreen(onBackClick: () -> Unit) {
         ),
         ToolioPack(
             "Weekly Helper",
-            "20 text + 3 premium sessions",
-            "$4.99",
+            "10 premium sessions",
+            "$6.99",
             "ai.tooio.app.weekly_helper",
             Color(0xFFffbd7c),
             Res.drawable.toolio_pack_2
         ),
         ToolioPack(
             "Home Master",
-            "50 text + 10 premium sessions",
+            "30 premium sessions",
             "$14.99",
             "ai.tooio.app.home_master",
             Color(0xFF4d9ca1),
@@ -121,7 +121,7 @@ fun SubscriptionScreen(onBackClick: () -> Unit) {
         ),
         ToolioPack(
             "Unlimited 30 Days",
-            "Unlimited text & premium for 1 month",
+            "Unlimited premium sessions for 1 month",
             "$29.99",
             "ai.tooio.app.unlimited_30_days",
             Color(0xFF335e76),

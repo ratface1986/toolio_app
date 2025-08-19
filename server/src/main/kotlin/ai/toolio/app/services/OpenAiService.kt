@@ -3,6 +3,7 @@ import ai.toolio.app.ext.toUUID
 import ai.toolio.app.misc.Roles
 import ai.toolio.app.models.*
 import io.ktor.client.*
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -10,6 +11,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.util.*
+import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
@@ -99,7 +101,10 @@ suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ToolioC
     }
 }
 
-suspend fun callWhisperTranscription(httpClient: HttpClient, request: ChatGptRequest): ToolioChatMessage {
+suspend fun callWhisperTranscription(
+    httpClient: HttpClient,
+    request: ChatGptRequest
+): ToolioChatMessage {
     val log = LoggerFactory.getLogger("OpenAIDebug")
     val apiKey = System.getenv("OPENAI_API_KEY") ?: error("Missing OPENAI_API_KEY")
     val boundary = "ToolioBoundary123456"
@@ -107,6 +112,9 @@ suspend fun callWhisperTranscription(httpClient: HttpClient, request: ChatGptReq
     val formData = MultiPartFormDataContent(
         formData {
             append("model", "whisper-1")
+            if (!request.language.isNullOrBlank()) {
+                append("language", request.language!!)
+            }
             append(
                 "file",
                 request.contentByteArray!!,
@@ -119,26 +127,49 @@ suspend fun callWhisperTranscription(httpClient: HttpClient, request: ChatGptReq
         boundary = boundary
     )
 
-    val response = httpClient.post("https://api.openai.com/v1/audio/transcriptions") {
-        header(HttpHeaders.Authorization, "Bearer $apiKey")
-        setBody(formData)
+    // retry policy
+    var lastError: Throwable? = null
+    repeat(3) { attempt ->
+        try {
+            val response = httpClient.post("https://api.openai.com/v1/audio/transcriptions") {
+                header(HttpHeaders.Authorization, "Bearer $apiKey")
+                timeout {
+                    requestTimeoutMillis = 30_000
+                    connectTimeoutMillis = 10_000
+                    socketTimeoutMillis = 30_000
+                }
+                setBody(formData)
+            }
+
+            if (!response.status.isSuccess()) {
+                val errBody = response.bodyAsText()
+                log.error("❌ Whisper HTTP ${response.status.value}: $errBody")
+                return ToolioChatMessage(
+                    sessionId = request.sessionId,
+                    content = "Speech-to-text failed: HTTP ${response.status.value}",
+                    role = Roles.ERROR
+                )
+            }
+
+            val result = response.bodyAsText()
+            val transcript = Json.decodeFromString<WhisperTranscriptionResponse>(result).text
+            return ToolioChatMessage(
+                sessionId = request.sessionId,
+                content = transcript,
+                role = Roles.USER
+            )
+        } catch (e: Exception) {
+            lastError = e
+            log.warn("⚠️ Whisper attempt ${attempt + 1} failed: ${e.message}")
+            delay((attempt + 1) * 1000L) // экспоненциальный бэкофф: 1s, 2s, 3s
+        }
     }
 
-    val result = response.bodyAsText()
-
-    return try {
-        val transcript = Json.decodeFromString<WhisperTranscriptionResponse>(result).text
-        ToolioChatMessage(
-            sessionId = "",
-            content = transcript,
-            role = Roles.USER
-        )
-    } catch (e: Exception) {
-        log.error("💥 Ошибка парсинга OpenAI-ответа: ${e.message}")
-        ToolioChatMessage(
-            sessionId = "",
-            content = "Ошибка: ${e.message.orEmpty()}",
-            role = Roles.SYSTEM
-        )
-    }
+    // все попытки упали
+    return ToolioChatMessage(
+        sessionId = request.sessionId,
+        content = "Speech-to-text error: ${lastError?.message.orEmpty()}",
+        role = Roles.SYSTEM
+    )
 }
+

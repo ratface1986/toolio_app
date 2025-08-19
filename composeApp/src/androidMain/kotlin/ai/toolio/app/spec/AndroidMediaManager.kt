@@ -63,22 +63,26 @@ class AndroidMediaManager(private val activity: Activity) : MediaInputManager {
     }
 
     override fun stopRecording(onResult: (ByteArray?) -> Unit) {
+        val localFile = outputFile
         try {
-            recorder?.stop()
-            recorder?.release()
-        } catch (e: Exception) {
-            // handle error
-        }
-        recorder = null
-
-        val bytes = outputFile?.let {
-            FileInputStream(it).use { input ->
-                ByteArrayOutputStream().apply {
-                    input.copyTo(this)
-                }.toByteArray()
+            recorder?.apply {
+                stop()
+                release()
             }
+        } catch (e: Exception) {
+            onResult(null)
+            return
+        } finally {
+            recorder = null
         }
 
+        val bytes = localFile?.let {
+            val data = FileInputStream(it).use { input ->
+                input.readBytes()
+            }
+            it.delete() // очищаем временный файл
+            data
+        }
         onResult(bytes)
     }
 }

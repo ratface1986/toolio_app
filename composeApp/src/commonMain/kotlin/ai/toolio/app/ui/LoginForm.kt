@@ -32,7 +32,9 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
 
     var isLoading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-    var name by remember { mutableStateOf("") }
+    //var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var emailError by remember { mutableStateOf(false) }
     var isLoginFailed by remember { mutableStateOf(false) }
     var isLoginFailedMessage by remember { mutableStateOf("AAAAA") }
     //var fb: FirebaseAuth
@@ -43,7 +45,7 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
         scope.launch {
             try {
                 //val userNickname = AppSessions.getUserNickname().takeIf { it.isNotBlank() } ?: name.trim()
-                val userNickname = name.trim()
+                val userNickname = email.trim()
                 val info = SubscriptionManager.getCustomerInfo()
                 val profile = toolioRepo.login(userNickname).copy(
                     isProUser = info.isActive == true
@@ -105,6 +107,10 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
         }
     }
 
+    fun isValidEmail(input: String): Boolean {
+        return Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$").matches(input)
+    }
+
     if (AppSessions.getUserNickname().isNotBlank()) {
         //onLoginClick(true)
     }
@@ -135,17 +141,21 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
                 HeadlineLargeText("Toolio")
                 Spacer(Modifier.height(48.dp))
 
-                Text("What's your name?", style = MaterialTheme.typography.headlineSmall)
+                Text("What's your email?", style = MaterialTheme.typography.headlineSmall)
                 Spacer(Modifier.height(12.dp))
 
                 Surface(
                     modifier = Modifier.padding(innerPadding),
-                    color = Color.Transparent // не затираем основной фон
+                    color = Color.Transparent
                 ) {
                     OutlinedTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        placeholder = { Text("Name", color = Color(0xFF554433)) }, // тёплый нейтральный
+                        value = email,
+                        onValueChange = {
+                            email = it
+                            emailError = !isValidEmail(it)
+                        },
+                        placeholder = { Text("Email", color = Color(0xFF554433)) },
+                        isError = emailError,
                         singleLine = true,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -159,15 +169,25 @@ fun LoginForm(nativeFeatures: NativeFeatures, onLoginSuccess: (UserProfile, Bool
                             unfocusedContainerColor = Color.White.copy(alpha = 0.9f),
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
-                            cursorColor = Color.Black
+                            cursorColor = Color.Black,
+                            errorTextColor = Color.Red
                         ),
                         shape = RoundedCornerShape(16.dp)
                     )
                 }
 
+                if (emailError) {
+                    Text(
+                        "Enter a valid email address",
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp)
+                    )
+                }
+
                 Spacer(Modifier.height(24.dp))
 
-                val buttonEnabled = !isLoading && name.trim().length >= 2
+                val buttonEnabled = !isLoading && email.isNotEmpty() && !emailError
 
                 Button(
                     onClick = {

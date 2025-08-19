@@ -114,10 +114,11 @@ class ToolioRepo(private val baseUrl: String) {
     suspend fun transcribeSpeech(audioBytes: ByteArray): ToolioChatMessage {
         val parts = formData {
             append("file", audioBytes, Headers.build {
-                append(HttpHeaders.ContentType, "audio/wav")
-                append(HttpHeaders.ContentDisposition, "filename=\"audio.wav\"")
+                append(HttpHeaders.ContentType, "audio/m4a")
+                append(HttpHeaders.ContentDisposition, "filename=\"audio.m4a\"")
             })
             append("userId", AppEnvironment.userProfile.userId)
+            append("language", AppEnvironment.userProfile.settings.language)
             append("sessionId", AppEnvironment.getSessionId())
         }
 
@@ -206,7 +207,7 @@ class ToolioRepo(private val baseUrl: String) {
         private var instance: ToolioRepo? = null
 
         //private const val BASE_URL = "https://toolio-api.vercel.app/api"
-        private const val BASE_URL = "https://toolioapp.com"
+        private const val BASE_URL = "https://api.toolioapp.com"
 
         fun getInstance(): ToolioRepo {
             return instance ?: createInstance()

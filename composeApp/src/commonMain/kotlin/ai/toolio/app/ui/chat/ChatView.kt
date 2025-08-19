@@ -22,15 +22,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -89,6 +92,7 @@ fun ChatView(
     var showSpeakOverlay by remember { mutableStateOf(false) }
     var startTime by remember { mutableStateOf(0L) }
     val isPremiumSession by remember { mutableStateOf(AppEnvironment.userProfile.sessions.lastOrNull()?.sessionType == SessionType.PREMIUM) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     fun sendMessage(text: String) {
         scope.launch {
@@ -223,9 +227,10 @@ fun ChatView(
 
         if (isPremiumSession) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             ) {
+                val haptic = LocalHapticFeedback.current
+
                 Box(
                     modifier = Modifier
                         .size(60.dp)
@@ -235,17 +240,28 @@ fun ChatView(
                                 onPress = {
                                     startTime = Clock.System.now().toEpochMilliseconds()
                                     showSpeakOverlay = true
-                                    //AppEnvironment.nativeFeatures.mediaManager.startRecording()
-                                    tryAwaitRelease()
+                                    AppEnvironment.nativeFeatures.mediaManager.startRecording()
 
-                                    val durationMs = Clock.System.now().toEpochMilliseconds() - startTime
-                                    if (durationMs >= 1000) {
-                                        /*AppEnvironment.nativeFeatures.mediaManager.stopRecording { audioBytes ->
-                                            audioBytes?.let { transcriptVoice(it) }
-                                        }*/
+                                    try {
+                                        val releasedInside = tryAwaitRelease() // false если cancel
+                                        val durationMs = Clock.System.now().toEpochMilliseconds() - startTime
+
+                                        if (releasedInside && durationMs >= 1000) {
+                                            AppEnvironment.nativeFeatures.mediaManager.stopRecording { audioBytes ->
+                                                audioBytes?.let { transcriptVoice(it) }
+                                            }
+                                        } else {
+                                            // отмена или слишком короткая запись
+                                            AppEnvironment.nativeFeatures.mediaManager.stopRecording { }
+                                            haptic.performHapticFeedback(
+                                                HapticFeedbackType.LongPress)
+                                            scope.launch {
+                                                snackbarHostState.showSnackbar("Recording too short")
+                                            }
+                                        }
+                                    } finally {
+                                        showSpeakOverlay = false
                                     }
-
-                                    showSpeakOverlay = false
                                 }
                             )
                         }
@@ -253,7 +269,7 @@ fun ChatView(
                     if (showSpeakOverlay) {
                         Box(
                             modifier = Modifier
-                                .offset(x = 20.dp, y = 20.dp) // за края
+                                .offset(x = 20.dp, y = 20.dp)
                                 .size(100.dp)
                                 .background(Color(0xFFFF9800), shape = CircleShape)
                                 .align(Alignment.BottomEnd)

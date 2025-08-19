@@ -9,6 +9,7 @@ import ai.toolio.app.misc.MeasureType
 import ai.toolio.app.models.RepairTaskSession
 import ai.toolio.app.models.Task
 import ai.toolio.app.models.TaskStatus
+import ai.toolio.app.models.Tasks
 import ai.toolio.app.models.UserProfile
 import ai.toolio.app.models.UserSettings
 import ai.toolio.app.theme.HeadlineLargeText
@@ -126,7 +127,7 @@ fun MainMenuScreen(
                     .padding(vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                Column {
+                /*Column {
                     TitleText(text = "Text left: ${AppEnvironment.userProfile.textSessions}", Color.White)
                     Button(
                         onClick = onStartTextSession,
@@ -150,11 +151,11 @@ fun MainMenuScreen(
                     color = Color(0x22000000),
                     thickness = 1.dp,
                     modifier = Modifier.padding(horizontal = 8.dp)
-                )
+                )*/
 
                 Column {
                     TitleText(
-                        text = "Premium left: ${AppEnvironment.userProfile.premiumSessions}",
+                        text = "Sessions left: ${AppEnvironment.userProfile.premiumSessions}",
                         textColor = Color.White
                     )
                     Button(
@@ -169,7 +170,7 @@ fun MainMenuScreen(
                         )
                     ) {
                         Text(
-                            text = if (AppEnvironment.userProfile.premiumSessions == 0) "Buy more sessions" else "Start PREMIUM project",
+                            text = if (AppEnvironment.userProfile.premiumSessions == 0) "Buy more sessions" else "Start new project",
                             fontSize = 19.sp
                         )
                     }
@@ -182,6 +183,10 @@ fun MainMenuScreen(
 @Preview
 @Composable
 fun PreviewMainMenuScreen() {
+    val tasks = Tasks.categories.joinToString(",") { category ->
+        "${category.title}:" + category.tasks.joinToString(",") { task -> task.name }
+    }
+    println("MYDATA $tasks")
     AppEnvironment.setUserProfile(
         UserProfile(
             userId = "123456789",

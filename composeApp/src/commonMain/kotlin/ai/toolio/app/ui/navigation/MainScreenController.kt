@@ -82,7 +82,9 @@ fun MainScreenController(
                     },
                     onStartPremiumSession = {
                         if (AppEnvironment.userProfile.premiumSessions == 0 ) {
-                            screen = AppScreen.PurchaseSessions
+                            //screen = AppScreen.PurchaseSessions
+                            AppEnvironment.userProfile.sessions.add(RepairTaskSession(sessionType = SessionType.PREMIUM))
+                            screen = AppScreen.Wizard
                         } else {
                             AppEnvironment.userProfile.sessions.add(RepairTaskSession(sessionType = SessionType.PREMIUM))
                             screen = AppScreen.Wizard

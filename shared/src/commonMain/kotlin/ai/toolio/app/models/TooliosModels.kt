@@ -87,7 +87,8 @@ data class ChatGptRequest(
     val prompt: String,
     val userId: String,
     val sessionId: String,
-    val contentByteArray: ByteArray? = null
+    val contentByteArray: ByteArray? = null,
+    val language: String? = "en",
 )
 
 @Serializable

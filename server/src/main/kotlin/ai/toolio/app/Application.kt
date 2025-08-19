@@ -184,6 +184,7 @@ fun Application.module() {
             var audioBytes: ByteArray? = null
             var userId = "unknownUser"
             var sessionId = "unknownSession"
+            var language: String? = null
 
             multipart.forEachPart { part ->
                 when (part) {
@@ -191,6 +192,7 @@ fun Application.module() {
                         when (part.name) {
                             "userId" -> userId = part.value
                             "sessionId" -> sessionId = part.value
+                            "language" -> language = part.value
                         }
                     }
 
@@ -217,14 +219,15 @@ fun Application.module() {
                     prompt = "",
                     userId = userId,
                     sessionId = sessionId,
-                    contentByteArray = audioBytes
+                    contentByteArray = audioBytes,
+                    language = language
                 )
             )
 
             insertChatMessage(
                 userId = userId,
                 sessionId = sessionId,
-                role = Roles.USER,
+                role = response.role,
                 content = response.content
             )
 

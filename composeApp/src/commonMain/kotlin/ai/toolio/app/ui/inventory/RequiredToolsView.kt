@@ -3,6 +3,7 @@ package ai.toolio.app.ui.inventory
 import ai.toolio.app.data.toDrawableResource
 import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.misc.MeasureType
+import ai.toolio.app.misc.SessionType
 import ai.toolio.app.misc.buildSystemPrompt
 import ai.toolio.app.models.RepairTaskSession
 import ai.toolio.app.models.Tool
@@ -11,7 +12,10 @@ import ai.toolio.app.models.UserSettings
 import ai.toolio.app.theme.BackButton
 import ai.toolio.app.theme.HeadlineMediumText
 import ai.toolio.app.theme.TaskView
+import ai.toolio.app.ui.shared.MyAlertDialog
 import ai.toolio.app.ui.shared.ScreenWrapper
+import ai.toolio.app.ui.shared.ToolioAlertPreview
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -36,22 +40,38 @@ fun RequiredToolsView(
 ) {
     val scope = rememberCoroutineScope()
     val tools by remember { mutableStateOf(AppEnvironment.userProfile.sessions.last().task.tools) }
+    var shouldShowWarning by remember { mutableStateOf(false) }
 
-    fun saveNewRepairTaskSession() {
-        scope.launch {
-            try {
-                AppEnvironment.updateSession(
-                    sessionId = uuid4().toString(),
-                    isSaved = true,
-                    initialPrompt = buildSystemPrompt()
-                )
-                val response = AppEnvironment.repo.saveNewSession(AppEnvironment.userProfile.sessions.last())
-            } catch (e: Error) {
-                println("Error saving new repair task session: ${e.message}")
-            } finally {
-                onConfirm()
+    fun saveNewRepairTaskSession(forceContinue: Boolean = false) {
+        val isAllRequiredToolsConfirmed = tools.all { tool -> AppEnvironment.userProfile.getTool(tool)?.confirmed == true }
+
+        if (isAllRequiredToolsConfirmed || forceContinue) {
+            scope.launch {
+                try {
+                    AppEnvironment.updateSession(
+                        sessionId = uuid4().toString(),
+                        isSaved = true,
+                        initialPrompt = buildSystemPrompt()
+                    )
+                    val response = AppEnvironment.repo.saveNewSession(AppEnvironment.userProfile.sessions.last())
+                    if (response) {
+                        val adjustTextSessions = if (AppEnvironment.userProfile.sessions.last().sessionType == SessionType.TEXT) 1 else 0
+                        val adjustPremiumSessions = if (AppEnvironment.userProfile.sessions.last().sessionType == SessionType.PREMIUM) 1 else 0
+                        AppEnvironment.setUserProfile(
+                            AppEnvironment.userProfile.copy(
+                                textSessions = AppEnvironment.userProfile.textSessions - adjustTextSessions,
+                                premiumSessions = AppEnvironment.userProfile.premiumSessions - adjustPremiumSessions
+                            )
+                        )
+                    }
+                } catch (e: Error) {
+                    println("Error saving new repair task session: ${e.message}")
+                } finally {
+                    onConfirm()
+                }
             }
-
+        } else {
+            shouldShowWarning = true
         }
 
     }
@@ -122,6 +142,20 @@ fun RequiredToolsView(
                 }
             }
         }
+    }
+
+    if (shouldShowWarning) {
+        MyAlertDialog(
+            "Warning!",
+            "You have not confirmed all required tools. Are you sure you want to continue?",
+            onConfirm = {
+                shouldShowWarning = false
+                saveNewRepairTaskSession(true)
+            },
+            onDismiss = {
+                shouldShowWarning = false
+            }
+        )
     }
 }
 

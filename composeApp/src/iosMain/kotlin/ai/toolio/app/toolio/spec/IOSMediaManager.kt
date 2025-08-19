@@ -7,6 +7,8 @@ import platform.AVFAudio.AVAudioRecorder
 import platform.AVFAudio.AVAudioRecorderDelegateProtocol
 import platform.AVFAudio.AVAudioSession
 import platform.AVFAudio.AVAudioSessionCategoryPlayAndRecord
+import platform.AVFAudio.AVAudioSessionRecordPermissionDenied
+import platform.AVFAudio.AVAudioSessionRecordPermissionUndetermined
 import platform.AVFAudio.AVEncoderAudioQualityKey
 import platform.AVFAudio.AVFormatIDKey
 import platform.AVFAudio.AVNumberOfChannelsKey
@@ -14,8 +16,10 @@ import platform.AVFAudio.AVSampleRateKey
 import platform.AVFAudio.setActive
 import platform.CoreAudioTypes.kAudioFormatMPEG4AAC
 import platform.Foundation.NSData
+import platform.Foundation.NSFileManager
 import platform.Foundation.NSTemporaryDirectory
 import platform.Foundation.NSURL
+import platform.Foundation.NSUUID
 import platform.Foundation.dataWithContentsOfURL
 import platform.UIKit.*
 import platform.darwin.NSObject
@@ -70,8 +74,27 @@ class IOSMediaManager : MediaInputManager {
     @OptIn(ExperimentalForeignApi::class)
     override fun startRecording() {
         val session = AVAudioSession.sharedInstance()
-        session.setCategory(AVAudioSessionCategoryPlayAndRecord, null)
+        // Включаем запись + вывод на динамик, разрешаем BT
+        session.setCategory(
+            AVAudioSessionCategoryPlayAndRecord,
+            0x4u or 0x8u, // AllowBluetooth | DefaultToSpeaker
+            null
+        )
         session.setActive(true, null)
+
+        // Проверка пермишена
+        when (session.recordPermission) {
+            AVAudioSessionRecordPermissionDenied -> {
+                // нет доступа к микрофону
+                return
+            }
+            AVAudioSessionRecordPermissionUndetermined -> {
+                session.requestRecordPermission { granted ->
+                    if (!granted) return@requestRecordPermission
+                }
+            }
+            else -> {}
+        }
 
         val settings = mapOf<Any?, Any>(
             AVFormatIDKey to kAudioFormatMPEG4AAC,
@@ -88,17 +111,28 @@ class IOSMediaManager : MediaInputManager {
         recorder?.record()
     }
 
+    @OptIn(ExperimentalForeignApi::class)
     override fun stopRecording(onResult: (ByteArray?) -> Unit) {
         recorder?.stop()
         recorder = null
 
         val data = tempUrl?.let { NSData.dataWithContentsOfURL(it) }
         onResult(data?.toByteArray())
+
+        // очищаем файл и освобождаем сессию
+        tempUrl?.let {
+            try {
+                NSFileManager.defaultManager.removeItemAtURL(it, null)
+            } catch (_: Throwable) {}
+        }
+        AVAudioSession.sharedInstance().setActive(false, null)
     }
 
     private fun getTempAudioFileUrl(): NSURL {
         val tempDir = NSTemporaryDirectory()
-        val path = "$tempDir/recording.m4a"
+        val filename = "recording_${NSUUID.UUID().UUIDString}.m4a"
+        val path = "$tempDir/$filename"
         return NSURL.fileURLWithPath(path)
     }
+
 }

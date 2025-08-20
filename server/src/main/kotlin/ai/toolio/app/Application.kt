@@ -95,6 +95,8 @@ fun Application.module() {
     attributes.put(HttpClientKey, httpClient)
 
     routing {
+        staticFiles("/uploads", File(ToolioConfig.storagePath))
+
         get("/") {
             println("==> GET /")
             call.respondText("OK")
@@ -406,8 +408,6 @@ fun Application.module() {
                 call.respond(HttpStatusCode.InternalServerError, "Failed to update settings")
             }
         }
-
-        staticFiles("/uploads", File(ToolioConfig.storagePath))
     }
 
 

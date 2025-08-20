@@ -76,7 +76,7 @@ suspend fun RoutingContext.handleOpenAIImagePrompt() {
         content = response.content
     )
 
-    val downloadImageURL = System.getenv("DOMAIN_URL") + imageUrl
+    val downloadImageURL = System.getenv("DOMAIN_API_URL") + imageUrl
 
     val filePath = ToolioConfig.storagePath + "/" + File(imageUrl).name
     val file = File(filePath)

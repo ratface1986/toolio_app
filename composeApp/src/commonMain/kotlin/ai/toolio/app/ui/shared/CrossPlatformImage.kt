@@ -13,14 +13,15 @@ import org.jetbrains.compose.resources.decodeToImageBitmap
 
 @Composable
 fun CrossPlatformImage(
-    url: String,
+    url: String? = null,
+    bytes: ByteArray? = null,
     modifier: Modifier = Modifier
 ) {
     var imageBitmap by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
 
     LaunchedEffect(url) {
         try {
-            val bytes: ByteArray = AppEnvironment.repo.fetchImageByUrl(url)
+            val bytes: ByteArray = bytes ?: AppEnvironment.repo.fetchImageByUrl(url.orEmpty())
             imageBitmap = bytes.decodeToImageBitmap()
         } catch (e: Exception) {
             println("IMAGE LOAD FAIL: ${e.message}")

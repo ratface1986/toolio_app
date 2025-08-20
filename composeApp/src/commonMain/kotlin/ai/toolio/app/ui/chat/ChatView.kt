@@ -111,9 +111,9 @@ fun ChatView(
             isTypingLoading = true
             try {
                 val chatResponse = AppEnvironment.repo.chatGpt(prompt = "", imageBytes = imageBytes)
-                chatResponse.imageUrl?.let { url ->
+                /*chatResponse.imageUrl?.let { url ->
                     messages.add(ChatMessage.Image(url, isUser = true))
-                }
+                }*/
                 messages.add(ChatMessage.Text(chatResponse.content, isUser = false))
 
             } finally {
@@ -207,7 +207,10 @@ fun ChatView(
                         },
                         onPhotoClick = {
                             AppEnvironment.nativeFeatures.mediaManager.pickPhoto { photoBytes ->
-                                photoBytes?.let { uploadUserPhoto(photoBytes) }
+                                photoBytes?.let {
+                                    messages.add(ChatMessage.ImageBytes(photoBytes, isUser = true))
+                                    uploadUserPhoto(photoBytes)
+                                }
                             }
                         },
                         isInputEnabled = !isTypingLoading,

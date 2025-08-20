@@ -46,6 +46,11 @@ sealed class ChatMessage(open val isUser: Boolean) {
         val imageUrl: String,
         override val isUser: Boolean
     ) : ChatMessage(isUser)
+
+    data class ImageBytes(
+        val bytes: ByteArray,
+        override val isUser: Boolean
+    ) : ChatMessage(isUser)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -177,6 +182,27 @@ private fun ChatMessageItem(
                         contentAlignment = Alignment.Center
                     ) {
                         CrossPlatformImage(url = message.imageUrl)
+                    }
+                }
+            }
+
+            is ChatMessage.ImageBytes -> {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .padding(vertical = 4.dp)
+                        .size(200.dp)
+                        .fillMaxWidth(0.95f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(180.dp)
+                            .aspectRatio(3f / 4f)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(Color(0xFFE0E0E0)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CrossPlatformImage(bytes = message.bytes)
                     }
                 }
             }

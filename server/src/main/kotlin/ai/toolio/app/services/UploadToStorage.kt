@@ -4,22 +4,27 @@ import ai.toolio.app.ToolioConfig
 import java.io.File
 
 fun saveImageToLocalStorage(imageBytes: ByteArray, fileName: String): String {
-    val storagePath = ToolioConfig.storagePath // уже /app/storage по дефолту
-    val file = File("$storagePath/$fileName")
-    File(storagePath).mkdirs()
+    val storagePath = ToolioConfig.storagePath // по умолчанию "/app/storage"
     val dir = File(storagePath)
+
     if (!dir.exists()) {
-        dir.mkdirs()
-        println("MYDATA Created storage dir at $storagePath")
+        val created = dir.mkdirs()
+        println("MYDATA Storage dir created=$created at $storagePath")
+    } else {
+        println("MYDATA Storage dir already exists at $storagePath")
     }
 
+    val file = File(dir, fileName)
     file.writeBytes(imageBytes)
 
-    println("MYDATA Saving image to: $file (${imageBytes.size} bytes)")
-    println("MYDATA Return url: $/uploads/$fileName")
+    // Проверим, что файл реально записался
+    val exists = file.exists()
+    val length = if (exists) file.length() else -1
 
+    println("MYDATA Saving image to: ${file.absolutePath} (${imageBytes.size} bytes)")
+    println("MYDATA File exists=$exists, actualSize=$length")
+    println("MYDATA Return url: /uploads/$fileName")
 
-    // Возвращаем относительный путь, если надо отдавать URL — зависит от логики
     return "/uploads/$fileName"
 }
 

@@ -144,8 +144,9 @@ fun ChatView(
             try {
                 val chatResponse = AppEnvironment.repo.transcribeSpeech(audioBytes = audioBytes)
                 messages.add(ChatMessage.Text(chatResponse.content, isUser = true))
+                sendMessage(chatResponse.content)
             } finally {
-                isTypingLoading = false
+                //isTypingLoading = false
             }
         }
     }

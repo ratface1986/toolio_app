@@ -1,5 +1,6 @@
 package ai.toolio.app.api
 
+import ai.toolio.app.ToolioConfig
 import ai.toolio.app.db.insertChatMessage
 import ai.toolio.app.httpClient
 import ai.toolio.app.misc.Roles
@@ -13,6 +14,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.utils.io.*
 import kotlinx.io.readByteArray
+import java.io.File
 import java.util.*
 
 suspend fun RoutingContext.handleOpenAIImagePrompt() {
@@ -76,8 +78,18 @@ suspend fun RoutingContext.handleOpenAIImagePrompt() {
 
     val downloadImageURL = System.getenv("DOMAIN_URL") + imageUrl
 
+    val filePath = ToolioConfig.storagePath + "/" + File(imageUrl).name
+    val file = File(filePath)
+
+    if (!file.exists()) {
+        println("MYDATA ❌ File not found at $filePath (but URL would be $downloadImageURL)")
+    } else {
+        println("MYDATA ✅ File exists at $filePath, size=${file.length()} bytes, URL=$downloadImageURL")
+    }
+
     call.respond(
         status = HttpStatusCode.OK,
         message = response.copy(imageUrl = downloadImageURL)
     )
+
 }

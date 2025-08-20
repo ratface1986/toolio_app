@@ -4,6 +4,8 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Toolio uses the microphone so you can record voice notes for repair sessions.</string>
     <key>CFBundleURLTypes</key>
     <array>
         <dict>

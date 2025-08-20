@@ -152,7 +152,10 @@ suspend fun callWhisperTranscription(
             }
 
             val result = response.bodyAsText()
-            val transcript = Json.decodeFromString<WhisperTranscriptionResponse>(result).text
+            val jsonDecoder = Json {
+                ignoreUnknownKeys = true
+            }
+            val transcript = jsonDecoder.decodeFromString<WhisperTranscriptionResponse>(result).text
             return ToolioChatMessage(
                 sessionId = request.sessionId,
                 content = transcript,

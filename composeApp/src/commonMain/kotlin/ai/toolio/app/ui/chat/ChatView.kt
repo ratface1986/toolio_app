@@ -248,7 +248,10 @@ fun ChatView(
 
                                         if (releasedInside && durationMs >= 1000) {
                                             AppEnvironment.nativeFeatures.mediaManager.stopRecording { audioBytes ->
-                                                audioBytes?.let { transcriptVoice(it) }
+                                                audioBytes?.let {
+                                                    isTypingLoading = true
+                                                    transcriptVoice(it)
+                                                }
                                             }
                                         } else {
                                             // отмена или слишком короткая запись

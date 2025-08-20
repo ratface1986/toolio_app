@@ -2,10 +2,13 @@ package ai.toolio.app.toolio.spec
 
 import ai.toolio.app.utils.MediaInputManager
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.memScoped
 import platform.AVFAudio.AVAudioQualityHigh
 import platform.AVFAudio.AVAudioRecorder
 import platform.AVFAudio.AVAudioRecorderDelegateProtocol
 import platform.AVFAudio.AVAudioSession
+import platform.AVFAudio.AVAudioSessionCategoryOptionAllowBluetooth
+import platform.AVFAudio.AVAudioSessionCategoryOptionDefaultToSpeaker
 import platform.AVFAudio.AVAudioSessionCategoryPlayAndRecord
 import platform.AVFAudio.AVAudioSessionRecordPermissionDenied
 import platform.AVFAudio.AVAudioSessionRecordPermissionUndetermined
@@ -16,14 +19,21 @@ import platform.AVFAudio.AVSampleRateKey
 import platform.AVFAudio.setActive
 import platform.CoreAudioTypes.kAudioFormatMPEG4AAC
 import platform.Foundation.NSData
+import platform.Foundation.NSDictionary
 import platform.Foundation.NSFileManager
+import platform.Foundation.NSMutableDictionary
+import platform.Foundation.NSString
 import platform.Foundation.NSTemporaryDirectory
 import platform.Foundation.NSURL
 import platform.Foundation.NSUUID
 import platform.Foundation.dataWithContentsOfURL
+import platform.Foundation.dictionaryWithCapacity
 import platform.UIKit.*
 import platform.darwin.NSObject
 import kotlin.Any
+import kotlinx.cinterop.ObjCObjectVar
+import kotlinx.cinterop.*
+import platform.Foundation.NSError
 
 class IOSMediaManager : MediaInputManager {
     private var currentDelegate: NSObject? = null
@@ -35,7 +45,6 @@ class IOSMediaManager : MediaInputManager {
         if (UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypeCamera)) {
             picker.sourceType = UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypeCamera
         } else {
-            // Fallback to photo library in Simulator (or if no camera available)
             picker.sourceType = UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypePhotoLibrary
         }
         picker.allowsEditing = false
@@ -74,24 +83,17 @@ class IOSMediaManager : MediaInputManager {
     @OptIn(ExperimentalForeignApi::class)
     override fun startRecording() {
         val session = AVAudioSession.sharedInstance()
-        // Включаем запись + вывод на динамик, разрешаем BT
         session.setCategory(
             AVAudioSessionCategoryPlayAndRecord,
-            0x4u or 0x8u, // AllowBluetooth | DefaultToSpeaker
+            AVAudioSessionCategoryOptionAllowBluetooth or AVAudioSessionCategoryOptionDefaultToSpeaker,
             null
         )
         session.setActive(true, null)
 
-        // Проверка пермишена
         when (session.recordPermission) {
-            AVAudioSessionRecordPermissionDenied -> {
-                // нет доступа к микрофону
-                return
-            }
+            AVAudioSessionRecordPermissionDenied -> return
             AVAudioSessionRecordPermissionUndetermined -> {
-                session.requestRecordPermission { granted ->
-                    if (!granted) return@requestRecordPermission
-                }
+                session.requestRecordPermission { granted -> if (!granted) return@requestRecordPermission }
             }
             else -> {}
         }
@@ -106,9 +108,25 @@ class IOSMediaManager : MediaInputManager {
         val url = getTempAudioFileUrl()
         tempUrl = url
 
-        recorder = AVAudioRecorder(url, settings, null)
-        recorder?.prepareToRecord()
-        recorder?.record()
+        memScoped {
+            val errorPtr = alloc<ObjCObjectVar<NSError?>>()
+
+            val recorderInstance = AVAudioRecorder(url, settings, errorPtr.ptr)
+
+            if (errorPtr.value != null) {
+                println("❌ Ошибка инициализации AVAudioRecorder: ${errorPtr.value?.localizedDescription}")
+                return
+            }
+
+            recorder = recorderInstance
+            if (recorder?.prepareToRecord() == true) {
+                recorder?.record()
+                println("🎙️ Началась запись: ${url.absoluteString}")
+            } else {
+                println("⚠️ Не удалось подготовить AVAudioRecorder")
+            }
+        }
+
     }
 
     @OptIn(ExperimentalForeignApi::class)
@@ -119,13 +137,11 @@ class IOSMediaManager : MediaInputManager {
         val data = tempUrl?.let { NSData.dataWithContentsOfURL(it) }
         onResult(data?.toByteArray())
 
-        // очищаем файл и освобождаем сессию
-        tempUrl?.let {
-            try {
-                NSFileManager.defaultManager.removeItemAtURL(it, null)
-            } catch (_: Throwable) {}
-        }
         AVAudioSession.sharedInstance().setActive(false, null)
+
+        tempUrl?.let {
+            try { NSFileManager.defaultManager.removeItemAtURL(it, null) } catch (_: Throwable) {}
+        }
     }
 
     private fun getTempAudioFileUrl(): NSURL {
@@ -135,4 +151,16 @@ class IOSMediaManager : MediaInputManager {
         return NSURL.fileURLWithPath(path)
     }
 
+}
+
+fun Map<Any?, Any>.toNSDictionary(): NSDictionary {
+    val dict = NSMutableDictionary.dictionaryWithCapacity(this.size.toULong())
+    for ((key, value) in this) {
+        if (key is String) {
+            dict.setObject(value, forKey = key as NSString)
+        } else if (key is NSString) {
+            dict.setObject(value, forKey = key)
+        }
+    }
+    return dict
 }

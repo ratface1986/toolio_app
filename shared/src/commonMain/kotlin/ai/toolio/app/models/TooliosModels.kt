@@ -17,7 +17,14 @@ data class OpenAIRequest(
 
 @Serializable
 data class WhisperTranscriptionResponse(
-    val text: String
+    val text: String,
+    val usage: WhisperUsage? = null
+)
+
+@Serializable
+data class WhisperUsage(
+    val type: String,
+    val seconds: Int
 )
 
 @Serializable

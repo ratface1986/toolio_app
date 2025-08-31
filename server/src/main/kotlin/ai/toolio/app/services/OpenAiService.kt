@@ -22,11 +22,14 @@ suspend fun callOpenAI(httpClient: HttpClient, request: ChatGptRequest): ToolioC
     val messages = mutableListOf<ChatMessageOut>()
 
     // Загружаем историю сообщений
-    messages += loadChatMessagesForUser(request.sessionId.toUUID()).map { msg ->
-        ChatMessageOut(
-            role = msg.role.role,
-            content = listOf(ContentPart.Text(msg.content))
-        )
+    val uuid = runCatching { request.sessionId.toUUID() }.getOrNull()
+    if (uuid != null) {
+        messages += loadChatMessagesForUser(request.sessionId.toUUID()).map { msg ->
+            ChatMessageOut(
+                role = msg.role.role,
+                content = listOf(ContentPart.Text(msg.content))
+            )
+        }
     }
 
     // Добавляем user-сообщение, если есть текст или изображение

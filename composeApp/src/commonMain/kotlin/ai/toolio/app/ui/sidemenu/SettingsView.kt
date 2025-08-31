@@ -2,6 +2,7 @@ package ai.toolio.app.ui.sidemenu
 
 import ai.toolio.app.theme.*
 import ai.toolio.app.ui.shared.ScreenWrapper
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -73,25 +74,29 @@ fun SettingsView(
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    BodyText(text = languages.getValue(language))
+                    BodyText(text = languages.getValue(language), color = Color.White)
                 }
                 DropdownMenu(
                     expanded = expandLangDropdown,
                     onDismissRequest = { expandLangDropdown = false },
-                    modifier = Modifier.fillMaxWidth(0.9f)
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .background(Color.Black) // фон меню
                 ) {
                     languages.forEach { lang ->
                         DropdownMenuItem(
                             text = {
-                                BodyText(text = lang.value)
+                                BodyText(text = lang.value, color = Color.White) // белый текст
                             },
                             onClick = {
                                 onLanguageChange(lang.key)
                                 expandLangDropdown = false
-                            }
+                            },
+                            modifier = Modifier.background(Color.Black) // фон каждого айтема
                         )
                     }
                 }
+
             }
 
             // Units

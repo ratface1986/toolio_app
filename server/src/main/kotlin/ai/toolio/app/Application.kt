@@ -226,12 +226,12 @@ fun Application.module() {
                 )
             )
 
-            insertChatMessage(
+            /*insertChatMessage(
                 userId = userId,
                 sessionId = sessionId,
                 role = response.role,
                 content = response.content
-            )
+            )*/
 
             call.respond(HttpStatusCode.OK, response)
         }

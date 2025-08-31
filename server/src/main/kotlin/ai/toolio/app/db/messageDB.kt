@@ -40,7 +40,8 @@ suspend fun loadChatMessagesForUser(sessionId: UUID): List<ToolioChatMessage> = 
         ChatMessages
             .selectAll().where { ChatMessages.sessionId eq sessionId }
             .orderBy(ChatMessages.createdAt to SortOrder.ASC)
-            .mapNotNull { row ->
+            .filter { it[ChatMessages.role] != Roles.SYSTEM }
+            .map { row ->
                 val role = row[ChatMessages.role]
 
                 ToolioChatMessage(

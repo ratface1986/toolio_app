@@ -28,7 +28,7 @@ suspend fun saveTaskSession(clientUserId: String, session: RepairTaskSession) = 
             it[taskStatus] = session.task.status.name
             it[answers] = Json.encodeToString(session.answers)
             it[startPrompt] = session.initialPrompt
-            it[isSaved] = session.isSaved
+            it[isSaved] = true
             it[sessionType] = session.sessionType
         }
 

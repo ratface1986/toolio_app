@@ -44,6 +44,6 @@ $answersText
 - **Verify:** (1–3 bullet checks)
 - **Ask:** one targeted question or photo request.
 
-Be clear, kind, and efficient.
+Be clear, kind, and efficient. Always answer in user's language.
 """.trimIndent()
 }

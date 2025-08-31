@@ -70,7 +70,12 @@ fun MainScreenController(
 
                 MainMenuScreen(
                     lastActiveSession = AppEnvironment.userProfile.sessions.lastOrNull(),
-                    completedTaskNames = listOf("Hang shelf", "Install TV"), // or emptyList()
+                    completedTaskNames = AppEnvironment.userProfile.sessions
+                        .drop(AppEnvironment.userProfile.sessions.lastIndex)
+                        .takeLast(2)
+                        .map {
+                            it.task.name
+                    },
                     onContinueTask = { screen = AppScreen.Chat },
                     onStartTextSession = {
                         if (AppEnvironment.userProfile.textSessions == 0 ) {

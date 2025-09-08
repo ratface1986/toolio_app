@@ -1,5 +1,6 @@
 package ai.toolio.app.ui.dashboard
 
+import ai.toolio.app.di.AppEnvironment
 import ai.toolio.app.di.SubscriptionManager
 import ai.toolio.app.di.SubscriptionManager.purchase
 import ai.toolio.app.theme.BackButton
@@ -67,6 +68,7 @@ import toolio.composeapp.generated.resources.toolio_pack_4
 data class ToolioPack(
     val title: String,
     val description: String,
+    val totalSessions: Int,
     val price: String,
     val productId: String,
     val backgroundColor: Color,
@@ -74,17 +76,28 @@ data class ToolioPack(
 )
 
 @Composable
-fun SubscriptionScreen(onBackClick: () -> Unit) {
+fun SubscriptionScreen(
+    onPurchaseSubscriptionSuccess: () -> Unit,
+    onBackClick: () -> Unit
+) {
 
     val scope = rememberCoroutineScope()
 
-    fun subscribe(productId: String) {
+    fun subscribe(product: ToolioPack) {
         scope.launch {
             try {
                 val info = SubscriptionManager.getCustomerInfo()
                 println("MYDATA info: ${info.activeProductIds}")
-                val result = SubscriptionManager.purchase(productId)
+                val result = purchase(product.productId)
                 println("MYDATA result: $result")
+                if (result.success) {
+                    AppEnvironment.setUserProfile(
+                        AppEnvironment.userProfile.copy(
+                            premiumSessions = AppEnvironment.userProfile.premiumSessions + product.totalSessions
+                        )
+                    )
+                    onPurchaseSubscriptionSuccess()
+                }
             } catch (e: Exception) {
                 println("MYDATA Subscription error: ${e.message}")
                 e.printStackTrace()
@@ -98,6 +111,7 @@ fun SubscriptionScreen(onBackClick: () -> Unit) {
         ToolioPack(
             "Starter Pack",
             "3 premium sessions",
+            3,
             "$2.99",
             "ai.tooio.app.starter_pack",
             Color(0xFF6aa5c0),
@@ -106,6 +120,7 @@ fun SubscriptionScreen(onBackClick: () -> Unit) {
         ToolioPack(
             "Weekly Helper",
             "10 premium sessions",
+            10,
             "$6.99",
             "ai.tooio.app.weekly_helper",
             Color(0xFFffbd7c),
@@ -114,6 +129,7 @@ fun SubscriptionScreen(onBackClick: () -> Unit) {
         ToolioPack(
             "Home Master",
             "30 premium sessions",
+            30,
             "$14.99",
             "ai.tooio.app.home_master",
             Color(0xFF4d9ca1),
@@ -122,6 +138,7 @@ fun SubscriptionScreen(onBackClick: () -> Unit) {
         ToolioPack(
             "Unlimited 30 Days",
             "Unlimited premium sessions for 1 month",
+            999,
             "$29.99",
             "ai.tooio.app.unlimited_30_days",
             Color(0xFF335e76),
@@ -189,7 +206,7 @@ fun SubscriptionScreen(onBackClick: () -> Unit) {
                             }
                             Spacer(Modifier.height(12.dp))
                             Button(
-                                onClick = { subscribe(pack.productId) },
+                                onClick = { subscribe(pack) },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
@@ -208,5 +225,5 @@ fun SubscriptionScreen(onBackClick: () -> Unit) {
 @Preview
 @Composable
 fun SubscriptionScreenPreview() {
-    SubscriptionScreen(onBackClick = {})
+    SubscriptionScreen(onPurchaseSubscriptionSuccess = {}, onBackClick = {})
 }

@@ -42,9 +42,10 @@ fun ScreenWrapper(
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     content(innerPadding)
-                    LoadingScreen(isLoading)
                 }
             }
+
+            LoadingScreen(isLoading)
         }
     }
 }

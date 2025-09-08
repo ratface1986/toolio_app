@@ -233,14 +233,16 @@ suspend fun insertUserWithUserId(newGoogleUserId: String, nickname: String, emai
     }
 }
 
-suspend fun updateUserSettings(userId: String, settings: UserSettings): Boolean = withContext(Dispatchers.IO) {
+suspend fun updateUserSettings(userProfile: UserProfile): Boolean = withContext(Dispatchers.IO) {
     try {
         transaction {
-            Users.update({ Users.id eq userId.toUUID() }) {
-                it[nickname] = settings.nickname
-                it[email] = settings.email
-                it[language] = settings.language
-                it[measure] = settings.measure
+            Users.update({ Users.id eq userProfile.userId.toUUID() }) {
+                it[nickname] = userProfile.settings.nickname
+                it[email] = userProfile.settings.email
+                it[language] = userProfile.settings.language
+                it[measure] = userProfile.settings.measure
+                it[premiumSessions] = userProfile.premiumSessions
+                it[textSessions] = userProfile.textSessions
             }
         }
         true

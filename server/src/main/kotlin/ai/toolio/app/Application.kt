@@ -399,8 +399,8 @@ fun Application.module() {
         }
 
         post("/update-settings") {
-            val request = call.receive<UserProfile>()
-            val success = updateUserSettings(request.userId, request.settings)
+            val requestUserProfile = call.receive<UserProfile>()
+            val success = updateUserSettings(requestUserProfile)
 
             if (success) {
                 call.respond(HttpStatusCode.OK)

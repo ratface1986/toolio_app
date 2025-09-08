@@ -87,8 +87,8 @@ fun MainScreenController(
                     },
                     onStartPremiumSession = {
                         if (AppEnvironment.userProfile.premiumSessions == 0 ) {
-                            //screen = AppScreen.PurchaseSessions
-                            AppEnvironment.userProfile.sessions.add(RepairTaskSession(sessionType = SessionType.PREMIUM))
+                            screen = AppScreen.PurchaseSessions
+                            //AppEnvironment.userProfile.sessions.add(RepairTaskSession(sessionType = SessionType.PREMIUM))
                             screen = AppScreen.Wizard
                         } else {
                             AppEnvironment.userProfile.sessions.add(RepairTaskSession(sessionType = SessionType.PREMIUM))
@@ -220,6 +220,9 @@ fun MainScreenController(
             }
             AppScreen.PurchaseSessions -> {
                 SubscriptionScreen(
+                    onPurchaseSubscriptionSuccess = {
+                        updateUserProfile()
+                    },
                     onBackClick = {
                         screen = AppScreen.MainMenu
                     }

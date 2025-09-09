@@ -74,6 +74,8 @@ suspend fun findUserByNickname(nickname: String): UserProfile? = withContext(Dis
         val email = userRow[Users.email].orEmpty()
         val language = userRow[Users.language].orEmpty()
         val measure = userRow[Users.measure]
+        val premiumSessions = userRow[Users.premiumSessions]
+        val textSessions = userRow[Users.textSessions]
 
         val inventory = Tools
             .selectAll().where { Tools.userId eq userId }
@@ -95,7 +97,9 @@ suspend fun findUserByNickname(nickname: String): UserProfile? = withContext(Dis
                 email = email,
                 language = language,
                 measure = measure
-            )
+            ),
+            premiumSessions = premiumSessions,
+            textSessions = textSessions
         )
     }
 }

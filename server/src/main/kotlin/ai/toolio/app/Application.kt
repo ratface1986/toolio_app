@@ -164,7 +164,7 @@ fun Application.module() {
                 httpClient = call.httpClient,
                 request = ChatGptRequest(
                     userId = request.userId,
-                    prompt = "",
+                    prompt = "Discard language of this message and reply in user language which is: ${request.language} and let's get started",
                     sessionId = request.sessionId
                 )
             )

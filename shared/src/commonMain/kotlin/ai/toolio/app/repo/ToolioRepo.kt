@@ -149,7 +149,8 @@ class ToolioRepo(private val baseUrl: String) {
         val request = ChatGptRequest(
             userId = AppEnvironment.userProfile.userId,
             prompt = systemPrompt,
-            sessionId = AppEnvironment.getSessionId()
+            sessionId = AppEnvironment.getSessionId(),
+            language = AppEnvironment.userProfile.settings.language
         )
 
         val response = client.post("$baseUrl/openai-system") {

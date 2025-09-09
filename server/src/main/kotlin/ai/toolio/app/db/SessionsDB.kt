@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
@@ -50,7 +51,9 @@ suspend fun saveTaskSession(clientUserId: String, session: RepairTaskSession) = 
 suspend fun loadTaskSessions(userId: String): List<RepairTaskSession> = withContext(Dispatchers.IO) {
     val rows = transaction {
         TaskSessions
-            .selectAll().where { TaskSessions.userId eq userId.toUUID() }
+            .selectAll()
+            .where { TaskSessions.userId eq userId.toUUID() }
+            .orderBy(TaskSessions.createdAt to SortOrder.ASC)
             .toList()
     }
 
